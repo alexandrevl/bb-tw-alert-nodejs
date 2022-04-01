@@ -18,7 +18,8 @@
   },
   "homepage": "https://gitlab.com/bb-tw-alert/nodejs#readme",
   "dependencies": {
+    "@google-cloud/language": "^4.3.2",
     "dotenv": "^16.0.0",
-    "twitter-api-v2": "^1.11.2"
+    "twit": "^2.2.11"
   }
 }
