@@ -17,27 +17,34 @@ async function main() {
     strictSSL: true, // optional - requires SSL certificates to be valid.
   });
 
-  let tweets = await searchTweets(twit);
-  //console.log(tweets);
-
-  await insertMany(db, tweets);
+  let max_id = 1507040780380217300;
+  for (let i = 0; i < 100; i++) {
+    console.log(`Trying ${i + 1} attempt`);
+    let tweets = await searchTweets(twit, max_id);
+    console.log(tweets);
+    console.log(tweets[tweets.length - 1]);
+    max_id = tweets[tweets.length - 1].id;
+    await insertMany(db, tweets);
+  }
   await client.close();
   console.log("Done");
 }
 
-async function searchTweets(twit) {
-  console.log("Searching tweets");
+async function searchTweets(twit, max_id) {
+  console.log("Searching tweets ", max_id);
   return twit
     .get("search/tweets", {
       q: '"banco do brasil"',
+      max_id: max_id,
       count: 100,
     })
     .then(async (response) => {
       data = response.data;
-      data.statuses.forEach((msg) => {
-        console.log(`${msg.id} - ${msg.created_at} - ${msg.text}`);
-      });
+      // data.statuses.forEach((msg) => {
+      //   console.log(`${msg.id} - ${msg.created_at} - ${msg.text}`);
+      // });
       console.log(data.search_metadata);
+      //console.log(data.statuses);
       return data.statuses;
     });
 }
