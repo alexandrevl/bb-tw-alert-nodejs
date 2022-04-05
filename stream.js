@@ -2,6 +2,7 @@ const http = require("http");
 const path = require("path");
 const needle = require("needle");
 const config = require("dotenv").config();
+const sentiment = require("sentiment-multi-language");
 const TOKEN = process.env.TW_BEARER;
 
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
@@ -62,7 +63,23 @@ async function deleteRules(rules) {
 
   return response.body;
 }
-
+var options = {
+  extras: {
+    stress: -3,
+    estressou: -3,
+    stressa: -3,
+    estressa: -3,
+    stressado: -2,
+    stressada: -2,
+    desfalque: -2,
+    demoraram: -1,
+    demorou: -1,
+    demoram: -1,
+    paciência: -1,
+    ódio: -3,
+  },
+};
+let sumScore = 0;
 function streamTweets() {
   console.log("Streaming tweets...");
   const stream = needle.get(streamURL, {
@@ -70,11 +87,18 @@ function streamTweets() {
       Authorization: `Bearer ${TOKEN}`,
     },
   });
+  stream.on("connect", (socket) => {
+    console.log("Connected");
+  });
 
   stream.on("data", (data) => {
     try {
       const json = JSON.parse(data);
-      console.log(json);
+      //console.log(json);
+      var r1 = sentiment(json.data.text);
+      console.log(`(${r1.score}): ${json.data.text}`);
+      sumScore += r1.score;
+      console.log(`Sentiment now: ${sumScore}`);
     } catch (error) {}
   });
 }
