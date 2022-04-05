@@ -1,0 +1,9 @@
+version: "3"
+services:
+  node:
+    restart: always
+    command: node stream.js
+    container_name: stream
+    build: .
+    volumes:
+      - .:/usr/src/app
