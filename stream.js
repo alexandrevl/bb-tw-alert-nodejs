@@ -7,9 +7,10 @@ const TOKEN = process.env.TW_BEARER;
 
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL =
-  "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics&expansions=author_id";
+  "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics";
 
-const rules = [{ value: '"banco do brasil"' }];
+const rules = [{ value: '"bbb"' }];
+//console.log(TOKEN);
 
 // Get stream rules
 async function getRules() {
@@ -87,19 +88,19 @@ function streamTweets() {
       Authorization: `Bearer ${TOKEN}`,
     },
   });
-  stream.on("connect", (socket) => {
-    console.log("Connected");
-  });
 
   stream.on("data", (data) => {
     try {
+      // console.log(data);
       const json = JSON.parse(data);
       //console.log(json);
       var r1 = sentiment(json.data.text);
       console.log(`(${r1.score}): ${json.data.text}`);
       sumScore += r1.score;
       console.log(`Sentiment now: ${sumScore}`);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   });
 }
 (async () => {
@@ -111,7 +112,7 @@ function streamTweets() {
     currentRules = await getRules();
     console.log(currentRules);
   } catch (error) {
-    console.error(error);
+    console.log(error);
     process.exit(1);
   }
   streamTweets();

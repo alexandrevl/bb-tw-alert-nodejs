@@ -7,3 +7,5 @@ services:
     build: .
     volumes:
       - .:/usr/src/app
+    env_file:
+      - ./.env
