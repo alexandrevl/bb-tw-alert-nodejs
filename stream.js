@@ -9,7 +9,7 @@ const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL =
   "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics";
 
-const rules = [{ value: '"bbb"' }];
+const rules = [{ value: '"banco do brasil"' }];
 //console.log(TOKEN);
 
 // Get stream rules
