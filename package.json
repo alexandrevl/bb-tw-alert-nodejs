@@ -28,6 +28,7 @@
     "promised-twit": "^0.1.0",
     "sentiment-multi-language": "^1.0.4",
     "twit": "^2.2.11",
-    "twitter-api-v2": "^1.11.2"
+    "twitter-api-v2": "^1.11.2",
+    "wink-tokenizer": "^5.3.0"
   }
 }

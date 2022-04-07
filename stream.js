@@ -2,6 +2,7 @@ const http = require("http");
 const path = require("path");
 const needle = require("needle");
 const config = require("dotenv").config();
+const { MongoClient } = require("mongodb");
 const sentiment = require("sentiment-multi-language");
 const TOKEN = process.env.TW_BEARER;
 
@@ -11,6 +12,9 @@ const streamURL =
 
 const rules = [{ value: '"banco do brasil"' }];
 //console.log(TOKEN);
+
+const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
+const client = new MongoClient(url);
 
 // Get stream rules
 async function getRules() {
@@ -78,8 +82,24 @@ var options = {
     demoram: -1,
     paciência: -1,
     ódio: -3,
+    odeio: -3,
+    sofro: -2,
+    sofrer: -2,
+    sofri: -2,
+    sofremos: -2,
+    fraude: -2,
+    golpe: -2,
+    bosta: -2,
+    merda: -2,
+    porra: -2,
+    vtnc: -4,
+    fudido: -2,
+    fudidos: -2,
+    fudida: -2,
+    fudidas: -2,
   },
 };
+let isCoolDown = false;
 let sumScore = 0;
 function streamTweets() {
   console.log("Streaming tweets...");
@@ -88,32 +108,58 @@ function streamTweets() {
       Authorization: `Bearer ${TOKEN}`,
     },
   });
-
+  let countTweets = 0;
   stream.on("data", (data) => {
     try {
-      // console.log(data);
+      //console.log(data);
+      if (data.title) {
+        console.log(data);
+      }
       const json = JSON.parse(data);
       //console.log(json);
-      var r1 = sentiment(json.data.text);
+      var r1 = sentiment(json.data.text, "pt-br", options);
       console.log(`(${r1.score}): ${json.data.text}`);
+      // console.log(countWords(json.data.text));
       sumScore += r1.score;
-      console.log(`Sentiment now: ${sumScore}`);
+      console.log(`Temperature: ${sumScore}`);
+      json.data.ts = new Date();
+      json.data.sentiment = r1.score;
+      insertMany([json.data]);
+      ++countTweets;
     } catch (error) {
-      console.log(error);
+      // if (error.title) {
+      //   console.log(error);
+      // }
     }
   });
 }
+let db = null;
 (async () => {
   let currentRules;
   try {
+    console.log("Connecting mongo...");
+    await client.connect();
+    db = client.db("twitter");
+    console.log("Mongo connected");
     currentRules = await getRules();
     await deleteRules(currentRules);
-    await setRules();
-    currentRules = await getRules();
+    currentRules = await setRules();
     console.log(currentRules);
+    // currentRules = await getRules();
+    // console.log(currentRules);
   } catch (error) {
     console.log(error);
     process.exit(1);
   }
   streamTweets();
 })();
+
+async function insertMany(data) {
+  const options = { ordered: true };
+  const result = await db
+    .collection("raw_data_stream")
+    .insertMany(data, options);
+
+  //console.log(`${result.insertedCount} documents were inserted`);
+  return result;
+}
