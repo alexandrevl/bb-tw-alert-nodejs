@@ -97,6 +97,9 @@ var options = {
     fudidos: -2,
     fudida: -2,
     fudidas: -2,
+    morrer: -1,
+    morreu: -1,
+    morrendo: -1,
   },
 };
 let isCoolDown = false;
@@ -118,10 +121,10 @@ function streamTweets() {
       const json = JSON.parse(data);
       //console.log(json);
       var r1 = sentiment(json.data.text, "pt-br", options);
-      console.log(`(${r1.score}): ${json.data.text}`);
-      // console.log(countWords(json.data.text));
       sumScore += r1.score;
-      console.log(`Temperature: ${sumScore}`);
+      console.log(`(${r1.score}/${sumScore}): ${json.data.text}`);
+      // console.log(countWords(json.data.text));
+
       json.data.ts = new Date();
       json.data.sentiment = r1.score;
       insertMany([json.data]);
