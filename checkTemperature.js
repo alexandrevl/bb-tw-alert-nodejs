@@ -14,7 +14,7 @@ async function check() {
   let tweets = await compileHour();
   //console.log(tweets);
   let analysedTweets = await analyse(tweets);
-  console.log("Temperature checked");
+  //console.log("Temperature checked");
   console.log(analysedTweets[0]);
   return analysedTweets;
 }

@@ -127,6 +127,7 @@ function streamTweets() {
 
       json.data.ts = new Date();
       json.data.sentiment = r1.score;
+      json.data.fullSentiment = r1;
       insertMany([json.data]);
       ++countTweets;
     } catch (error) {
