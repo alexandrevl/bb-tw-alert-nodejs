@@ -1,7 +1,9 @@
 const config = require("dotenv").config();
+const needle = require("needle");
 const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
-const SENTIMENT_ALERT = -10;
+const SENTIMENT_ALERT = 10;
+const TEAMS_URL = process.env.TEAMS_URL;
 
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
@@ -23,10 +25,12 @@ async function analyse(tweets) {
       let diffCount = tw.count - tweets[index - 1].count;
       tweets[index].diffSentiment = diffSentiment;
       tweets[index].diffCount = diffCount;
-      if (diffSentiment < SENTIMENT_ALERT) {
+      //   console.log(diffSentiment, SENTIMENT_ALERT, index);
+      if (diffSentiment < SENTIMENT_ALERT && index === 1) {
         console.log(
           `Changes in sentiments in minute ${tw.minute}: (${diffCount}/${diffSentiment})`
         );
+        await sendMsgTeams(diffCount, diffSentiment);
       }
     }
   }
@@ -76,6 +80,48 @@ async function checkMinutes(minutes) {
     .toArray();
   return result;
 }
+async function sendMsgTeams(count, temperature) {
+  console.log("Sending msg to Teams");
+  const data = {
+    "@type": "MessageCard",
+    "@context": "http://schema.org/extensions",
+    themeColor: "0076D7",
+    summary: "Temperatura Twitter",
+    sections: [
+      {
+        activityTitle: "Alerta de mudança de temperatura do twitter",
+        activitySubtitle:
+          'Os daddos coletados são da combinação de palavras "banco do brasil"',
+        facts: [
+          {
+            name: "Quantidade tweets",
+            value: count,
+          },
+          {
+            name: "Temp do último minuto",
+            value: temperature,
+          },
+          {
+            name: "Data/hora",
+            value: new Date(),
+          },
+          {
+            name: "Palavras relacionadas",
+            value: "banco do brasil, lorem, ipsum",
+          },
+        ],
+        markdown: true,
+      },
+    ],
+  };
+
+  const response = await needle("post", TEAMS_URL, data, {
+    headers: {
+      "content-type": "application/json",
+    },
+  });
+  return response;
+}
 async function connectMongo() {
   console.log("Connecting mongo...");
   await client.connect();
@@ -88,11 +134,12 @@ async function main() {
   let cronStr = "* * * * *";
   console.log(`Cron: ${cronStr}`);
   console.log(`Sentiment Alert: ${SENTIMENT_ALERT}`);
-  cron.schedule(cronStr, async () => {
-    console.log(`Cron: ${cronStr}`);
-    await check();
-    console.log(`Cron: done`);
-  });
+  //   cron.schedule(cronStr, async () => {
+  //     console.log(`Cron: ${cronStr}`);
+  //     await check();
+  //     console.log(`Cron: done`);
+  //   });
+  await check();
 }
 if (require.main === module) {
   main();
