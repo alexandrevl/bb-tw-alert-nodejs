@@ -2,7 +2,7 @@ const config = require("dotenv").config();
 const needle = require("needle");
 const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
-const SENTIMENT_ALERT = 10;
+const SENTIMENT_ALERT = -10;
 const TEAMS_URL = process.env.TEAMS_URL;
 
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
@@ -28,7 +28,7 @@ async function analyse(tweets) {
       //   console.log(diffSentiment, SENTIMENT_ALERT, index);
       if (diffSentiment < SENTIMENT_ALERT && index === 1) {
         console.log(
-          `Changes in sentiments in minute ${tw.minute}: (${diffCount}/${diffSentiment})`
+          `Changes in sentiments in minute ${tw.minute}: (Count: ${diffCount}/Sentiment: ${diffSentiment})`
         );
         await sendMsgTeams(diffCount, diffSentiment);
       }
