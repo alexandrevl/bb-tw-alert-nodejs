@@ -24,6 +24,7 @@
     "express": "^4.17.3",
     "mongodb": "^4.4.1",
     "needle": "^3.0.0",
+    "node-cron": "^3.0.0",
     "nodemon": "^2.0.15",
     "promised-twit": "^0.1.0",
     "sentiment-multi-language": "^1.0.4",

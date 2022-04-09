@@ -1,9 +1,18 @@
 version: "3"
 services:
-  node:
+  stream:
     restart: always
     command: node stream.js
     container_name: stream
+    build: .
+    volumes:
+      - .:/usr/src/app
+    env_file:
+      - ./.env
+  temperature:
+    restart: always
+    command: node checkTemperature.js
+    container_name: temperature
     build: .
     volumes:
       - .:/usr/src/app
