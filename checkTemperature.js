@@ -39,7 +39,7 @@ async function analyse(tweets) {
         console.log(
           `Changes in sentiments in minute ${tw.minute}: (Count: ${diffCount}/Sentiment: ${diffSentiment})`
         );
-        await sendMsgTeams(diffCount, diffSentiment, diffSumSentiment);
+        await sendMsgTeams(diffCount, diffSentiment, sumSentiment);
       }
     }
   }
@@ -118,11 +118,11 @@ async function sendMsgTeams(count, temperature, sumSentiment) {
           'Os daddos coletados são da combinação de palavras "banco do brasil"',
         facts: [
           {
-            name: "Quantidade tweets",
+            name: "Variação de tweets",
             value: count,
           },
           {
-            name: "Temp média do último minuto",
+            name: "Var. Temp média do último minuto",
             value: temperature,
           },
           {
