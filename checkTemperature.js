@@ -139,12 +139,12 @@ async function main() {
   let cronStr = "* * * * *";
   console.log(`Cron: ${cronStr}`);
   console.log(`Sentiment Alert: ${SENTIMENT_ALERT}`);
-  //   cron.schedule(cronStr, async () => {
-  //     console.log(`Cron: ${cronStr}`);
-  //     await check();
-  //     console.log(`Cron: done`);
-  //   });
-  await check();
+  cron.schedule(cronStr, async () => {
+    console.log(`Cron: ${cronStr}`);
+    await check();
+    console.log(`Cron: done`);
+  });
+  //   await check();
 }
 if (require.main === module) {
   main();
