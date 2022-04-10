@@ -62,6 +62,10 @@ async function compileHour() {
       tw.avgSentiment = sumSentiment / tw.count;
     }
     tw.words = _.countBy(tw.words);
+    // tw.words = _.sortBy(tw.words);
+    // console.log(tw.words);
+    // tw.words = _.countBy(tw.words)._invert()._sortBy().value();
+    // console.log(tw.words);
     results.push(tw);
   }
   //   console.log(tweets);
@@ -136,16 +140,26 @@ async function connectMongo() {
 }
 async function main() {
   db = await connectMongo();
+  console.log(`Sentiment Alert: ${SENTIMENT_ALERT}`);
+  //Cron
   let cronStr = "* * * * *";
   console.log(`Cron: ${cronStr}`);
-  console.log(`Sentiment Alert: ${SENTIMENT_ALERT}`);
   cron.schedule(cronStr, async () => {
     console.log(`Cron: ${cronStr}`);
-    await check();
+    let timeline = await check();
+    await insertMany(timeline);
     console.log(`Cron: done`);
   });
   //   await check();
 }
 if (require.main === module) {
   main();
+}
+
+async function insertMany(data) {
+  const options = { ordered: true };
+  const result = await db.collection("tw_timeline").insertMany(data, options);
+
+  //console.log(`${result.insertedCount} documents were inserted`);
+  return result;
 }
