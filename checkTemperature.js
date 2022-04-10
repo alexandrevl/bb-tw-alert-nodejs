@@ -1,4 +1,5 @@
 const config = require("dotenv").config();
+const _ = require("lodash");
 const needle = require("needle");
 const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
@@ -41,25 +42,27 @@ async function compileHour() {
   let results = [];
   for (let index = 0; index < 60; index++) {
     let tws = await checkMinutes(index);
-    tw = {
+    let tw = {
       minute: index,
       count: tws.length,
       sumSentiment: 0,
       avgSentiment: 0,
+      words: [],
     };
     let sumSentiment = 0;
     if (tws.length > 0) {
       for (let i = 0; i < tws.length; i++) {
-        const tw = tws[i];
-        sumSentiment += tw.sentiment;
+        const twIntern = tws[i];
+        tw.words.push(...twIntern.fullSentiment.tokens);
+        sumSentiment += twIntern.sentiment;
       }
     }
     if (sumSentiment != 0) {
       tw.sumSentiment = sumSentiment;
       tw.avgSentiment = sumSentiment / tw.count;
     }
+    tw.words = _.countBy(tw.words);
     results.push(tw);
-    //console.log(tw);
   }
   //   console.log(tweets);
   return results;
@@ -103,8 +106,9 @@ async function sendMsgTeams(count, temperature) {
             value: temperature,
           },
           {
-            name: "Data/hora",
-            value: new Date(),
+            name: "Link",
+            value:
+              "https://twitter.com/search?q=%22banco%20do%20brasil%22&src=typed_query",
           },
           {
             name: "Palavras relacionadas",
@@ -135,12 +139,12 @@ async function main() {
   let cronStr = "* * * * *";
   console.log(`Cron: ${cronStr}`);
   console.log(`Sentiment Alert: ${SENTIMENT_ALERT}`);
-  cron.schedule(cronStr, async () => {
-    console.log(`Cron: ${cronStr}`);
-    await check();
-    console.log(`Cron: done`);
-  });
-  //await check();
+  //   cron.schedule(cronStr, async () => {
+  //     console.log(`Cron: ${cronStr}`);
+  //     await check();
+  //     console.log(`Cron: done`);
+  //   });
+  await check();
 }
 if (require.main === module) {
   main();
