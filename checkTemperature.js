@@ -24,7 +24,7 @@ async function analyse(tweets) {
     let tw = tweets[index];
     if (index === 0) {
       if (
-        tw.avgSentiment < AVG_SENTIMENT_ALERT ||
+        (tw.avgSentiment < AVG_SENTIMENT_ALERT && tw.count >= 5) ||
         tw.sumSentiment < SUM_SENTIMENT_ALERT
       ) {
         console.log(
