@@ -4,6 +4,7 @@ const needle = require("needle");
 const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
 const SENTIMENT_ALERT = -2;
+const SUM_SENTIMENT_ALERT = -30;
 const TEAMS_URL = process.env.TEAMS_URL;
 
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
@@ -25,14 +26,20 @@ async function analyse(tweets) {
     if (index > 0) {
       let diffSentiment = tw.avgSentiment - tweets[index - 1].avgSentiment;
       let diffCount = tw.count - tweets[index - 1].count;
+      let diffSumSentiment = tw.sumSentiment + tweets[index - 1].sumSentiment;
       tweets[index].diffSentiment = diffSentiment;
       tweets[index].diffCount = diffCount;
+      tweets[index].sumSentiment = diffSumSentiment;
       //   console.log(diffSentiment, SENTIMENT_ALERT, index);
-      if (diffSentiment < SENTIMENT_ALERT && index === 1) {
+      if (
+        (diffSentiment < SENTIMENT_ALERT ||
+          diffSumSentiment < SUM_SENTIMENT_ALERT) &&
+        index === 1
+      ) {
         console.log(
           `Changes in sentiments in minute ${tw.minute}: (Count: ${diffCount}/Sentiment: ${diffSentiment})`
         );
-        await sendMsgTeams(diffCount, diffSentiment);
+        await sendMsgTeams(diffCount, diffSentiment, diffSumSentiment);
       }
     }
   }
@@ -97,7 +104,7 @@ async function checkMinutes(minutes) {
     .toArray();
   return result;
 }
-async function sendMsgTeams(count, temperature) {
+async function sendMsgTeams(count, temperature, sumSentiment) {
   console.log("Sending msg to Teams");
   const data = {
     "@type": "MessageCard",
@@ -115,13 +122,16 @@ async function sendMsgTeams(count, temperature) {
             value: count,
           },
           {
-            name: "Temp do último minuto",
+            name: "Temp média do último minuto",
             value: temperature,
           },
           {
+            name: "Temperatura do minuto",
+            value: sumSentiment,
+          },
+          {
             name: "Link",
-            value:
-              "https://twitter.com/search?q=%22banco%20do%20brasil%22&src=typed_query",
+            value: "https://twitter.com/search?q=%22banco%20do%20brasil%22",
           },
           {
             name: "Palavras relacionadas",
@@ -150,12 +160,14 @@ async function connectMongo() {
 async function main() {
   db = await connectMongo();
   console.log(`Sentiment Alert: ${SENTIMENT_ALERT}`);
+  console.log(`SumSentiment Alert: ${SUM_SENTIMENT_ALERT}`);
   //Cron
   let cronStr = "* * * * *";
   console.log(`Cron: ${cronStr}`);
   cron.schedule(cronStr, async () => {
     console.log(`Cron: ${cronStr}`);
     let timeline = await check();
+    timeline.ts = new Date();
     await insertMany(timeline);
     console.log(`Cron: done`);
   });
