@@ -53,7 +53,7 @@ async function compileHour() {
     if (tws.length > 0) {
       for (let i = 0; i < tws.length; i++) {
         const twIntern = tws[i];
-        tw.words.push(...twIntern.fullSentiment.tokens);
+        //tw.words.push(...twIntern.fullSentiment.tokens);
         sumSentiment += twIntern.sentiment;
       }
     }
@@ -61,7 +61,16 @@ async function compileHour() {
       tw.sumSentiment = sumSentiment;
       tw.avgSentiment = sumSentiment / tw.count;
     }
-    tw.words = _.countBy(tw.words);
+    // tw.words = _.countBy(tw.words);
+    // let resultWord = [];
+    // for (let index = 0; index < tw.words.length; index++) {
+    //   const element = tw[index];
+    //   console.log(element);
+    //   if (element.sentiment != 0) {
+    //     resultWord.push(element);
+    //   }
+    // }
+    // tw.words = resultWord.words;
     // tw.words = _.sortBy(tw.words);
     // console.log(tw.words);
     // tw.words = _.countBy(tw.words)._invert()._sortBy().value();
