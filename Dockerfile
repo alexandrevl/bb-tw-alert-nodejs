@@ -14,4 +14,5 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-CMD [ "node", "stream.js" ]
+# CMD [ "node", "stream.js" ]
+# CMD [ "node", "temperature.js" ]

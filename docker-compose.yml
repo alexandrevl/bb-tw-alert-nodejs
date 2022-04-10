@@ -11,7 +11,7 @@ services:
       - ./.env
   temperature:
     restart: always
-    command: node checkTemperature.js
+    command: node temperature.js
     container_name: temperature
     build: .
     volumes:
