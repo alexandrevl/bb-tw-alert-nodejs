@@ -3,7 +3,7 @@ const _ = require("lodash");
 const needle = require("needle");
 const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
-const SENTIMENT_ALERT = -10;
+const SENTIMENT_ALERT = -2;
 const TEAMS_URL = process.env.TEAMS_URL;
 
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
