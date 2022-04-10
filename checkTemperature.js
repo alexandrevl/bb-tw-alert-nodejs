@@ -6,7 +6,7 @@ let cron = require("node-cron");
 const AVG_SENTIMENT_ALERT = -2;
 const SUM_SENTIMENT_ALERT = -30;
 const TEAMS_URL = process.env.TEAMS_URL;
-const MINUTES = 30;
+const MINUTES = 5;
 
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
@@ -14,28 +14,18 @@ const client = new MongoClient(url);
 let db = null;
 async function check() {
   console.log("Checking temperature...");
-  let tweets = await compileHour();
-  //console.log(tweets);
-  let analysedTweets = await analyse(tweets);
-  //console.log("Temperature checked");
-  console.log(analysedTweets[0]);
+  let tweetsArray = await compileHour();
+  console.log(tweetsArray[0]);
+  let analysedTweets = await analyse(tweetsArray);
   return analysedTweets;
 }
 async function analyse(tweets) {
   for (let index = 0; index < tweets.length; index++) {
     let tw = tweets[index];
-    if (index > 0) {
-      //   let diffSentiment = tw.avgSentiment - tweets[index - 1].avgSentiment;
-      //   let diffCount = tw.count - tweets[index - 1].count;
-      //   let diffSumSentiment = tw.sumSentiment + tweets[index - 1].sumSentiment;
-      //   tweets[index].diffSentiment = diffSentiment;
-      //   tweets[index].diffCount = diffCount;
-      //   tweets[index].sumSentiment = diffSumSentiment;
-      //   console.log(diffSentiment, SENTIMENT_ALERT, index);
+    if (index === 0) {
       if (
-        (tw.avgSentiment < AVG_SENTIMENT_ALERT ||
-          tw.sumSentiment < SUM_SENTIMENT_ALERT) &&
-        index === 1
+        tw.avgSentiment < AVG_SENTIMENT_ALERT ||
+        tw.sumSentiment < SUM_SENTIMENT_ALERT
       ) {
         console.log(
           `Changes in sentiments in minute ${tw.minute}: (Count: ${tw.count}/SumSentiment: ${tw.sumSentiment})`
@@ -55,6 +45,7 @@ async function compileHour() {
       count: tws.length,
       sumSentiment: 0,
       avgSentiment: 0,
+      ts: new Date(),
       words: [],
     };
     let sumSentiment = 0;
@@ -116,10 +107,10 @@ async function sendMsgTeams(count, temperature, sumSentiment) {
       {
         activityTitle: "Alerta de mudança de temperatura do twitter",
         activitySubtitle:
-          'Os daddos coletados são da combinação de palavras "banco do brasil"',
+          'Os dados coletados são da combinação de palavras "banco do brasil"',
         facts: [
           {
-            name: "Qnt tweets",
+            name: "Quantidade tweets",
             value: count,
           },
           {
