@@ -28,7 +28,7 @@ async function analyse(tweets) {
         tw.sumSentiment < SUM_SENTIMENT_ALERT
       ) {
         console.log(
-          `Changes in sentiments in minute ${tw.minute}: (Count: ${tw.count}/SumSentiment: ${tw.sumSentiment})`
+          `Changes in sentiments (Count: ${tw.count}/SumSentiment: ${tw.sumSentiment})`
         );
         await sendMsgTeams(tw.count, tw.avgSentiment, tw.sumSentiment);
       }
@@ -110,16 +110,16 @@ async function sendMsgTeams(count, temperature, sumSentiment) {
           'Os dados coletados são da combinação de palavras "banco do brasil"',
         facts: [
           {
+            name: "Temperatura do minuto",
+            value: sumSentiment,
+          },
+          {
             name: "Quantidade tweets",
             value: count,
           },
           {
             name: "Temp média do minuto",
             value: temperature,
-          },
-          {
-            name: "Temperatura do minuto",
-            value: sumSentiment,
           },
           {
             name: "Link",
