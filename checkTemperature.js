@@ -6,7 +6,7 @@ let cron = require("node-cron");
 const AVG_SENTIMENT_ALERT = -2;
 const SUM_SENTIMENT_ALERT = -30;
 const TEAMS_URL = process.env.TEAMS_URL;
-const MINUTES = 5;
+const MINUTES = 1;
 
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
