@@ -3,9 +3,10 @@ const _ = require("lodash");
 const needle = require("needle");
 const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
-const SENTIMENT_ALERT = -2;
+const AVG_SENTIMENT_ALERT = -2;
 const SUM_SENTIMENT_ALERT = -30;
 const TEAMS_URL = process.env.TEAMS_URL;
+const MINUTES = 30;
 
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
@@ -24,22 +25,22 @@ async function analyse(tweets) {
   for (let index = 0; index < tweets.length; index++) {
     let tw = tweets[index];
     if (index > 0) {
-      let diffSentiment = tw.avgSentiment - tweets[index - 1].avgSentiment;
-      let diffCount = tw.count - tweets[index - 1].count;
-      let diffSumSentiment = tw.sumSentiment + tweets[index - 1].sumSentiment;
-      tweets[index].diffSentiment = diffSentiment;
-      tweets[index].diffCount = diffCount;
-      tweets[index].sumSentiment = diffSumSentiment;
+      //   let diffSentiment = tw.avgSentiment - tweets[index - 1].avgSentiment;
+      //   let diffCount = tw.count - tweets[index - 1].count;
+      //   let diffSumSentiment = tw.sumSentiment + tweets[index - 1].sumSentiment;
+      //   tweets[index].diffSentiment = diffSentiment;
+      //   tweets[index].diffCount = diffCount;
+      //   tweets[index].sumSentiment = diffSumSentiment;
       //   console.log(diffSentiment, SENTIMENT_ALERT, index);
       if (
-        (diffSentiment < SENTIMENT_ALERT ||
-          diffSumSentiment < SUM_SENTIMENT_ALERT) &&
+        (tw.avgSentiment < AVG_SENTIMENT_ALERT ||
+          tw.sumSentiment < SUM_SENTIMENT_ALERT) &&
         index === 1
       ) {
         console.log(
-          `Changes in sentiments in minute ${tw.minute}: (Count: ${diffCount}/Sentiment: ${diffSentiment})`
+          `Changes in sentiments in minute ${tw.minute}: (Count: ${tw.count}/SumSentiment: ${tw.sumSentiment})`
         );
-        await sendMsgTeams(diffCount, diffSentiment, sumSentiment);
+        await sendMsgTeams(tw.count, tw.avgSentiment, tw.sumSentiment);
       }
     }
   }
@@ -47,7 +48,7 @@ async function analyse(tweets) {
 }
 async function compileHour() {
   let results = [];
-  for (let index = 0; index < 60; index++) {
+  for (let index = 0; index < MINUTES; index++) {
     let tws = await checkMinutes(index);
     let tw = {
       minute: index,
@@ -118,11 +119,11 @@ async function sendMsgTeams(count, temperature, sumSentiment) {
           'Os daddos coletados são da combinação de palavras "banco do brasil"',
         facts: [
           {
-            name: "Variação de tweets",
+            name: "Qnt tweets",
             value: count,
           },
           {
-            name: "Var. Temp média do minuto",
+            name: "Temp média do minuto",
             value: temperature,
           },
           {
@@ -159,7 +160,7 @@ async function connectMongo() {
 }
 async function main() {
   db = await connectMongo();
-  console.log(`Sentiment Alert: ${SENTIMENT_ALERT}`);
+  console.log(`AvgSentiment Alert: ${AVG_SENTIMENT_ALERT}`);
   console.log(`SumSentiment Alert: ${SUM_SENTIMENT_ALERT}`);
   //Cron
   let cronStr = "* * * * *";
