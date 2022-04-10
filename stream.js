@@ -163,7 +163,5 @@ async function insertMany(data) {
   const result = await db
     .collection("raw_data_stream")
     .insertMany(data, options);
-
-  //console.log(`${result.insertedCount} documents were inserted`);
   return result;
 }
