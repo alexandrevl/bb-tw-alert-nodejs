@@ -122,7 +122,7 @@ async function sendMsgTeams(count, temperature, sumSentiment) {
             value: count,
           },
           {
-            name: "Var. Temp média do último minuto",
+            name: "Var. Temp média do minuto",
             value: temperature,
           },
           {
