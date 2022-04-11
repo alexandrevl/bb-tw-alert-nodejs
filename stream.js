@@ -100,6 +100,11 @@ var options = {
     morrer: -1,
     morreu: -1,
     morrendo: -1,
+    trafico: -1,
+    tráfico: -1,
+    estressar: -1,
+    estresse: -1,
+    inferno: -1,
   },
 };
 let isCoolDown = false;

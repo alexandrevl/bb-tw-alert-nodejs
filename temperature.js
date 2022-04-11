@@ -3,6 +3,7 @@ const _ = require("lodash");
 const needle = require("needle");
 const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
+
 const AVG_SENTIMENT_ALERT = -2;
 const SUM_SENTIMENT_ALERT = -30;
 const TEAMS_URL = process.env.TEAMS_URL;
@@ -172,7 +173,5 @@ if (require.main === module) {
 async function insertMany(data) {
   const options = { ordered: true };
   const result = await db.collection("tw_timeline").insertMany(data, options);
-
-  //console.log(`${result.insertedCount} documents were inserted`);
   return result;
 }
