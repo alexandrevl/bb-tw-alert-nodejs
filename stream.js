@@ -2,6 +2,7 @@ const http = require("http");
 const path = require("path");
 const needle = require("needle");
 const config = require("dotenv").config();
+let cron = require("node-cron");
 const { MongoClient } = require("mongodb");
 const sentiment = require("sentiment-multi-language");
 const TOKEN = process.env.TW_BEARER;
@@ -105,13 +106,18 @@ var options = {
     estressar: -1,
     estresse: -1,
     inferno: -1,
+    procon: -1,
   },
 };
 let isCoolDown = false;
 let sumScore = 0;
+let stream = null;
 function streamTweets() {
+  //cronStr = "* * * * *";
+  //cron.schedule(cronStr, recycle());
+  setTimeout(recycle, 360 * 1000);
   console.log("Streaming tweets...");
-  const stream = needle.get(streamURL, {
+  stream = needle.get(streamURL, {
     headers: {
       Authorization: `Bearer ${TOKEN}`,
     },
@@ -125,7 +131,7 @@ function streamTweets() {
       }
       const json = JSON.parse(data);
       //console.log(json);
-      var r1 = sentiment(json.data.text, "pt-br", options);
+      var r1 = sentiment(json.data.text.toLowerCase(), "pt-br", options);
       sumScore += r1.score;
       console.log(`(${r1.score}/${sumScore}): ${json.data.text}`);
       // console.log(countWords(json.data.text));
@@ -142,6 +148,13 @@ function streamTweets() {
     }
   });
 }
+async function recycle() {
+  if (stream) {
+    console.log("Recycling...");
+    await stream.request.abort();
+    streamTweets();
+  }
+}
 let db = null;
 (async () => {
   let currentRules;
@@ -154,12 +167,11 @@ let db = null;
     await deleteRules(currentRules);
     currentRules = await setRules();
     console.log(currentRules);
-    // currentRules = await getRules();
-    // console.log(currentRules);
   } catch (error) {
     console.log(error);
     process.exit(1);
   }
+  //cron.schedule(cronStr, rescycle());
   streamTweets();
 })();
 
