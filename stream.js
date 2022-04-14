@@ -113,7 +113,7 @@ let isCoolDown = false;
 let sumScore = 0;
 let stream = null;
 function streamTweets() {
-  //setTimeout(recycle, 1000 * 60 * 60);
+  setTimeout(recycle, 1000 * 60 * 120);
   console.log("Streaming tweets...");
   stream = needle.get(streamURL, {
     headers: {
@@ -150,7 +150,7 @@ async function recycle() {
   if (stream) {
     console.log("Recycling...");
     await stream.request.abort();
-    streamTweets();
+    setTimeout(streamTweets, 1000 * 2);
   }
 }
 let db = null;
