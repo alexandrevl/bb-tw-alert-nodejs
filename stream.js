@@ -129,7 +129,7 @@ function streamTweets() {
       }
       const json = JSON.parse(data);
       //console.log(json);
-      var r1 = sentiment(json.data.text.toLowerCase(), "pt-br", options);
+      var r1 = sentiment(json.data.text, "pt-br", options);
       sumScore += r1.score;
       console.log(`(${r1.score}/${sumScore}): ${json.data.text}`);
       // console.log(countWords(json.data.text));
