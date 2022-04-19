@@ -2,7 +2,6 @@ const http = require("http");
 const path = require("path");
 const needle = require("needle");
 const config = require("dotenv").config();
-let cron = require("node-cron");
 const { MongoClient } = require("mongodb");
 const sentiment = require("sentiment-multi-language");
 const TOKEN = process.env.TW_BEARER;
@@ -11,7 +10,18 @@ const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL =
   "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics";
 
-const rules = [{ value: '"banco do brasil"' }];
+//const rules = [{ value: '"banco do brasil"' }];
+
+const rules = [
+  {
+    value: '"banco do brasil"',
+    tag: "banco do brasil",
+  },
+  {
+    value: "bancodobrasil",
+    tag: "bancodobrasil",
+  },
+];
 //console.log(TOKEN);
 
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
@@ -145,6 +155,7 @@ function streamTweets() {
       // }
     }
   });
+  stream.on("connected", () => console.log("Stream is started."));
 }
 async function recycle() {
   if (stream) {
