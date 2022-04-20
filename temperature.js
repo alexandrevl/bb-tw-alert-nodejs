@@ -157,13 +157,13 @@ async function main() {
   console.log(`SumSentiment Alert: ${SUM_SENTIMENT_ALERT}`);
   //Cron
   let cronStr = "* * * * *";
-  console.log(`Cron: ${cronStr}`);
+  //console.log(`Cron: ${cronStr}`);
   cron.schedule(cronStr, async () => {
-    console.log(`Cron: ${cronStr}`);
+    //console.log(`Cron: ${cronStr}`);
     let timeline = await check();
     timeline.ts = new Date();
     await insertMany(timeline);
-    console.log(`Cron: done`);
+    //console.log(`Cron: done`);
   });
   //   await check();
 }
