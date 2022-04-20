@@ -128,7 +128,7 @@ let sumScore = 0;
 let stream = null;
 function streamTweets() {
   setTimeout(recycle, 1000 * 60 * 120);
-  setInterval(() => (sumScore = 0), 60 * 60 * 1000);
+  // setInterval(() => (sumScore = 0), 60 * 60 * 1000);
   console.log("Streaming tweets...");
   stream = needle.get(streamURL, {
     headers: {
@@ -136,7 +136,7 @@ function streamTweets() {
     },
   });
   let countTweets = 0;
-  stream.on("data", (data) => {
+  stream.on("data", async (data) => {
     try {
       //console.log(data);
       if (data.title) {
@@ -145,7 +145,7 @@ function streamTweets() {
       const json = JSON.parse(data);
       //console.log(json);
       var r1 = sentiment(json.data.text, "pt-br", options);
-      sumScore += r1.score;
+      sumScore = await getHourSentiment();
       console.log(`(${r1.score}/${sumScore}): ${json.data.text}`);
       // console.log(countWords(json.data.text));
 
@@ -195,4 +195,19 @@ async function insertMany(data) {
     .collection("raw_data_stream")
     .insertMany(data, options);
   return result;
+}
+
+async function getHourSentiment() {
+  const options = { ordered: true };
+  const result = await db.collection("raw_data_stream").aggregate(
+    {
+      $match: {
+        ts: {
+          $gt: new Date(ISODate().getTime() - 1000 * 60 * 60),
+        },
+      },
+    },
+    { $group: { _id: "$id", sum: { $sum: "$sumSentiment" } } }
+  );
+  return result.sum;
 }
