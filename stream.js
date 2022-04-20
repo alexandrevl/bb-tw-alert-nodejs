@@ -128,7 +128,7 @@ let sumScore = 0;
 let stream = null;
 function streamTweets() {
   setTimeout(recycle, 1000 * 60 * 120);
-  setInterval(() => (sumScore = 0), 60 * 1000);
+  setInterval(() => (sumScore = 0), 60 * 60 * 1000);
   console.log("Streaming tweets...");
   stream = needle.get(streamURL, {
     headers: {
