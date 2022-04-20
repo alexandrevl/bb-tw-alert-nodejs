@@ -176,6 +176,7 @@ let db = null;
     console.log("Connecting mongo...");
     await client.connect();
     db = client.db("twitter");
+    //getHourSentiment();
     console.log("Mongo connected");
     currentRules = await getRules();
     await deleteRules(currentRules);
@@ -198,16 +199,20 @@ async function insertMany(data) {
 }
 
 async function getHourSentiment() {
-  const options = { ordered: true };
-  const result = await db.collection("raw_data_stream").aggregate(
-    {
-      $match: {
-        ts: {
-          $gt: new Date(ISODate().getTime() - 1000 * 60 * 60),
+  //console.log("getHourSentiment");
+  const result = await db
+    .collection("tw_timeline")
+    .aggregate([
+      {
+        $match: {
+          ts: {
+            $gt: new Date(new Date().getTime() - 1000 * 60 * 60),
+          },
         },
       },
-    },
-    { $group: { _id: "$id", sum: { $sum: "$sumSentiment" } } }
-  );
-  return result.sum;
+      { $group: { _id: "$id", sum: { $sum: "$sumSentiment" } } },
+    ])
+    .toArray();
+  //console.log(result[0].sum);
+  return result[0].sum;
 }
