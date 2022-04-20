@@ -18,6 +18,10 @@ const rules = [
     tag: "banco do brasil",
   },
   {
+    value: "bb banco",
+    tag: "banco do brasil",
+  },
+  {
     value: "bancodobrasil",
     tag: "bancodobrasil",
   },
