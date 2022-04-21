@@ -6,7 +6,8 @@ const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
 
 const AVG_SENTIMENT_ALERT = -2;
-const SUM_SENTIMENT_ALERT = -30;
+const SUM_SENTIMENT_ALERT = -20;
+const COUNT_ALERT = 5;
 const TEAMS_URL = process.env.TEAMS_URL;
 const MINUTES = 1;
 
@@ -17,7 +18,6 @@ let db = null;
 async function check() {
   console.log("Checking temperature...");
   let tweetsArray = await compileHour();
-  console.log(tweetsArray[0]);
   let analysedTweets = await analyse(tweetsArray);
   return analysedTweets;
 }
@@ -26,7 +26,7 @@ async function analyse(tweets) {
     let tw = tweets[index];
     if (index === 0) {
       if (
-        (tw.avgSentiment < AVG_SENTIMENT_ALERT && tw.count >= 5) ||
+        (tw.avgSentiment < AVG_SENTIMENT_ALERT && tw.count >= COUNT_ALERT) ||
         tw.sumSentiment < SUM_SENTIMENT_ALERT
       ) {
         console.log(
@@ -42,11 +42,13 @@ async function compileHour() {
   let results = [];
   for (let index = 0; index < MINUTES; index++) {
     let tws = await checkMinutes(index);
+    let hour = await getHourSentiment();
     let tw = {
       minute: index,
       count: tws.length,
       sumSentiment: 0,
       avgSentiment: 0,
+      hourSentiment: hour.sum,
       ts: new Date(),
       words: [],
     };
@@ -87,7 +89,7 @@ async function checkMinutes(minutes) {
     .collection("raw_data_stream")
     .find({
       $and: [
-        { ts: { $lte: new Date(new Date().getTime() - minutes * 60 * 1000) } },
+        { ts: { $lte: new Date(new Date().getTime() - 1 * 60 * 1000) } },
         {
           ts: {
             $gt: new Date(new Date().getTime() - (minutes + 1) * 60 * 1000),
@@ -157,12 +159,15 @@ async function main() {
   console.log(`SumSentiment Alert: ${SUM_SENTIMENT_ALERT}`);
   //Cron
   let cronStr = "* * * * *";
+
   //console.log(`Cron: ${cronStr}`);
   cron.schedule(cronStr, async () => {
     //console.log(`Cron: ${cronStr}`);
     let timeline = await check();
-    timeline.ts = new Date();
+    // timeline.ts = new Date();
+    // timeline.hourSentiment = await getHourSentiment();
     await insertMany(timeline);
+    console.log(timeline);
     //console.log(`Cron: done`);
   });
   //   await check();
@@ -175,4 +180,28 @@ async function insertMany(data) {
   const options = { ordered: true };
   const result = await db.collection("tw_timeline").insertMany(data, options);
   return result;
+}
+
+async function getHourSentiment() {
+  //console.log("getHourSentiment");
+  const result = await db
+    .collection("tw_timeline")
+    .aggregate([
+      {
+        $match: {
+          ts: {
+            $gt: new Date(new Date().getTime() - 1000 * 60 * 60),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$id",
+          sum: { $sum: "$sumSentiment" },
+        },
+      },
+    ])
+    .toArray();
+  //console.log(result[0].sum);
+  return result[0];
 }
