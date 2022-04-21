@@ -78,6 +78,7 @@ async function compileHour() {
     // console.log(tw.words);
     // tw.words = _.countBy(tw.words)._invert()._sortBy().value();
     // console.log(tw.words);
+    tw.hourSentiment = hour.sum + tw.sumSentiment;
     results.push(tw);
   }
   //   console.log(tweets);
