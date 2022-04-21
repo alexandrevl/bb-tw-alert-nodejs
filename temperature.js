@@ -89,7 +89,7 @@ async function checkMinutes(minutes) {
     .collection("raw_data_stream")
     .find({
       $and: [
-        { ts: { $lte: new Date(new Date().getTime() - 1 * 60 * 1000) } },
+        { ts: { $lte: new Date(new Date().getTime() - minutes * 60 * 1000) } },
         {
           ts: {
             $gt: new Date(new Date().getTime() - (minutes + 1) * 60 * 1000),
