@@ -168,7 +168,7 @@ async function main() {
     // timeline.ts = new Date();
     // timeline.hourSentiment = await getHourSentiment();
     await insertMany(timeline);
-    console.log(timeline);
+    console.log(timeline[0]);
     //console.log(`Cron: done`);
   });
   //   await check();
