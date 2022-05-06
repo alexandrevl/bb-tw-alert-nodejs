@@ -121,6 +121,8 @@ var options = {
     estresse: -1,
     inferno: -1,
     procon: -1,
+    ouvidoria: -2,
+    bacen: -1,
   },
 };
 let isCoolDown = false;
