@@ -17,8 +17,10 @@ const client = new MongoClient(url);
 let db = null;
 async function check() {
   console.log("Checking temperature...");
+  console.time("checked in");
   let tweetsArray = await compileHour();
   let analysedTweets = await analyse(tweetsArray);
+  console.timeEnd("checked in");
   return analysedTweets;
 }
 async function analyse(tweets) {
