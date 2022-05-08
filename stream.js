@@ -129,6 +129,7 @@ let isCoolDown = false;
 let sumScore = 0;
 let stream = null;
 function streamTweets() {
+  console.timeEnd("recycled in");
   setTimeout(recycle, 1000 * 60 * 10);
   // setInterval(() => (sumScore = 0), 60 * 60 * 1000);
   console.log("Streaming tweets...");
@@ -169,8 +170,7 @@ async function recycle() {
     console.time("recycled in");
     console.log("Recycling...");
     await stream.request.abort();
-    console.timeEnd("recycled in");
-    setTimeout(streamTweets, 1000 * 1);
+    setTimeout(streamTweets, 100);
   }
 }
 let db = null;
