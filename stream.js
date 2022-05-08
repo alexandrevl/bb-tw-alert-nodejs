@@ -128,6 +128,7 @@ var options = {
 let isCoolDown = false;
 let sumScore = 0;
 let stream = null;
+console.time("recycled in");
 function streamTweets() {
   console.timeEnd("recycled in");
   setTimeout(recycle, 1000 * 60 * 10);
