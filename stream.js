@@ -4,6 +4,7 @@ const needle = require("needle");
 const config = require("dotenv").config();
 const { MongoClient } = require("mongodb");
 const sentiment = require("sentiment-multi-language");
+const keyword_extractor = require("keyword-extractor");
 const TOKEN = process.env.TW_BEARER;
 
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
@@ -140,6 +141,7 @@ function streamTweets() {
     },
   });
   let countTweets = 0;
+
   stream.on("data", async (data) => {
     try {
       //console.log(data);
@@ -156,6 +158,13 @@ function streamTweets() {
       json.data.ts = new Date();
       json.data.sentiment = r1.score;
       json.data.fullSentiment = r1;
+      const extraction_result = keyword_extractor.extract(json.data.text, {
+        language: "portuguese",
+        remove_digits: true,
+        return_changed_case: true,
+        remove_duplicates: false,
+      });
+      json.data.words = extraction_result;
       insertMany([json.data]);
       ++countTweets;
     } catch (error) {
