@@ -5,6 +5,7 @@ const config = require("dotenv").config();
 const { MongoClient } = require("mongodb");
 const sentiment = require("sentiment-multi-language");
 const keyword_extractor = require("keyword-extractor");
+var _ = require("lodash");
 const TOKEN = process.env.TW_BEARER;
 
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
@@ -192,6 +193,7 @@ let db = null;
     db = client.db("twitter");
     //getHourSentiment();
     console.log("Mongo connected");
+    getHourWords(db);
     currentRules = await getRules();
     await deleteRules(currentRules);
     currentRules = await setRules();
@@ -209,6 +211,40 @@ async function insertMany(data) {
   const result = await db
     .collection("raw_data_stream")
     .insertMany(data, options);
+  return result;
+}
+
+async function getHourWords(db) {
+  let words = await db
+    .collection("tw_timeline")
+    .find({
+      ts: {
+        $gt: new Date(new Date().getTime() - 1000 * 60 * 60 * 1),
+      },
+    })
+    .toArray();
+
+  let totalWords = [];
+  for (let i = 0; i < words.length; i++) {
+    let word = words[i];
+    totalWords = totalWords.concat(word.words);
+  }
+  // console.log({totalWords})
+  let wordsCounted = _.countBy(totalWords);
+  let finalWords = [];
+  for (const [key, value] of Object.entries(wordsCounted)) {
+    if (
+      !key.includes("banco") &&
+      key != "rt" &&
+      key != "bb" &&
+      key != "dm" &&
+      !key.includes("brasil")
+    ) {
+      finalWords.push({ word: key, count: value });
+    }
+  }
+  let result = _.orderBy(finalWords, ["count"], ["desc"]);
+  console.log(result);
   return result;
 }
 

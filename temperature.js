@@ -105,6 +105,13 @@ async function checkMinutes(minutes) {
 }
 async function sendMsgTeams(count, temperature, sumSentiment) {
   console.log("Sending msg to Teams");
+  let hourWords = await getHourWords();
+  let resultWordsStr = "";
+  for (let index = 0; index < hourWords.length; index++) {
+    const word = hourWords[index];
+    resultWordsStr += `${word.word} (${word.count}) `;
+  }
+
   const data = {
     "@type": "MessageCard",
     "@context": "http://schema.org/extensions",
@@ -134,7 +141,7 @@ async function sendMsgTeams(count, temperature, sumSentiment) {
           },
           {
             name: "Palavras relacionadas",
-            value: "banco do brasil, lorem, ipsum",
+            value: resultWordsStr,
           },
         ],
         markdown: true,
@@ -182,6 +189,53 @@ if (require.main === module) {
 async function insertMany(data) {
   const options = { ordered: true };
   const result = await db.collection("tw_timeline").insertMany(data, options);
+  return result;
+}
+
+async function getHourWords() {
+  const hours = 1;
+  let qtWordsDisplay = 10;
+  let words = await db
+    .collection("raw_data_stream")
+    .find(
+      {
+        ts: {
+          $gt: new Date(new Date().getTime() - 1000 * 60 * 60 * hours),
+        },
+      },
+      { projection: { _id: 0, words: 1 } }
+    )
+    .sort({ _id: -1 })
+    .toArray();
+
+  let totalWords = [];
+  for (let i = 0; i < words.length; i++) {
+    let word = words[i];
+    totalWords = totalWords.concat(word.words);
+  }
+  // console.log({totalWords})
+  let wordsCounted = _.countBy(totalWords);
+  let finalWords = [];
+  for (const [key, value] of Object.entries(wordsCounted)) {
+    if (
+      !key.includes("banco") &&
+      key.length > 2 &&
+      key != "pra" &&
+      key != "pro" &&
+      !key.includes("brasil")
+    ) {
+      finalWords.push({ word: key, count: value });
+    }
+  }
+  let orderedFinalWords = _.orderBy(finalWords, ["count"], ["desc"]);
+  if (qtWordsDisplay > orderedFinalWords.length) {
+    qtWordsDisplay = orderedFinalWords.length;
+  }
+  let result = [];
+  for (let i = 0; i < qtWordsDisplay; i++) {
+    let word = orderedFinalWords[i];
+    result.push(word);
+  }
   return result;
 }
 
