@@ -181,7 +181,7 @@ async function recycle() {
     console.time("recycled in");
     console.log("Recycling...");
     await stream.request.abort();
-    setTimeout(streamTweets, 100);
+    setTimeout(streamTweets, 200);
   }
 }
 let db = null;
