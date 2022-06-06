@@ -10,8 +10,14 @@ let db = null;
 const SERVER_PORT = 8005;
 
 app.get("/", async (req, res) => {
-  let result = await getHourSentiment();
+  let hourSentiment = await getHourSentiment();
+  let hourWords = await getHourWords();
+  let result = {
+    hourSentiment: hourSentiment.sum,
+    hourWords: hourWords,
+  };
   console.log(result);
+
   res.send(result);
 });
 
@@ -26,6 +32,53 @@ async function connectMongo() {
   db = client.db("twitter");
   console.log("Mongo connected");
   return db;
+}
+
+async function getHourWords() {
+  const hours = 1;
+  let qtWordsDisplay = 10;
+  let words = await db
+    .collection("raw_data_stream")
+    .find(
+      {
+        ts: {
+          $gt: new Date(new Date().getTime() - 1000 * 60 * 60 * hours),
+        },
+      },
+      { projection: { _id: 0, words: 1 } }
+    )
+    .sort({ _id: -1 })
+    .toArray();
+
+  let totalWords = [];
+  for (let i = 0; i < words.length; i++) {
+    let word = words[i];
+    totalWords = totalWords.concat(word.words);
+  }
+  // console.log({totalWords})
+  let wordsCounted = _.countBy(totalWords);
+  let finalWords = [];
+  for (const [key, value] of Object.entries(wordsCounted)) {
+    if (
+      !key.includes("banco") &&
+      key.length > 2 &&
+      key != "pra" &&
+      key != "pro" &&
+      !key.includes("brasil")
+    ) {
+      finalWords.push({ word: key, count: value });
+    }
+  }
+  let orderedFinalWords = _.orderBy(finalWords, ["count"], ["desc"]);
+  if (qtWordsDisplay > orderedFinalWords.length) {
+    qtWordsDisplay = orderedFinalWords.length;
+  }
+  let result = [];
+  for (let i = 0; i < qtWordsDisplay; i++) {
+    let word = orderedFinalWords[i];
+    result.push(word);
+  }
+  return result;
 }
 
 async function getHourSentiment() {
