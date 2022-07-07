@@ -129,6 +129,7 @@ var options = {
     ar: -3,
     caindo: -2,
     cair: -2,
+    caiu: -3,
     inacessível: -2,
     inacessivel: -2,
     humilhar: -2,
