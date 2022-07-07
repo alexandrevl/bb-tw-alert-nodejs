@@ -66,6 +66,7 @@ async function compileHour() {
       tw.sumSentiment = sumSentiment;
       tw.avgSentiment = sumSentiment / tw.count;
     }
+    tw.words = await getHourWords();
     // tw.words = _.countBy(tw.words);
     // let resultWord = [];
     // for (let index = 0; index < tw.words.length; index++) {
