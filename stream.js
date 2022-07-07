@@ -137,6 +137,13 @@ var options = {
     inoperante: -3,
     fdp: -2,
     pqp: -2,
+    pior: -4,
+    lixo: -2,
+    falha: -2,
+    dificil: -1,
+    travar: -2,
+    travando: -2,
+    indisponibilidade: -3,
   },
 };
 let isCoolDown = false;
