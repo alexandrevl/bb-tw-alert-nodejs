@@ -125,6 +125,9 @@ var options = {
     procon: -1,
     ouvidoria: -2,
     bacen: -1,
+    fora: -3,
+    ar: -3,
+    "fora do ar": -5,
   },
 };
 let isCoolDown = false;
