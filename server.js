@@ -9,6 +9,17 @@ var app = express();
 let db = null;
 const SERVER_PORT = 8005;
 
+app.get("/temp", async (req, res) => {
+  let hourSentiment = await getHourSentiment();
+  let hourWords = await getHourWords();
+  let result = {
+    hourSentiment: hourSentiment.sum,
+    hourWords: hourWords,
+  };
+  console.log(result);
+
+  res.send(result);
+});
 app.get("/", async (req, res) => {
   let hourSentiment = await getHourSentiment();
   let hourWords = await getHourWords();
@@ -21,9 +32,16 @@ app.get("/", async (req, res) => {
   res.send(result);
 });
 
+app.get("/app", async (req, res) => {
+  let result = await searchWords();
+  // console.log(result);
+
+  res.send(result);
+});
+
 var server = app.listen(SERVER_PORT, async () => {
   await connectMongo();
-  console.log(`Example app listening at ${SERVER_PORT}`);
+  console.log(`App listening at ${SERVER_PORT}`);
 });
 
 async function connectMongo() {
@@ -103,4 +121,19 @@ async function getHourSentiment() {
     .toArray();
   //console.log(result[0].sum);
   return result[0];
+}
+
+async function searchWords() {
+  console.log("searchWords");
+  const result = await db
+    .collection("raw_data_stream")
+    .find(
+      { $or: [{ text: /aplicativo/ }, { text: /app/ }] },
+      { projection: { sentiment: 1, text: 1, ts: 1, _id: 0 } }
+    )
+    .limit(100)
+    .sort({ _id: -1 })
+    .toArray();
+  //console.log(result[0].sum);
+  return result;
 }
