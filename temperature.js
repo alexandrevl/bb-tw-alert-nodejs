@@ -138,7 +138,8 @@ async function sendMsgTeams(count, temperature, sumSentiment) {
           },
           {
             name: "Link",
-            value: "https://twitter.com/search?q=%22banco%20do%20brasil%22",
+            value:
+              "https://twitter.com/search?q=%22banco%20do%20brasil%22&f=live",
           },
           {
             name: "Palavras relacionadas",
