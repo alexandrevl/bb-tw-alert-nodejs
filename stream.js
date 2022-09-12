@@ -27,6 +27,14 @@ const rules = [
     value: "bancodobrasil",
     tag: "bancodobrasil",
   },
+  {
+    value: "carteira bb",
+    tag: "carteira bb",
+  },
+  {
+    value: "carteirabb",
+    tag: "carteira bb",
+  },
 ];
 //console.log(TOKEN);
 
