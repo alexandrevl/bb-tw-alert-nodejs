@@ -5,8 +5,8 @@ const needle = require("needle");
 const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
 
-const AVG_SENTIMENT_ALERT = -2;
-const SUM_SENTIMENT_ALERT = -20;
+const AVG_SENTIMENT_ALERT = -4;
+const SUM_SENTIMENT_ALERT = -40;
 const COUNT_ALERT = 8;
 const TEAMS_URL = process.env.TEAMS_URL;
 const MINUTES = 1;
@@ -45,6 +45,9 @@ async function compileHour() {
   for (let index = 0; index < MINUTES; index++) {
     let tws = await checkMinutes(index);
     let hour = await getHourSentiment();
+    if (hour == null) {
+      hour = { sum: 0 };
+    }
     let tw = {
       minute: index,
       count: tws.length,
@@ -150,7 +153,7 @@ async function sendMsgTeams(count, temperature, sumSentiment) {
       },
     ],
   };
-  // const response = "";
+
   const response = await needle("post", TEAMS_URL, data, {
     headers: {
       "content-type": "application/json",
@@ -171,6 +174,9 @@ async function main() {
   console.log(`SumSentiment Alert: ${SUM_SENTIMENT_ALERT}`);
   //Cron
   let cronStr = "* * * * *";
+
+  // c = await compileHour();
+  // console.log(c);
 
   //console.log(`Cron: ${cronStr}`);
   cron.schedule(cronStr, async () => {
