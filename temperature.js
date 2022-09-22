@@ -150,7 +150,7 @@ async function sendMsgTeams(count, temperature, sumSentiment) {
       },
     ],
   };
-  const response = "";
+  // const response = "";
   const response = await needle("post", TEAMS_URL, data, {
     headers: {
       "content-type": "application/json",
