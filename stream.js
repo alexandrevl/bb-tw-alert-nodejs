@@ -182,9 +182,7 @@ function streamTweets() {
         //console.log(json);
         var r1 = sentiment(json.data.text, "pt-br", options);
         sumScore = (await getHourSentiment()) + r1.score;
-        console.log(
-          `(${r1.score}/${sumScore}) ${json.data.author_id}: ${json.data.text}`
-        );
+        console.log(`(${r1.score}/${sumScore}) ${json.data.text}`);
         // console.log(countWords(json.data.text));
 
         json.data.ts = new Date();
