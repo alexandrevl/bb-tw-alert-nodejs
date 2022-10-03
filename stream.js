@@ -7,7 +7,7 @@ const sentiment = require("sentiment-multi-language");
 const keyword_extractor = require("keyword-extractor");
 var _ = require("lodash");
 const TOKEN = process.env.TW_BEARER;
-
+//Twitter`s API doc: https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/api-reference/get-tweets-search-stream
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL =
   "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics";
@@ -180,7 +180,9 @@ function streamTweets() {
       //console.log(json);
       var r1 = sentiment(json.data.text, "pt-br", options);
       sumScore = (await getHourSentiment()) + r1.score;
-      console.log(`(${r1.score}/${sumScore}): ${json.data.text}`);
+      console.log(
+        `(${r1.score}/${sumScore}) ${json.data.author_id}: ${json.data.text}`
+      );
       // console.log(countWords(json.data.text));
 
       json.data.ts = new Date();
