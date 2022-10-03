@@ -10,7 +10,7 @@ const TOKEN = process.env.TW_BEARER;
 //Twitter`s API doc: https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/api-reference/get-tweets-search-stream
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL =
-  "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics";
+  "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics&expansions=author_id";
 
 //const rules = [{ value: '"banco do brasil"' }];
 
@@ -177,8 +177,8 @@ function streamTweets() {
         console.log(data);
       }
       const json = JSON.parse(data);
-      console.log(json.data);
-      if (json.data.author_id != "BancodoBrasil") {
+      // console.log(json.data);
+      if (json.data.author_id != "83723557") {
         //console.log(json);
         var r1 = sentiment(json.data.text, "pt-br", options);
         sumScore = (await getHourSentiment()) + r1.score;
@@ -199,6 +199,8 @@ function streamTweets() {
         json.data.words = extraction_result;
         insertMany([json.data]);
         ++countTweets;
+      } else {
+        console.log(`(BB): ${json.data.text}`);
       }
     } catch (error) {
       // if (error.title) {
