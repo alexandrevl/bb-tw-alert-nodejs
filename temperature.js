@@ -5,8 +5,8 @@ const needle = require("needle");
 const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
 
-const AVG_SENTIMENT_ALERT = -4;
-const SUM_SENTIMENT_ALERT = -40;
+const AVG_SENTIMENT_ALERT = -3;
+const SUM_SENTIMENT_ALERT = -20;
 const COUNT_ALERT = 8;
 const TEAMS_URL = process.env.TEAMS_URL;
 const MINUTES = 1;
