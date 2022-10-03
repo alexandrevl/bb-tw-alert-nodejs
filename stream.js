@@ -177,26 +177,29 @@ function streamTweets() {
         console.log(data);
       }
       const json = JSON.parse(data);
-      //console.log(json);
-      var r1 = sentiment(json.data.text, "pt-br", options);
-      sumScore = (await getHourSentiment()) + r1.score;
-      console.log(
-        `(${r1.score}/${sumScore}) ${json.data.author_id}: ${json.data.text}`
-      );
-      // console.log(countWords(json.data.text));
+      console.log(json.data);
+      if (json.data.author_id != "BancodoBrasil") {
+        //console.log(json);
+        var r1 = sentiment(json.data.text, "pt-br", options);
+        sumScore = (await getHourSentiment()) + r1.score;
+        console.log(
+          `(${r1.score}/${sumScore}) ${json.data.author_id}: ${json.data.text}`
+        );
+        // console.log(countWords(json.data.text));
 
-      json.data.ts = new Date();
-      json.data.sentiment = r1.score;
-      json.data.fullSentiment = r1;
-      const extraction_result = keyword_extractor.extract(json.data.text, {
-        language: "portuguese",
-        remove_digits: true,
-        return_changed_case: true,
-        remove_duplicates: false,
-      });
-      json.data.words = extraction_result;
-      insertMany([json.data]);
-      ++countTweets;
+        json.data.ts = new Date();
+        json.data.sentiment = r1.score;
+        json.data.fullSentiment = r1;
+        const extraction_result = keyword_extractor.extract(json.data.text, {
+          language: "portuguese",
+          remove_digits: true,
+          return_changed_case: true,
+          remove_duplicates: false,
+        });
+        json.data.words = extraction_result;
+        insertMany([json.data]);
+        ++countTweets;
+      }
     } catch (error) {
       // if (error.title) {
       //   console.log(error);
