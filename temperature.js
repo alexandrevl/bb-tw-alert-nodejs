@@ -4,12 +4,14 @@ const _ = require("lodash");
 const needle = require("needle");
 const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
+const TelegramBot = require("node-telegram-bot-api");
 
 const AVG_SENTIMENT_ALERT = -3;
 const SUM_SENTIMENT_ALERT = -20;
 const COUNT_ALERT = 8;
 const TEAMS_URL = process.env.TEAMS_URL;
 const MINUTES = 1;
+const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
@@ -34,11 +36,39 @@ async function analyse(tweets) {
         console.log(
           `Changes in sentiments (Count: ${tw.count}/SumSentiment: ${tw.sumSentiment})`
         );
-        await sendMsgTeams(tw.count, tw.avgSentiment, tw.sumSentiment);
+        let hourWords = await getHourWords();
+        let resultWordsStr = "";
+        for (let index = 0; index < hourWords.length; index++) {
+          const word = hourWords[index];
+          resultWordsStr += `${word.word} (${word.count}) `;
+        }
+        sendTelegram(
+          tw.count,
+          tw.avgSentiment,
+          tw.sumSentiment,
+          resultWordsStr
+        );
+        await sendMsgTeams(
+          tw.count,
+          tw.avgSentiment,
+          tw.sumSentiment,
+          resultWordsStr
+        );
       }
     }
   }
   return tweets;
+}
+const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
+function sendTelegram(count, temperature, sumSentiment, resultWordsStr) {
+  const chatId = "@bb_alert_tw";
+  const resp = `*TW Alerta de mudança de temperatura do twitter*\n
+              Temperatura min: ${sumSentiment}
+              Quantidade tweets: ${count}
+              Temp. media min: ${temperature}\n
+              Palavras: ${resultWordsStr}`;
+  console.log(`Send to ${chatId}: ${resp}`);
+  bot.sendMessage(chatId, resp, { parse_mode: "Markdown" });
 }
 async function compileHour() {
   let results = [];
@@ -107,15 +137,8 @@ async function checkMinutes(minutes) {
     .toArray();
   return result;
 }
-async function sendMsgTeams(count, temperature, sumSentiment) {
+async function sendMsgTeams(count, temperature, sumSentiment, resultWordsStr) {
   console.log("Sending msg to Teams");
-  let hourWords = await getHourWords();
-  let resultWordsStr = "";
-  for (let index = 0; index < hourWords.length; index++) {
-    const word = hourWords[index];
-    resultWordsStr += `${word.word} (${word.count}) `;
-  }
-
   const data = {
     "@type": "MessageCard",
     "@context": "http://schema.org/extensions",
