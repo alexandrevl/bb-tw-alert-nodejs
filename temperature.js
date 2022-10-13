@@ -97,7 +97,7 @@ async function compileHour() {
     }
     if (sumSentiment != 0) {
       tw.sumSentiment = sumSentiment;
-      tw.avgSentiment = parseFloat(sumSentiment / tw.count).toFixed(2);
+      tw.avgSentiment = sumSentiment / tw.count;
     }
     tw.words = await getHourWords();
     // tw.words = _.countBy(tw.words);
