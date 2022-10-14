@@ -65,9 +65,7 @@ function sendTelegram(count, temperature, sumSentiment, resultWordsStr) {
   const resp = `*TW Alerta de mudança de temperatura do twitter*\n
 Temperatura do minuto: ${sumSentiment}
 Quantidade de tweets: ${count}
-Temp. media do minuto: ${parseFloat(temperature).toFixed(
-    2
-  )}/thr: ${AVG_SENTIMENT_ALERT}\n
+Temp. media do minuto: ${parseFloat(temperature).toFixed(2)}
 Palavras: ${resultWordsStr}`;
   console.log(`Send to ${chatId}: ${resp}`);
   bot.sendMessage(chatId, resp, { parse_mode: "Markdown" });
