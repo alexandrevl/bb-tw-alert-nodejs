@@ -6,7 +6,7 @@ const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
 const TelegramBot = require("node-telegram-bot-api");
 
-const c = -3;
+const AVG_SENTIMENT_ALERT = -3;
 const SUM_SENTIMENT_ALERT = -20;
 const COUNT_ALERT = 8;
 const TEAMS_URL = process.env.TEAMS_URL;
