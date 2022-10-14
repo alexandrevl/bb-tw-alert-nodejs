@@ -63,8 +63,8 @@ const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 function sendTelegram(count, temperature, sumSentiment, resultWordsStr) {
   const chatId = "@bb_alert_tw";
   const resp = `*TW Alerta de mudança de temperatura do twitter*\n
-Temperatura do minuto: ${sumSentiment}/thr: ${SUM_SENTIMENT_ALERT}
-Quantidade de tweets: ${count}/thr: ${COUNT_ALERT}
+Temperatura do minuto: ${sumSentiment}
+Quantidade de tweets: ${count}
 Temp. media do minuto: ${parseFloat(temperature).toFixed(
     2
   )}/thr: ${AVG_SENTIMENT_ALERT}\n
