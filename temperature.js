@@ -6,7 +6,7 @@ const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
 const TelegramBot = require("node-telegram-bot-api");
 
-const AVG_SENTIMENT_ALERT = -3;
+const c = -3;
 const SUM_SENTIMENT_ALERT = -20;
 const COUNT_ALERT = 8;
 const TEAMS_URL = process.env.TEAMS_URL;
@@ -63,9 +63,11 @@ const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 function sendTelegram(count, temperature, sumSentiment, resultWordsStr) {
   const chatId = "@bb_alert_tw";
   const resp = `*TW Alerta de mudança de temperatura do twitter*\n
-Temperatura do minuto: ${sumSentiment}
-Quantidade de tweets: ${count}
-Temp. media do minuto: ${parseFloat(temperature).toFixed(2)}\n
+Temperatura do minuto: ${sumSentiment}/thr: ${SUM_SENTIMENT_ALERT}
+Quantidade de tweets: ${count}/thr: ${COUNT_ALERT}
+Temp. media do minuto: ${parseFloat(temperature).toFixed(
+    2
+  )}/thr: ${AVG_SENTIMENT_ALERT}\n
 Palavras: ${resultWordsStr}`;
   console.log(`Send to ${chatId}: ${resp}`);
   bot.sendMessage(chatId, resp, { parse_mode: "Markdown" });
