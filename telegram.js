@@ -140,7 +140,7 @@ async function sendApp(msg) {
   words.forEach((tweet) => {
     strFinalApp += `(${moment(tweet.ts).format("DD/MM HH:mm:ss")}) ${tweet.text
       .normalize("NFD")
-      .replace(/[^\x00-\x7F]/g, "")}\n\n`;
+      .replace(/[^\x00-\x7F]/g, "")}\n-\n`;
   });
   console.log(`Sending to ${chatId}: ${strFinalApp}`);
   bot.sendMessage(chatId, strFinalApp);
