@@ -32,7 +32,7 @@ services:
   telegram:
     restart: always
     command: node telegram.js
-    container_name: server
+    container_name: telegram
     build: .
     ports:
       - 8000:8000

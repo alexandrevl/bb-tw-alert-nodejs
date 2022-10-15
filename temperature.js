@@ -40,12 +40,12 @@ async function analyse(tweets) {
           const word = hourWords[index];
           resultWordsStr += `${word.word} (${word.count}) `;
         }
-        sendTelegram(
-          tw.count,
-          tw.avgSentiment,
-          tw.sumSentiment,
-          resultWordsStr
-        );
+        // sendTelegram(
+        //   tw.count,
+        //   tw.avgSentiment,
+        //   tw.sumSentiment,
+        //   resultWordsStr
+        // );
         await sendMsgTeams(
           tw.count,
           tw.avgSentiment,
