@@ -115,22 +115,12 @@ Palavras: ${resultWordsStr}`;
   bot.sendMessage(chatId, resp, { parse_mode: "Markdown" });
 }
 
-bot.on("message", async (msg) => {
-  console.log(msg.text);
-  if (db != null) {
-    switch (msg.text) {
-      case "/status":
-        sendStatus(msg);
-        break;
-      case "/app":
-        sendApp(msg);
-        break;
+bot.onText(/\/status/, (msg) => {
+  sendStatus(msg);
+});
 
-      default:
-        break;
-    }
-  } else {
-  }
+bot.onText(/\/app/, (msg) => {
+  sendApp(msg);
 });
 
 async function sendApp(msg) {
