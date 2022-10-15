@@ -43,7 +43,7 @@ async function analyse(tweets) {
           const word = hourWords[index];
           resultWordsStr += `${word.word} (${word.count}) `;
         }
-        socketTelegram.emit("sendTelegram", [
+        socketTelegram.emit("alertTemp", [
           tw.count,
           tw.avgSentiment,
           tw.sumSentiment,
