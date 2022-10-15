@@ -4,8 +4,9 @@ const { MongoClient } = require("mongodb");
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
 const _ = require("lodash");
+const moment = require("moment");
 const TelegramBot = require("node-telegram-bot-api");
-const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
+const bot = new TelegramBot(process.env.TELEGRAM_DEV_TOKEN, { polling: true });
 
 let db = null;
 
@@ -19,7 +20,7 @@ async function connectMongo() {
 
 async function getHourWords() {
   const hours = 1;
-  let qtWordsDisplay = 5;
+  let qtWordsDisplay = 10;
   let words = await db
     .collection("raw_data_stream")
     .find(
@@ -89,14 +90,13 @@ async function getHourSentiment() {
 }
 
 async function searchWords() {
-  console.log("searchWords");
   const result = await db
     .collection("raw_data_stream")
     .find(
       { $or: [{ text: /aplicativo/ }, { text: /app/ }] },
       { projection: { sentiment: 1, text: 1, ts: 1, _id: 0 } }
     )
-    .limit(10)
+    .limit(20)
     .sort({ _id: -1 })
     .toArray();
   //console.log(result[0].sum);
@@ -116,29 +116,14 @@ Palavras: ${resultWordsStr}`;
 }
 
 bot.on("message", async (msg) => {
-  const chatId = msg.chat.id;
   console.log(msg.text);
   if (db != null) {
-    const chatId = msg.chat.id;
     switch (msg.text) {
       case "/status":
-        let hourSentiment = await getHourSentiment();
-        let hourWords = await getHourWords();
-        let result = {
-          hourSentiment: hourSentiment.sum,
-          hourWords: hourWords,
-        };
-        console.log(`Sending to ${chatId}: ${JSON.stringify(result, null, 2)}`);
-        bot.sendMessage(chatId, "`" + JSON.stringify(result, null, 2) + "`", {
-          parse_mode: "Markdown",
-        });
+        sendStatus(msg);
         break;
       case "/app":
-        let words = await searchWords();
-        console.log(`Sending to ${chatId}: ${JSON.stringify(words, null, 2)}`);
-        bot.sendMessage(chatId, "`" + JSON.stringify(words, null, 2) + "`", {
-          parse_mode: "Markdown",
-        });
+        sendApp(msg);
         break;
 
       default:
@@ -147,6 +132,39 @@ bot.on("message", async (msg) => {
   } else {
   }
 });
+
+async function sendApp(msg) {
+  const chatId = msg.chat.id;
+  let words = await searchWords();
+  let strFinalApp = "";
+  words.forEach((tweet) => {
+    strFinalApp += `(${moment(tweet.ts).format("DD/MM HH:mm:ss")}) ${tweet.text
+      .normalize("NFD")
+      .replace(/[^\x00-\x7F]/g, "")}\n\n`;
+  });
+  console.log(`Sending to ${chatId}: ${strFinalApp}`);
+  bot.sendMessage(chatId, strFinalApp);
+}
+
+async function sendStatus(msg) {
+  const chatId = msg.chat.id;
+  let hourSentiment = await getHourSentiment();
+  let hourWords = await getHourWords();
+  let result = {
+    hourSentiment: hourSentiment.sum,
+    hourWords: hourWords,
+  };
+  let resultWordsStr = "";
+  for (let index = 0; index < hourWords.length; index++) {
+    const word = hourWords[index];
+    resultWordsStr += `${word.word} (${word.count}) `;
+  }
+  let strFinal = `**Hour Sentiment**: ${hourSentiment.sum}\n**Words**: ${resultWordsStr}`;
+  console.log(`Sending to ${chatId}: ${strFinal}`);
+  bot.sendMessage(chatId, strFinal, {
+    parse_mode: "Markdown",
+  });
+}
 
 async function init() {
   io.on("connection", async (client) => {
