@@ -159,11 +159,9 @@ async function sendStatus(msg) {
     const word = hourWords[index];
     resultWordsStr += `${word.word} (${word.count}) `;
   }
-  let strFinal = `**Hour Sentiment**: ${hourSentiment.sum}\n**Words**: ${resultWordsStr}`;
+  let strFinal = `Hour Sentiment: ${hourSentiment.sum}\nWords: ${resultWordsStr}`;
   console.log(`Sending to ${chatId}: ${strFinal}`);
-  bot.sendMessage(chatId, strFinal, {
-    parse_mode: "Markdown",
-  });
+  bot.sendMessage(chatId, strFinal);
 }
 
 async function init() {
