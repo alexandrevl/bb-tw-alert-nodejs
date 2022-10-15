@@ -18,10 +18,10 @@ services:
       - .:/usr/src/app
     env_file:
       - ./.env
-  server:
+  api-server:
     restart: always
-    command: node server.js
-    container_name: server
+    command: node api-server.js
+    container_name: api-server
     build: .
     ports:
       - 8005:8005
@@ -29,10 +29,10 @@ services:
       - .:/usr/src/app
     env_file:
       - ./.env
-  telegram:
+  telegram-server:
     restart: always
-    command: node telegram.js
-    container_name: telegram
+    command: node telegram-server.js
+    container_name: telegram-server
     build: .
     ports:
       - 8000:8000
