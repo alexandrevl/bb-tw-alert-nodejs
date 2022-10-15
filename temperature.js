@@ -4,14 +4,12 @@ const _ = require("lodash");
 const needle = require("needle");
 const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
-const TelegramBot = require("node-telegram-bot-api");
 
 const AVG_SENTIMENT_ALERT = -3;
 const SUM_SENTIMENT_ALERT = -20;
 const COUNT_ALERT = 8;
 const TEAMS_URL = process.env.TEAMS_URL;
 const MINUTES = 1;
-const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
@@ -59,17 +57,7 @@ async function analyse(tweets) {
   }
   return tweets;
 }
-const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
-function sendTelegram(count, temperature, sumSentiment, resultWordsStr) {
-  const chatId = "@bb_alert_tw";
-  const resp = `*TW Alerta de mudança de temperatura do twitter*\n
-Temperatura do minuto: ${sumSentiment}
-Quantidade de tweets: ${count}
-Temp. media do minuto: ${parseFloat(temperature).toFixed(2)}
-Palavras: ${resultWordsStr}`;
-  console.log(`Send to ${chatId}: ${resp}`);
-  bot.sendMessage(chatId, resp, { parse_mode: "Markdown" });
-}
+
 async function compileHour() {
   let results = [];
   for (let index = 0; index < MINUTES; index++) {

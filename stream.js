@@ -1,5 +1,3 @@
-const http = require("http");
-const path = require("path");
 const needle = require("needle");
 const config = require("dotenv").config();
 const { MongoClient } = require("mongodb");
