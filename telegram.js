@@ -7,7 +7,7 @@ io.on("connection", (client) => {
   console.log("Client connected");
   client.emit("welcome", "welcome man");
   client.on("alertTemp", (data) => {
-    sendTelegram(data);
+    alertTemp(data);
   });
 });
 io.listen(8000);
