@@ -4,6 +4,7 @@ const _ = require("lodash");
 const needle = require("needle");
 const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
+const io = require("socket.io-client");
 
 const AVG_SENTIMENT_ALERT = -3;
 const SUM_SENTIMENT_ALERT = -20;
@@ -13,6 +14,8 @@ const MINUTES = 1;
 
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
+
+const socketTelegram = io("ws://170.187.152.51:8000");
 
 let db = null;
 async function check() {
@@ -40,12 +43,12 @@ async function analyse(tweets) {
           const word = hourWords[index];
           resultWordsStr += `${word.word} (${word.count}) `;
         }
-        // sendTelegram(
-        //   tw.count,
-        //   tw.avgSentiment,
-        //   tw.sumSentiment,
-        //   resultWordsStr
-        // );
+        socketTelegram.emit("sendTelegram", [
+          tw.count,
+          tw.avgSentiment,
+          tw.sumSentiment,
+          resultWordsStr,
+        ]);
         await sendMsgTeams(
           tw.count,
           tw.avgSentiment,

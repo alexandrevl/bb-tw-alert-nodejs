@@ -4,15 +4,15 @@ const TelegramBot = require("node-telegram-bot-api");
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 
 io.on("connection", (client) => {
-  console.log("user connected");
+  console.log("Client connected");
   client.emit("welcome", "welcome man");
-  client.on("sendTelegram", (data) => {
+  client.on("alertTemp", (data) => {
     sendTelegram(data);
   });
 });
 io.listen(8000);
 
-function sendTelegram(data) {
+function alertTemp(data) {
   let [count, temperature, sumSentiment, resultWordsStr] = data;
   const chatId = "@bb_alert_tw";
   const resp = `*TW Alerta de mudança de temperatura do twitter*\n
