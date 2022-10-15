@@ -5,7 +5,7 @@ const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${pro
 const client = new MongoClient(url);
 const _ = require("lodash");
 const TelegramBot = require("node-telegram-bot-api");
-const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
+const bot = new TelegramBot(process.env.TELEGRAM_DEV_TOKEN, { polling: true });
 
 let db = null;
 
@@ -19,7 +19,7 @@ async function connectMongo() {
 
 async function getHourWords() {
   const hours = 1;
-  let qtWordsDisplay = 10;
+  let qtWordsDisplay = 5;
   let words = await db
     .collection("raw_data_stream")
     .find(
@@ -147,6 +147,7 @@ bot.on("message", async (msg) => {
   } else {
   }
 });
+
 async function init() {
   io.on("connection", async (client) => {
     console.log("New client connected");
