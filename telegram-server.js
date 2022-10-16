@@ -104,19 +104,20 @@ async function searchWords() {
 }
 
 async function searchWordsMatch(match) {
-  let query = { $or: [{ text: /match[1]/ }] };
-  console.log(query);
+  let regex = new RegExp(match[1], "i");
+  let query = { $or: [{ text: regex }] };
+  // console.log(query);
   let result = await db
     .collection("raw_data_stream")
     .find(query, { projection: { sentiment: 1, text: 1, ts: 1, _id: 0 } })
     .limit(20)
     .sort({ _id: -1 })
     .toArray();
-  console.log(result);
+  // console.log(result);
   if (result.length <= 0) {
     result = [{ sentiment: 0, text: "", ts: 0 }];
   }
-  console.log(result);
+  // console.log(result);
   return result;
 }
 
@@ -131,6 +132,10 @@ Palavras: ${resultWordsStr}`;
   console.log(`Send to ${chatId}: ${resp}`);
   bot.sendMessage(chatId, resp, { parse_mode: "Markdown" });
 }
+
+bot.onText(/\/f (.+)/, (msg, match) => {
+  sendSearch(msg, match);
+});
 
 bot.onText(/\/search (.+)/, (msg, match) => {
   sendSearch(msg, match);
