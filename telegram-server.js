@@ -183,7 +183,7 @@ async function sendSearch(msg, match) {
         "DD/MM HH:mm:ss"
       )}) ${tweet.text.normalize("NFD").replace(/[^\x00-\x7F]/g, "")}\n\n`;
     });
-    console.log(`Sending to ${chatId}: ${strFinalApp}`);
+    console.log(`Sending to ${msg.chat.username}: ${strFinalApp}`);
     const opts = {
       disable_web_page_preview: true,
       reply_to_message_id: msg.message_id,
@@ -214,7 +214,7 @@ async function sendApp(msg) {
       one_time_keyboard: true,
     }),
   };
-  console.log(`Sending to ${chatId}: ${strFinalApp}`);
+  console.log(`Sending to ${msg.chat.username}: ${strFinalApp}`);
   bot.sendMessage(chatId, strFinalApp, opts);
 }
 
@@ -225,12 +225,12 @@ async function sendStatus(msg) {
   let resultWordsStr = "";
   for (let index = 0; index < hourWords.length; index++) {
     const word = hourWords[index];
-    resultWordsStr += `   ${word.word} (${word.count})\n`;
+    resultWordsStr += `   • ${word.word} (${word.count})\n`;
   }
   let strFinal = `Twitter\`s Sentiment Temperature\n\nSentiment: ${
     hourSentiment.sum
   } ${getSignalEmoji(hourSentiment.sum)}\n\nWords:\n${resultWordsStr}`;
-  console.log(`Sending to ${chatId}: ${strFinal}`);
+  console.log(`Sending to ${msg.chat.username}: ${strFinal}`);
   bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
 }
 
