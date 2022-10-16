@@ -158,23 +158,41 @@ bot.onText(/\/status/, (msg) => {
 bot.onText(/\/app/, (msg) => {
   if (db != null) sendApp(msg);
 });
+bot.onText(/\/last/, (msg) => {
+  if (db != null) sendSearch(msg, ["", " "]);
+});
 
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   bot.sendMessage(chatId, "Hi! 👋", { parse_mode: "Markdown" });
 });
+bot.on("callback_query", (query) => {
+  bot.answerCallbackQuery(query.id, () => {
+    console.log("ooi");
+  });
+});
 
 async function sendSearch(msg, match) {
   const chatId = msg.chat.id;
   let words = await searchWordsMatch(match);
-  let strFinalApp = `Result for search: ${match[1]}\n\n`;
-  words.forEach((tweet) => {
-    strFinalApp += `● (${moment(tweet.ts).format(
-      "DD/MM HH:mm:ss"
-    )}) ${tweet.text.normalize("NFD").replace(/[^\x00-\x7F]/g, "")}\n-\n`;
-  });
-  console.log(`Sending to ${chatId}: ${strFinalApp}`);
-  bot.sendMessage(chatId, strFinalApp, { disable_web_page_preview: true });
+  if (match[1] != "*") {
+    let strFinalApp = `Result for search: ${match[1]}\n\n`;
+    words.forEach((tweet) => {
+      strFinalApp += `● (${moment(tweet.ts).format(
+        "DD/MM HH:mm:ss"
+      )}) ${tweet.text.normalize("NFD").replace(/[^\x00-\x7F]/g, "")}\n-\n`;
+    });
+    console.log(`Sending to ${chatId}: ${strFinalApp}`);
+    const opts = {
+      disable_web_page_preview: true,
+      reply_to_message_id: msg.message_id,
+      reply_markup: JSON.stringify({
+        inline_keyboard: [[{ text: "more", callback_data: "hello" }]],
+        one_time_keyboard: true,
+      }),
+    };
+    bot.sendMessage(chatId, strFinalApp, opts);
+  }
 }
 
 async function sendApp(msg) {
@@ -186,18 +204,23 @@ async function sendApp(msg) {
       "DD/MM HH:mm:ss"
     )}) ${tweet.text.normalize("NFD").replace(/[^\x00-\x7F]/g, "")}\n\n`;
   });
+
+  const opts = {
+    disable_web_page_preview: true,
+    reply_to_message_id: msg.message_id,
+    reply_markup: JSON.stringify({
+      inline_keyboard: [[{ text: "more", callback_data: "hello" }]],
+      one_time_keyboard: true,
+    }),
+  };
   console.log(`Sending to ${chatId}: ${strFinalApp}`);
-  bot.sendMessage(chatId, strFinalApp, { disable_web_page_preview: true });
+  bot.sendMessage(chatId, strFinalApp, opts);
 }
 
 async function sendStatus(msg) {
   const chatId = msg.chat.id;
   let hourSentiment = await getHourSentiment();
   let hourWords = await getHourWords();
-  let result = {
-    hourSentiment: hourSentiment.sum,
-    hourWords: hourWords,
-  };
   let resultWordsStr = "";
   for (let index = 0; index < hourWords.length; index++) {
     const word = hourWords[index];
