@@ -103,6 +103,16 @@ async function searchWords() {
   return result;
 }
 
+function getSignalEmoji(sentiment) {
+  let result = "🟢";
+  if (sentiment < -40 && sentiment > -100) {
+    result = "🟡";
+  } else if (sentiment <= -100) {
+    result = "🔴";
+  }
+  return result;
+}
+
 async function searchWordsMatch(match) {
   let regex = new RegExp(match[1], "i");
   let query = { $or: [{ text: regex }] };
@@ -193,7 +203,9 @@ async function sendStatus(msg) {
     const word = hourWords[index];
     resultWordsStr += `   ${word.word} (${word.count})\n`;
   }
-  let strFinal = `Twitter\`s Sentiment Temperature\n\nSentiment: ${hourSentiment.sum}\n\nWords:\n${resultWordsStr}`;
+  let strFinal = `Twitter\`s Sentiment Temperature\n\nSentiment: ${
+    hourSentiment.sum
+  } ${getSignalEmoji(hourSentiment.sum)}\n\nWords:\n${resultWordsStr}`;
   console.log(`Sending to ${chatId}: ${strFinal}`);
   bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
 }
