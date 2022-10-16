@@ -135,7 +135,7 @@ async function searchWordsMatch(match) {
 function alertTemp(data) {
   let [count, temperature, sumSentiment, resultWordsStr] = data;
   const chatId = "@bb_alert_tw";
-  const resp = `*TW Alerta de mudança de temperatura do twitter*\n
+  const resp = `⚠️ *TW Alerta de mudança de temperatura do twitter*\n
 Temperatura do minuto: ${sumSentiment}
 Quantidade de tweets: ${count}
 Temp. media do minuto: ${parseFloat(temperature).toFixed(2)}
@@ -181,7 +181,7 @@ async function sendSearch(msg, match) {
     words.forEach((tweet) => {
       strFinalApp += `● (${moment(tweet.ts).format(
         "DD/MM HH:mm:ss"
-      )}) ${tweet.text.normalize("NFD").replace(/[^\x00-\x7F]/g, "")}\n-\n`;
+      )}) ${tweet.text.normalize("NFD").replace(/[^\x00-\x7F]/g, "")}\n\n`;
     });
     console.log(`Sending to ${chatId}: ${strFinalApp}`);
     const opts = {
