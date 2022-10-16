@@ -134,19 +134,24 @@ Palavras: ${resultWordsStr}`;
 }
 
 bot.onText(/\/f (.+)/, (msg, match) => {
-  sendSearch(msg, match);
+  if (db != null) sendSearch(msg, match);
 });
 
 bot.onText(/\/search (.+)/, (msg, match) => {
-  sendSearch(msg, match);
+  if (db != null) sendSearch(msg, match);
 });
 
 bot.onText(/\/status/, (msg) => {
-  sendStatus(msg);
+  if (db != null) sendStatus(msg);
 });
 
 bot.onText(/\/app/, (msg) => {
-  sendApp(msg);
+  if (db != null) sendApp(msg);
+});
+
+bot.onText(/\/start/, (msg) => {
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, "Hi! 👋", { parse_mode: "Markdown" });
 });
 
 async function sendSearch(msg, match) {
