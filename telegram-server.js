@@ -149,9 +149,9 @@ async function sendSearch(msg, match) {
   let words = await searchWordsMatch(match);
   let strFinalApp = "";
   words.forEach((tweet) => {
-    strFinalApp += `(${moment(tweet.ts).format("DD/MM HH:mm:ss")}) ${tweet.text
-      .normalize("NFD")
-      .replace(/[^\x00-\x7F]/g, "")}\n☭\n`;
+    strFinalApp += `● (${moment(tweet.ts).format(
+      "DD/MM HH:mm:ss"
+    )}) ${tweet.text.normalize("NFD").replace(/[^\x00-\x7F]/g, "")}\n-\n`;
   });
   console.log(`Sending to ${chatId}: ${strFinalApp}`);
   bot.sendMessage(chatId, strFinalApp, { disable_web_page_preview: true });
@@ -162,9 +162,9 @@ async function sendApp(msg) {
   let words = await searchWords();
   let strFinalApp = "";
   words.forEach((tweet) => {
-    strFinalApp += `(${moment(tweet.ts).format("DD/MM HH:mm:ss")}) ${tweet.text
-      .normalize("NFD")
-      .replace(/[^\x00-\x7F]/g, "")}\n☭\n`;
+    strFinalApp += `● (${moment(tweet.ts).format(
+      "DD/MM HH:mm:ss"
+    )}) ${tweet.text.normalize("NFD").replace(/[^\x00-\x7F]/g, "")}\n\n`;
   });
   console.log(`Sending to ${chatId}: ${strFinalApp}`);
   bot.sendMessage(chatId, strFinalApp, { disable_web_page_preview: true });
