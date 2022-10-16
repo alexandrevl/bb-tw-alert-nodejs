@@ -114,6 +114,7 @@ function getSignalEmoji(sentiment) {
 }
 
 async function searchWordsMatch(match) {
+  if (match[1] == "*") match[1] = " ";
   let regex = new RegExp(match[1], "i");
   let query = { $or: [{ text: regex }] };
   // console.log(query);
