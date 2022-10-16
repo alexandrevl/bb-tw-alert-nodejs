@@ -152,7 +152,7 @@ bot.onText(/\/app/, (msg) => {
 async function sendSearch(msg, match) {
   const chatId = msg.chat.id;
   let words = await searchWordsMatch(match);
-  let strFinalApp = "";
+  let strFinalApp = `Result for search: ${match[1]}\n\n`;
   words.forEach((tweet) => {
     strFinalApp += `● (${moment(tweet.ts).format(
       "DD/MM HH:mm:ss"
@@ -165,7 +165,7 @@ async function sendSearch(msg, match) {
 async function sendApp(msg) {
   const chatId = msg.chat.id;
   let words = await searchWords();
-  let strFinalApp = "";
+  let strFinalApp = "Result for search: app\n\n";
   words.forEach((tweet) => {
     strFinalApp += `● (${moment(tweet.ts).format(
       "DD/MM HH:mm:ss"
@@ -186,9 +186,9 @@ async function sendStatus(msg) {
   let resultWordsStr = "";
   for (let index = 0; index < hourWords.length; index++) {
     const word = hourWords[index];
-    resultWordsStr += `${word.word} (${word.count}) `;
+    resultWordsStr += `   ${word.word} (${word.count})\n`;
   }
-  let strFinal = `Hour Sentiment: ${hourSentiment.sum}\nWords: ${resultWordsStr}`;
+  let strFinal = `Twitter\`s Sentiment Temperature\n\nSentiment: ${hourSentiment.sum}\n\nWords:\n${resultWordsStr}`;
   console.log(`Sending to ${chatId}: ${strFinal}`);
   bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
 }
