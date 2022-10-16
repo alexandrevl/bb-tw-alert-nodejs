@@ -96,7 +96,7 @@ async function searchWords() {
       { $or: [{ text: /aplicativo/ }, { text: /app/ }] },
       { projection: { sentiment: 1, text: 1, ts: 1, _id: 0 } }
     )
-    .limit(20)
+    .limit(10)
     .sort({ _id: -1 })
     .toArray();
   //console.log(result[0].sum);
@@ -110,7 +110,7 @@ async function searchWordsMatch(match) {
   let result = await db
     .collection("raw_data_stream")
     .find(query, { projection: { sentiment: 1, text: 1, ts: 1, _id: 0 } })
-    .limit(20)
+    .limit(10)
     .sort({ _id: -1 })
     .toArray();
   // console.log(result);
