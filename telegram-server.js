@@ -103,6 +103,23 @@ async function searchWords() {
   return result;
 }
 
+async function searchWordsMatch(match) {
+  let query = { $or: [{ text: /match[1]/ }] };
+  console.log(query);
+  let result = await db
+    .collection("raw_data_stream")
+    .find(query, { projection: { sentiment: 1, text: 1, ts: 1, _id: 0 } })
+    .limit(20)
+    .sort({ _id: -1 })
+    .toArray();
+  console.log(result);
+  if (result.length <= 0) {
+    result = [{ sentiment: 0, text: "", ts: 0 }];
+  }
+  console.log(result);
+  return result;
+}
+
 function alertTemp(data) {
   let [count, temperature, sumSentiment, resultWordsStr] = data;
   const chatId = "@bb_alert_tw";
@@ -115,6 +132,10 @@ Palavras: ${resultWordsStr}`;
   bot.sendMessage(chatId, resp, { parse_mode: "Markdown" });
 }
 
+bot.onText(/\/search (.+)/, (msg, match) => {
+  sendSearch(msg, match);
+});
+
 bot.onText(/\/status/, (msg) => {
   sendStatus(msg);
 });
@@ -123,6 +144,19 @@ bot.onText(/\/app/, (msg) => {
   sendApp(msg);
 });
 
+async function sendSearch(msg, match) {
+  const chatId = msg.chat.id;
+  let words = await searchWordsMatch(match);
+  let strFinalApp = "";
+  words.forEach((tweet) => {
+    strFinalApp += `(${moment(tweet.ts).format("DD/MM HH:mm:ss")}) ${tweet.text
+      .normalize("NFD")
+      .replace(/[^\x00-\x7F]/g, "")}\n☭\n`;
+  });
+  console.log(`Sending to ${chatId}: ${strFinalApp}`);
+  bot.sendMessage(chatId, strFinalApp, { disable_web_page_preview: true });
+}
+
 async function sendApp(msg) {
   const chatId = msg.chat.id;
   let words = await searchWords();
@@ -130,10 +164,10 @@ async function sendApp(msg) {
   words.forEach((tweet) => {
     strFinalApp += `(${moment(tweet.ts).format("DD/MM HH:mm:ss")}) ${tweet.text
       .normalize("NFD")
-      .replace(/[^\x00-\x7F]/g, "")}\n-\n`;
+      .replace(/[^\x00-\x7F]/g, "")}\n☭\n`;
   });
   console.log(`Sending to ${chatId}: ${strFinalApp}`);
-  bot.sendMessage(chatId, strFinalApp);
+  bot.sendMessage(chatId, strFinalApp, { disable_web_page_preview: true });
 }
 
 async function sendStatus(msg) {
@@ -151,7 +185,7 @@ async function sendStatus(msg) {
   }
   let strFinal = `Hour Sentiment: ${hourSentiment.sum}\nWords: ${resultWordsStr}`;
   console.log(`Sending to ${chatId}: ${strFinal}`);
-  bot.sendMessage(chatId, strFinal);
+  bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
 }
 
 async function init() {
