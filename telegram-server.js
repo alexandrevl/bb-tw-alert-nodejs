@@ -161,7 +161,7 @@ bot.onText(/\/status/, (msg) => {
 bot.onText(/\/app/, (msg) => {
   if (db != null) sendApp(msg, 0);
 });
-bot.onText(/\/last/, (msg) => {
+bot.onText(/\/latest/, (msg) => {
   if (db != null) sendSearch(msg, ["", " "], 0);
 });
 
