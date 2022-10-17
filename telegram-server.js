@@ -170,12 +170,22 @@ bot.onText(/\/start/, (msg) => {
   bot.sendMessage(chatId, "Hi! 👋", { parse_mode: "Markdown" });
 });
 bot.on("callback_query", (query) => {
-  let [func, skip] = query.data.split("-");
-  skip = parseInt(skip) + 10;
-  if (func == "app") {
-    console.log(func, skip);
-    if (db != null) sendApp(query.message, skip);
+  // console.log(query.data);
+  try {
+    let data = JSON.parse(query.data);
+    console.log(data);
+    if (data.func == "app") {
+      let skip = parseInt(data.skip) + 10;
+      if (db != null) sendApp(query.message, skip);
+    }
+    if (data.func == "search") {
+      let skip = parseInt(data.skip) + 10;
+      if (db != null) sendSearch(query.message, data.params, skip);
+    }
+  } catch (error) {
+    console.log(error);
   }
+
   // console.log(query.from.id);
 });
 
@@ -189,22 +199,26 @@ async function sendSearch(msg, match, skip) {
         "DD/MM HH:mm:ss"
       )}) ${tweet.text.normalize("NFD").replace(/[^\x00-\x7F]/g, "")}\n\n`;
     });
-    console.log(`Sending to ${msg.chat.username}`);
     const opts = {
       disable_web_page_preview: true,
       reply_to_message_id: msg.message_id,
-      // reply_markup: JSON.stringify({
-      //   inline_keyboard: [
-      //     [
-      //       {
-      //         text: "more",
-      //         callback_data: `search-${skip}`,
-      //       },
-      //     ],
-      //   ],
-      //   one_time_keyboard: true,
-      // }),
+      one_time_keyboard: true,
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "more",
+              callback_data: JSON.stringify({
+                func: "search",
+                params: match,
+                skip: skip,
+              }),
+            },
+          ],
+        ],
+      },
     };
+    console.log(`(search) Sending to ${msg.chat.username}`);
     bot.sendMessage(chatId, strFinalApp, opts);
   }
 }
@@ -224,10 +238,21 @@ async function sendApp(msg, skip) {
     reply_to_message_id: msg.message_id,
     one_time_keyboard: true,
     reply_markup: {
-      inline_keyboard: [[{ text: "more", callback_data: `app-${skip}` }]],
+      inline_keyboard: [
+        [
+          {
+            text: "more",
+            callback_data: JSON.stringify({
+              func: "app",
+              params: "",
+              skip: skip,
+            }),
+          },
+        ],
+      ],
     },
   };
-  console.log(`Sending to ${msg.chat.username}`);
+  console.log(`(app) Sending to ${msg.chat.username}`);
   bot.sendMessage(chatId, strFinalApp, opts);
 }
 
