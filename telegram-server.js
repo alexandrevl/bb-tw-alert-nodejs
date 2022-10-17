@@ -171,7 +171,7 @@ bot.onText(/\/start/, (msg) => {
 });
 bot.on("callback_query", (query) => {
   let [func, skip] = query.data.split("-");
-  skip = parseInt(skip) + 20;
+  skip = parseInt(skip) + 10;
   if (func == "app") {
     console.log(func, skip);
     if (db != null) sendApp(query.message, skip);
