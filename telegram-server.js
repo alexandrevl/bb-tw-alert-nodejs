@@ -191,9 +191,10 @@ bot.on("callback_query", (query) => {
 
 async function sendSearch(msg, match, skip) {
   const chatId = msg.chat.id;
+  let strFinalApp = "";
   let words = await searchWordsMatch(match, skip);
-  if (match[1] != "*") {
-    let strFinalApp = `Result for search: ${match[1]}\n\n`;
+  if (match[1] != "*" && words[0].ts != 0) {
+    strFinalApp = `Result for search: ${match[1]}\n\n`;
     words.forEach((tweet) => {
       strFinalApp += `● (${moment(tweet.ts).format(
         "DD/MM HH:mm:ss"
@@ -220,7 +221,11 @@ async function sendSearch(msg, match, skip) {
     };
     console.log(`(search) Sending to ${msg.chat.username}`);
     bot.sendMessage(chatId, strFinalApp, opts);
+  } else {
+    strFinalApp = "Não foram encontrados resultados para a pesquisa";
+    bot.sendMessage(chatId, strFinalApp);
   }
+  return true;
 }
 
 async function sendApp(msg, skip) {
