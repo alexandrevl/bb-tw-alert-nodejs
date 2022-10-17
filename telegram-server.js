@@ -208,7 +208,7 @@ async function sendSearch(msg, match, skip) {
         inline_keyboard: [
           [
             {
-              text: "more",
+              text: "more tweets",
               callback_data: JSON.stringify({
                 func: "search",
                 params: match,
@@ -222,7 +222,7 @@ async function sendSearch(msg, match, skip) {
     console.log(`(search) Sending to ${msg.chat.username}`);
     bot.sendMessage(chatId, strFinalApp, opts);
   } else {
-    strFinalApp = "Não foram encontrados resultados para a pesquisa";
+    strFinalApp = "No results";
     bot.sendMessage(chatId, strFinalApp);
   }
   return true;
@@ -246,7 +246,7 @@ async function sendApp(msg, skip) {
       inline_keyboard: [
         [
           {
-            text: "more",
+            text: "more tweets",
             callback_data: JSON.stringify({
               func: "app",
               params: "",
