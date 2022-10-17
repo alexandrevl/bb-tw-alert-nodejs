@@ -96,8 +96,8 @@ async function searchWords(skip) {
       { $or: [{ text: /aplicativo/ }, { text: /app/ }] },
       { projection: { sentiment: 1, text: 1, ts: 1, _id: 0 } }
     )
-    .limit(10)
     .skip(skip)
+    .limit(10)
     .sort({ _id: -1 })
     .toArray();
   //console.log(result[0].sum);
