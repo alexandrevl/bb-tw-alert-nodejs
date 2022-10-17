@@ -189,7 +189,7 @@ async function sendSearch(msg, match, skip) {
         "DD/MM HH:mm:ss"
       )}) ${tweet.text.normalize("NFD").replace(/[^\x00-\x7F]/g, "")}\n\n`;
     });
-    console.log(`Sending to ${msg.chat.username}: ${strFinalApp}`);
+    console.log(`Sending to ${msg.chat.username}`);
     const opts = {
       disable_web_page_preview: true,
       reply_to_message_id: msg.message_id,
@@ -227,7 +227,7 @@ async function sendApp(msg, skip) {
       inline_keyboard: [[{ text: "more", callback_data: `app-${skip}` }]],
     },
   };
-  console.log(`Sending to ${msg.chat.username}: ${strFinalApp}`);
+  console.log(`Sending to ${msg.chat.username}`);
   bot.sendMessage(chatId, strFinalApp, opts);
 }
 
