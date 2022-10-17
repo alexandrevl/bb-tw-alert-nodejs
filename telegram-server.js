@@ -89,7 +89,7 @@ async function getHourSentiment() {
   return result[0];
 }
 
-async function searchWords() {
+async function searchWords(skip) {
   const result = await db
     .collection("raw_data_stream")
     .find(
@@ -97,6 +97,7 @@ async function searchWords() {
       { projection: { sentiment: 1, text: 1, ts: 1, _id: 0 } }
     )
     .limit(10)
+    .skip(skip)
     .sort({ _id: -1 })
     .toArray();
   //console.log(result[0].sum);
@@ -113,7 +114,7 @@ function getSignalEmoji(sentiment) {
   return result;
 }
 
-async function searchWordsMatch(match) {
+async function searchWordsMatch(match, skip) {
   if (match[1] == "*") match[1] = " ";
   let regex = new RegExp(match[1], "i");
   let query = { $or: [{ text: regex }] };
@@ -121,6 +122,7 @@ async function searchWordsMatch(match) {
   let result = await db
     .collection("raw_data_stream")
     .find(query, { projection: { sentiment: 1, text: 1, ts: 1, _id: 0 } })
+    .skip(skip)
     .limit(10)
     .sort({ _id: -1 })
     .toArray();
@@ -145,11 +147,11 @@ Palavras: ${resultWordsStr}`;
 }
 
 bot.onText(/\/f (.+)/, (msg, match) => {
-  if (db != null) sendSearch(msg, match);
+  if (db != null) sendSearch(msg, match, 0);
 });
 
 bot.onText(/\/search (.+)/, (msg, match) => {
-  if (db != null) sendSearch(msg, match);
+  if (db != null) sendSearch(msg, match, 0);
 });
 
 bot.onText(/\/status/, (msg) => {
@@ -157,10 +159,10 @@ bot.onText(/\/status/, (msg) => {
 });
 
 bot.onText(/\/app/, (msg) => {
-  if (db != null) sendApp(msg);
+  if (db != null) sendApp(msg, 0);
 });
 bot.onText(/\/last/, (msg) => {
-  if (db != null) sendSearch(msg, ["", " "]);
+  if (db != null) sendSearch(msg, ["", " "], 0);
 });
 
 bot.onText(/\/start/, (msg) => {
@@ -168,14 +170,18 @@ bot.onText(/\/start/, (msg) => {
   bot.sendMessage(chatId, "Hi! 👋", { parse_mode: "Markdown" });
 });
 bot.on("callback_query", (query) => {
-  bot.answerCallbackQuery(query.id, () => {
-    console.log("ooi");
-  });
+  let [func, skip] = query.data.split("-");
+  skip = parseInt(skip) + 20;
+  if (func == "app") {
+    console.log(func, skip);
+    if (db != null) sendApp(query.message, skip);
+  }
+  // console.log(query.from.id);
 });
 
-async function sendSearch(msg, match) {
+async function sendSearch(msg, match, skip) {
   const chatId = msg.chat.id;
-  let words = await searchWordsMatch(match);
+  let words = await searchWordsMatch(match, skip);
   if (match[1] != "*") {
     let strFinalApp = `Result for search: ${match[1]}\n\n`;
     words.forEach((tweet) => {
@@ -187,19 +193,26 @@ async function sendSearch(msg, match) {
     const opts = {
       disable_web_page_preview: true,
       reply_to_message_id: msg.message_id,
-      reply_markup: JSON.stringify({
-        inline_keyboard: [[{ text: "more", callback_data: "hello" }]],
-        one_time_keyboard: true,
-      }),
+      // reply_markup: JSON.stringify({
+      //   inline_keyboard: [
+      //     [
+      //       {
+      //         text: "more",
+      //         callback_data: `search-${skip}`,
+      //       },
+      //     ],
+      //   ],
+      //   one_time_keyboard: true,
+      // }),
     };
     bot.sendMessage(chatId, strFinalApp, opts);
   }
 }
 
-async function sendApp(msg) {
+async function sendApp(msg, skip) {
   const chatId = msg.chat.id;
-  let words = await searchWords();
-  let strFinalApp = "Result for search: app\n\n";
+  let words = await searchWords(skip);
+  let strFinalApp = `Result for search: app ${skip != 0 ? skip : ""}\n\n`;
   words.forEach((tweet) => {
     strFinalApp += `● (${moment(tweet.ts).format(
       "DD/MM HH:mm:ss"
@@ -209,10 +222,10 @@ async function sendApp(msg) {
   const opts = {
     disable_web_page_preview: true,
     reply_to_message_id: msg.message_id,
-    reply_markup: JSON.stringify({
-      inline_keyboard: [[{ text: "more", callback_data: "hello" }]],
-      one_time_keyboard: true,
-    }),
+    one_time_keyboard: true,
+    reply_markup: {
+      inline_keyboard: [[{ text: "more", callback_data: `app-${skip}` }]],
+    },
   };
   console.log(`Sending to ${msg.chat.username}: ${strFinalApp}`);
   bot.sendMessage(chatId, strFinalApp, opts);
