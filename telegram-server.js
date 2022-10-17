@@ -263,6 +263,7 @@ async function sendApp(msg, skip) {
 
 async function sendStatus(msg) {
   const chatId = msg.chat.id;
+
   let hourSentiment = await getHourSentiment();
   let hourWords = await getHourWords();
   let resultWordsStr = "";
@@ -274,7 +275,10 @@ async function sendStatus(msg) {
     hourSentiment.sum
   } ${getSignalEmoji(hourSentiment.sum)}\n\nWords:\n${resultWordsStr}`;
   console.log(`Sending to ${msg.chat.username}: ${strFinal}`);
-  bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
+  bot.sendMessage(chatId, strFinal, {
+    disable_web_page_preview: true,
+    reply_to_message_id: msg.message_id,
+  });
 }
 
 async function init() {
