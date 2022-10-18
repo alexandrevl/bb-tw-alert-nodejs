@@ -6,7 +6,7 @@ const client = new MongoClient(url);
 const _ = require("lodash");
 const moment = require("moment");
 const TelegramBot = require("node-telegram-bot-api");
-const bot = new TelegramBot(process.env.TELEGRAM_DEV_TOKEN, { polling: true });
+const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 
 let db = null;
 
@@ -115,9 +115,13 @@ function getSignalEmoji(sentiment) {
 }
 
 async function searchWordsMatch(match, skip) {
-  if (match[1] == "*") match[1] = " ";
-  let regex = new RegExp(match[1], "i");
-  let query = { $or: [{ text: regex }] };
+  let query = {};
+  if (match[1] == "*" || match[1] == " ") {
+    match[1] = " ";
+  } else {
+    let regex = new RegExp(match[1], "i");
+    query = { text: regex };
+  }
   // console.log(query);
   let result = await db
     .collection("raw_data_stream")
