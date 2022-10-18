@@ -214,7 +214,7 @@ async function sendSearch(msg, match, skip) {
         "DD/MM HH:mm:ss"
       )}) ${tweet.text.normalize("NFD").replace(/[^\x00-\x7F]/g, "")}\n\n`;
     });
-    const opts = {
+    let opts = {
       disable_web_page_preview: true,
       reply_to_message_id: msg.message_id,
       one_time_keyboard: true,
@@ -233,7 +233,15 @@ async function sendSearch(msg, match, skip) {
         ],
       },
     };
-    console.log(opts.reply_markup.inline_keyboard);
+    console.log(
+      JSON.parse(opts.reply_markup.inline_keyboard[0][0].callback_data)
+    );
+    if (words.length < 10) {
+      opts = {
+        disable_web_page_preview: true,
+        reply_to_message_id: msg.message_id,
+      };
+    }
     console.log(`(search) Sending to ${msg.from.username}`);
     bot.sendMessage(chatId, strFinalApp.slice(0, 4096), opts);
   } else {
