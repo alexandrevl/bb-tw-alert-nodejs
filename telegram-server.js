@@ -179,7 +179,7 @@ bot.on("callback_query", (query) => {
   // console.log(query.data);
   try {
     let data = JSON.parse(query.data);
-    console.log(data);
+    // console.log(data);
     if (data.f == 1) {
       let skip = parseInt(data.s) + 10;
       if (db != null) sendApp(query.message, skip);
@@ -198,10 +198,16 @@ bot.on("callback_query", (query) => {
 
 async function sendSearch(msg, match, skip) {
   const chatId = msg.chat.id;
+
   let strFinalApp = "";
   let words = await searchWordsMatch(match, skip);
   if (match[1] != "*" && words[0].ts != 0) {
     match[1] = match[1].slice(0, 39);
+    console.log(
+      `(search) Search to ${msg.from.username}: ${
+        match[1] == " " ? "latest" : match[1]
+      }`
+    );
     strFinalApp = `Result for search: ${match[1]}\n\n`;
     words.forEach((tweet) => {
       strFinalApp += `● (${moment(tweet.ts).format(
@@ -228,8 +234,8 @@ async function sendSearch(msg, match, skip) {
       },
     };
     console.log(opts.reply_markup.inline_keyboard);
-    console.log(`(search) Sending to ${msg.chat.username}`);
-    bot.sendMessage(chatId, strFinalApp, opts);
+    console.log(`(search) Sending to ${msg.from.username}`);
+    bot.sendMessage(chatId, strFinalApp.slice(0, 4096), opts);
   } else {
     strFinalApp = "No results";
     bot.sendMessage(chatId, strFinalApp);
@@ -240,6 +246,7 @@ async function sendSearch(msg, match, skip) {
 async function sendApp(msg, skip) {
   const chatId = msg.chat.id;
   let words = await searchWords(skip);
+  console.log(`(app) Search to ${msg.from.username}`);
   let strFinalApp = `Result for search: app ${skip != 0 ? skip : ""}\n\n`;
   words.forEach((tweet) => {
     strFinalApp += `● (${moment(tweet.ts).format(
@@ -271,7 +278,7 @@ async function sendApp(msg, skip) {
 
 async function sendStatus(msg) {
   const chatId = msg.chat.id;
-
+  console.log(`(status) Status to ${msg.from.username}`);
   let hourSentiment = await getHourSentiment();
   let hourWords = await getHourWords();
   let resultWordsStr = "";
