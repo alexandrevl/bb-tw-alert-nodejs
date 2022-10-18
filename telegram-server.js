@@ -9,6 +9,8 @@ const TelegramBot = require("node-telegram-bot-api");
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 
 let db = null;
+const SEARCH = 0;
+const APP = 1;
 
 async function connectMongo() {
   console.log("Connecting mongo...");
@@ -178,13 +180,14 @@ bot.on("callback_query", (query) => {
   try {
     let data = JSON.parse(query.data);
     console.log(data);
-    if (data.func == "app") {
-      let skip = parseInt(data.skip) + 10;
+    if (data.f == 1) {
+      let skip = parseInt(data.s) + 10;
       if (db != null) sendApp(query.message, skip);
     }
-    if (data.func == "search") {
-      let skip = parseInt(data.skip) + 10;
-      if (db != null) sendSearch(query.message, data.params, skip);
+    if (data.f == 0) {
+      let skip = parseInt(data.s) + 10;
+      let match = ["", data.p];
+      if (db != null) sendSearch(query.message, match, skip);
     }
   } catch (error) {
     console.log(error);
@@ -198,6 +201,7 @@ async function sendSearch(msg, match, skip) {
   let strFinalApp = "";
   let words = await searchWordsMatch(match, skip);
   if (match[1] != "*" && words[0].ts != 0) {
+    match[1] = match[1].slice(0, 39);
     strFinalApp = `Result for search: ${match[1]}\n\n`;
     words.forEach((tweet) => {
       strFinalApp += `● (${moment(tweet.ts).format(
@@ -214,15 +218,16 @@ async function sendSearch(msg, match, skip) {
             {
               text: "more tweets",
               callback_data: JSON.stringify({
-                func: "search",
-                params: match,
-                skip: skip,
+                f: SEARCH,
+                p: match[1],
+                s: skip,
               }),
             },
           ],
         ],
       },
     };
+    console.log(opts.reply_markup.inline_keyboard);
     console.log(`(search) Sending to ${msg.chat.username}`);
     bot.sendMessage(chatId, strFinalApp, opts);
   } else {
@@ -252,9 +257,8 @@ async function sendApp(msg, skip) {
           {
             text: "more tweets",
             callback_data: JSON.stringify({
-              func: "app",
-              params: "",
-              skip: skip,
+              f: APP,
+              s: skip,
             }),
           },
         ],
