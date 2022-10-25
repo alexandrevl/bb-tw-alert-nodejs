@@ -143,13 +143,12 @@ async function searchWordsMatch(match, skip) {
 function alertTemp(data) {
   let [count, temperature, sumSentiment, resultWordsStr] = data;
   const chatId = "@bb_alert_tw";
-  const resp = `⚠️ *TW Alerta de mudança de temperatura do twitter*\n
-Temperatura do minuto: ${sumSentiment}
-Quantidade de tweets: ${count}
-Temp. media do minuto: ${parseFloat(temperature).toFixed(2)}
-Palavras: ${resultWordsStr}`;
+  const resp = `⚠️ Twitter Sentiment Temperature ⚠️\n
+Sentiment: ${sumSentiment}
+Tweets count: ${count}
+Words: ${resultWordsStr}`;
   console.log(`Send to ${chatId}: ${resp}`);
-  bot.sendMessage(chatId, resp, { parse_mode: "Markdown" });
+  bot.sendMessage(chatId, resp);
 }
 
 bot.onText(/\/f (.+)/, (msg, match) => {
