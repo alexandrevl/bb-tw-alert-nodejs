@@ -143,10 +143,7 @@ async function searchWordsMatch(match, skip) {
 function alertTemp(data) {
   let [count, temperature, sumSentiment, resultWordsStr] = data;
   const chatId = "@bb_alert_tw";
-  const resp = `⚠️ Twitter Sentiment Temperature ⚠️\n
-Sentiment: ${sumSentiment}
-Tweets count: ${count}
-Words: ${resultWordsStr}`;
+  const resp = `⚠️ Twitter Sentiment Temperature ⚠️\n\nSentiment: ${sumSentiment}\nCount: ${count}\nWords: ${resultWordsStr}`;
   console.log(`Send to ${chatId}: ${resp}`);
   bot.sendMessage(chatId, resp);
 }
