@@ -21,7 +21,7 @@ async function connectMongo() {
 }
 
 async function getHourWords() {
-  const hours = 1;
+  const hours = 0.08;
   let qtWordsDisplay = 10;
   let words = await db
     .collection("raw_data_stream")
