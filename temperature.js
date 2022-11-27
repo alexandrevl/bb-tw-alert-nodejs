@@ -269,7 +269,7 @@ async function getHourSentiment() {
       {
         $match: {
           ts: {
-            $gt: new Date(new Date().getTime() - 1000 * 60 * 60),
+            $gt: new Date(new Date().getTime() - 1000 * 60 * 5),
           },
         },
       },
