@@ -140,12 +140,26 @@ async function searchWordsMatch(match, skip) {
   return result;
 }
 
-function alertTemp(data) {
-  let [count, temperature, sumSentiment, resultWordsStr] = data;
+async function alertTemp(msg) {
+  // let [count, temperature, sumSentiment, resultWordsStr] = data;
+  // const chatId = "@bb_alert_tw";
+  // const resp = `TW Sentiment Temperature\n\nSentiment: ${sumSentiment}\nCount: ${count}\nWords: ${resultWordsStr}`;
+  // console.log(`Send to ${chatId}: ${resp}`);
+  // bot.sendMessage(chatId, resp);
+
   const chatId = "@bb_alert_tw";
-  const resp = `TW Sentiment Temperature\n\nSentiment: ${sumSentiment}\nCount: ${count}\nWords: ${resultWordsStr}`;
-  console.log(`Send to ${chatId}: ${resp}`);
-  bot.sendMessage(chatId, resp);
+  let hourSentiment = await getHourSentiment();
+  let hourWords = await getHourWords();
+  let resultWordsStr = "";
+  for (let index = 0; index < hourWords.length; index++) {
+    const word = hourWords[index];
+    resultWordsStr += `   • ${word.word} (${word.count})\n`;
+  }
+  let strFinal = `TW Sentiment Temperature\n\nSentiment: ${
+    hourSentiment.sum
+  } ${getSignalEmoji(hourSentiment.sum)}\n\nWords:\n${resultWordsStr}`;
+  console.log(`Sent to ${chatId}: ${strFinal}`);
+  bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
 }
 
 bot.onText(/\/f (.+)/, (msg, match) => {
