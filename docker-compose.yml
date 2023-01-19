@@ -5,6 +5,8 @@ services:
     command: node stream.js
     container_name: stream
     build: .
+    environment:
+      - TZ=America/Sao_Paulo
     volumes:
       - .:/usr/src/app
     env_file:
@@ -14,6 +16,8 @@ services:
     command: node temperature.js
     container_name: temperature
     build: .
+    environment:
+      - TZ=America/Sao_Paulo
     volumes:
       - .:/usr/src/app
     env_file:
@@ -23,6 +27,8 @@ services:
     command: node api-server.js
     container_name: api-server
     build: .
+    environment:
+      - TZ=America/Sao_Paulo
     ports:
       - 8005:8005
     volumes:
@@ -34,6 +40,8 @@ services:
     command: node telegram-server.js
     container_name: telegram-server
     build: .
+    environment:
+      - TZ=America/Sao_Paulo
     ports:
       - 8000:8000
     volumes:
