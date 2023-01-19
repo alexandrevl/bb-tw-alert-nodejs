@@ -1,5 +1,7 @@
 FROM node:current-alpine
 
+ENV TZ=America/Sao_Paulo
+
 WORKDIR /usr/src/app
 
 # Install app dependencies

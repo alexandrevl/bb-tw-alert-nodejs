@@ -9,6 +9,8 @@ services:
     build: .
     volumes:
       - .:/usr/src/app
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
     env_file:
       - ./.env
   temperature:
@@ -20,6 +22,8 @@ services:
     build: .
     volumes:
       - .:/usr/src/app
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
     env_file:
       - ./.env
   api-server:
@@ -33,6 +37,8 @@ services:
       - 8005:8005
     volumes:
       - .:/usr/src/app
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
     env_file:
       - ./.env
   telegram-server:
@@ -46,5 +52,7 @@ services:
       - 8000:8000
     volumes:
       - .:/usr/src/app
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
     env_file:
       - ./.env
