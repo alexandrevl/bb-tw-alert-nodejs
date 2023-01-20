@@ -1,4 +1,8 @@
 version: "3"
+networks:
+  default:
+    external:
+      name: main
 services:
   stream:
     environment:
@@ -6,8 +10,6 @@ services:
     restart: always
     command: node stream.js
     container_name: stream
-    networks:
-      - main
     build: .
     volumes:
       - .:/usr/src/app
@@ -21,8 +23,6 @@ services:
     restart: always
     command: node temperature.js
     container_name: temperature
-    networks:
-      - main
     build: .
     volumes:
       - .:/usr/src/app
@@ -36,8 +36,6 @@ services:
     restart: always
     command: node api-server.js
     container_name: api-server
-    networks:
-      - main
     build: .
     ports:
       - 8005:8005
@@ -53,8 +51,6 @@ services:
     restart: always
     command: node telegram-server.js
     container_name: telegram-server
-    networks:
-      - main
     build: .
     ports:
       - 8000:8000
