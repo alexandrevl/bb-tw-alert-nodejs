@@ -58,6 +58,7 @@ function relevance(user) {
     request(options, (error, response, body) => {
       if (error) {
         console.log(error);
+        resolve({ user: user, relevance: parseFloat(0).toFixed(3) });
       } else {
         let data = JSON.parse(body);
         let sumRelevanceIndex = 0;
