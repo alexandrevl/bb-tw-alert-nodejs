@@ -109,11 +109,11 @@ async function getHourImpact() {
       },
     ])
     .toArray();
-  let sum = result[0].sum;
+  let sum = parseFloat(result[0].sum);
   if (sum == null || sum == undefined) {
     sum = 0;
   }
-  return sum;
+  return parseFloat(sum);
 }
 
 async function searchWords(skip) {
