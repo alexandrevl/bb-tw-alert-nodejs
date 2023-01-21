@@ -18,8 +18,8 @@ const client = new MongoClient(url);
 let socketTelegram = null;
 
 function keepAlive() {
-  socketTelegram = io("ws://144.22.144.218:8000");
   console.log("Connecting to telegram-server...");
+  socketTelegram = io("ws://144.22.144.218:8000");
   socketTelegram.on("connect", () => {
     console.log("Connected to telegram-server");
   });

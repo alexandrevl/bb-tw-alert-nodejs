@@ -143,7 +143,7 @@ async function searchWordsMatch(match, skip) {
 async function alertRelevant(msg) {
   const chatId = "@bb_alert_tw";
   console.log(`Sent to relevant tweet to ${chatId}: ${msg}`);
-  bot.sendMessage(chatId, strFinal);
+  bot.sendMessage(chatId, msg);
 }
 
 async function alertTemp(msg) {
