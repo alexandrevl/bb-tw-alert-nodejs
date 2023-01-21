@@ -4,7 +4,7 @@ const _ = require("lodash");
 const needle = require("needle");
 const { MongoClient } = require("mongodb");
 let cron = require("node-cron");
-const io = require("socket.io-client");
+const io = require("telegram-server-client");
 
 const AVG_SENTIMENT_ALERT = -3;
 const SUM_SENTIMENT_ALERT = -20;
@@ -15,7 +15,23 @@ const MINUTES = 1;
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
 
-const socketTelegram = io("ws://144.22.144.21:8000");
+function keepAlive() {
+  const socket = io("ws://144.22.144.21:8000");
+  console.log("Connecting to telegram-server...");
+  socket.on("connect", () => {
+    console.log("Connected to telegram-server");
+  });
+  socket.on("disconnect", () => {
+    console.log("Disconnected from telegram-server");
+  });
+  socket.on("connect_error", (error) => {
+    console.log("Connection error: ", error);
+    setTimeout(() => {
+      keepAlive();
+    }, 2000);
+  });
+}
+keepAlive();
 
 let db = null;
 async function check() {

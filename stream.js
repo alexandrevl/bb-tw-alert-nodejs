@@ -12,8 +12,23 @@ const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL =
   "https://api.twitter.com/2/tweets/search/stream?tweet.fields=author_id,public_metrics&expansions=author_id&user.fields=username";
 
-//const rules = [{ value: '"banco do brasil"' }];
-const socketTelegram = io("ws://144.22.144.21:8000");
+function keepAlive() {
+  const socket = io("ws://144.22.144.21:8000");
+  console.log("Connecting to telegram-server...");
+  socket.on("connect", () => {
+    console.log("Connected to telegram-server");
+  });
+  socket.on("disconnect", () => {
+    console.log("Disconnected from telegram-server");
+  });
+  socket.on("connect_error", (error) => {
+    console.log("Connection error: ", error);
+    setInterval(() => {
+      keepAlive();
+    }, 2000);
+  });
+}
+keepAlive();
 
 const rules = [
   {
