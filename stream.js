@@ -222,7 +222,7 @@ function streamTweets() {
         console.log(data);
       }
       // console.log(data);
-      const json = JSON.parse(data);
+      let json = JSON.parse(data);
       // console.log(json.data);
       if (json.data.author_id != "83723557") {
         // console.dir(json, { depth: null });
@@ -231,7 +231,7 @@ function streamTweets() {
         let impact = userRelevance.relevance * r1.score;
         sumScore = (await getHourSentiment()) + r1.score;
         console.log(
-          `(${r1.score}/${sumScore})(${userRelevance.relevance}/${impact}) ${json.data.text}`
+          `(${r1.score}/${sumScore})(${userRelevance.relevance}/${impact}) @${userRelevance.user}: ${json.data.text}`
         );
         // console.log(countWords(json.data.text));
 
