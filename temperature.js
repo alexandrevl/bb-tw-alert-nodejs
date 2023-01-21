@@ -15,7 +15,7 @@ const MINUTES = 1;
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
 
-const socketTelegram = io("ws://170.187.152.51:8000");
+const socketTelegram = io("ws://144.22.144.21:8000");
 
 let db = null;
 async function check() {

@@ -140,6 +140,12 @@ async function searchWordsMatch(match, skip) {
   return result;
 }
 
+async function alertRelevant(msg) {
+  const chatId = "@bb_alert_tw";
+  console.log(`Sent to relevant tweet to ${chatId}: ${msg}`);
+  bot.sendMessage(chatId, strFinal);
+}
+
 async function alertTemp(msg) {
   // let [count, temperature, sumSentiment, resultWordsStr] = data;
   // const chatId = "@bb_alert_tw";

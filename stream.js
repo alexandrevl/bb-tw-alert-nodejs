@@ -4,6 +4,7 @@ const config = require("dotenv").config();
 const { MongoClient } = require("mongodb");
 const sentiment = require("sentiment-multi-language");
 const keyword_extractor = require("keyword-extractor");
+const io = require("socket.io-client");
 var _ = require("lodash");
 const TOKEN = process.env.TW_BEARER;
 //Twitter`s API doc: https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/api-reference/get-tweets-search-stream
@@ -12,6 +13,7 @@ const streamURL =
   "https://api.twitter.com/2/tweets/search/stream?tweet.fields=author_id,public_metrics&expansions=author_id&user.fields=username";
 
 //const rules = [{ value: '"banco do brasil"' }];
+const socketTelegram = io("ws://144.22.144.21:8000");
 
 const rules = [
   {
@@ -75,8 +77,7 @@ function relevance(user) {
             }
           });
           let avgRelevance = parseFloat(
-            sumRelevanceIndex / count / 1000,
-            3
+            sumRelevanceIndex / count / 1000
           ).toFixed(3);
           let result = { user: user, relevance: avgRelevance };
           resolve(result);
@@ -232,10 +233,12 @@ function streamTweets() {
         userRelevance.relevance = parseFloat(userRelevance.relevance);
         let impact = parseFloat(userRelevance.relevance) * r1.score;
         sumScore = (await getHourSentiment()) + r1.score;
-        console.log(
-          `(${r1.score}/${sumScore})(${userRelevance.relevance}/${impact}) @${userRelevance.user}: ${json.data.text}`
-        );
-        // console.log(countWords(json.data.text));
+        let msg = `(${r1.score}/${sumScore})(${userRelevance.relevance}/${impact}) @${userRelevance.user}: ${json.data.text}`;
+        console.log(msg);
+        if (impact >= 10 || impact <= -10) {
+          socketTelegram.emit("alertRelevant", msg);
+        }
+        socketTelegram.emit("alertRelevant", msg);
 
         json.data.ts = new Date();
         json.data.user_relevance = userRelevance.relevance;
