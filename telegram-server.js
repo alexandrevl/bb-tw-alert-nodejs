@@ -109,8 +109,11 @@ async function getHourImpact() {
       },
     ])
     .toArray();
-  //console.log(result[0].sum);
-  return result[0];
+  let sum = result[0].sum;
+  if (sum == null || sum == undefined) {
+    sum = 0;
+  }
+  return sum;
 }
 
 async function searchWords(skip) {
