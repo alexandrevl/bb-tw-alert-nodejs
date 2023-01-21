@@ -1,7 +1,7 @@
 @TELEGRAM_TOKEN = 5581380977:AAHRD1sJM0KuOU144RfWbmivwJPwhTCx7cU
 
-GET http://144.22.144.21:8005/app
+GET http://144.22.144.218:8005/app
 ###
-GET http://144.22.144.21:8005
+GET http://144.22.144.218:8005
 ###
 GET https://api.telegram.org/bot{{TELEGRAM_TOKEN}}/sendMessage?chat_id=@bb_alert_tw&text=Posso escrever o que eu quiser aqui?

@@ -16,7 +16,7 @@ const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${pro
 const client = new MongoClient(url);
 
 function keepAlive() {
-  const socket = io("ws://144.22.144.21:8000");
+  const socket = io("ws://144.22.144.218:8000");
   console.log("Connecting to telegram-server...");
   socket.on("connect", () => {
     console.log("Connected to telegram-server");

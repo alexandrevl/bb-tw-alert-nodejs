@@ -13,7 +13,7 @@ const streamURL =
   "https://api.twitter.com/2/tweets/search/stream?tweet.fields=author_id,public_metrics&expansions=author_id&user.fields=username";
 
 function keepAlive() {
-  const socket = io("ws://144.22.144.21:8000");
+  const socket = io("ws://144.22.144.218:8000");
   console.log("Connecting to telegram-server...");
   socket.on("connect", () => {
     console.log("Connected to telegram-server");
