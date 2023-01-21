@@ -1,4 +1,5 @@
 const needle = require("needle");
+const request = require("request");
 const config = require("dotenv").config();
 const { MongoClient } = require("mongodb");
 const sentiment = require("sentiment-multi-language");
@@ -8,7 +9,7 @@ const TOKEN = process.env.TW_BEARER;
 //Twitter`s API doc: https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/api-reference/get-tweets-search-stream
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL =
-  "https://api.twitter.com/2/tweets/search/stream?tweet.fields=public_metrics&expansions=author_id";
+  "https://api.twitter.com/2/tweets/search/stream?tweet.fields=author_id,public_metrics&expansions=author_id&user.fields=username";
 
 //const rules = [{ value: '"banco do brasil"' }];
 
@@ -38,6 +39,61 @@ const rules = [
 
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
+
+function relevance(user) {
+  return new Promise((resolve, reject) => {
+    const count_tweets = 20;
+    const options = {
+      url: "https://api.twitter.com/2/tweets/search/recent",
+      method: "GET",
+      qs: {
+        query: `from:${user} -is:retweet -is:reply`,
+        max_results: 20,
+        "tweet.fields": "public_metrics,referenced_tweets",
+      },
+      headers: {
+        Authorization: `Bearer ${TOKEN}`,
+      },
+    };
+    console.log("User", user, options);
+
+    request(options, (error, response, body) => {
+      if (error) {
+        console.log(error);
+      } else {
+        let data = JSON.parse(body);
+        console.dir(data, { depth: null });
+        let sumRelevanceIndex = 0;
+        let count = 0;
+        // console.log(user, data);
+        if (data.meta.result_count != 0) {
+          data.data.forEach((tweet) => {
+            if (tweet.referenced_tweets == undefined && count < count_tweets) {
+              let retweetIndex = tweet.public_metrics.retweet_count * 10;
+              let likeIndex = tweet.public_metrics.like_count;
+              let replyIndex = tweet.public_metrics.reply_count * 20;
+              let relevanceIndex = retweetIndex + likeIndex + replyIndex;
+              sumRelevanceIndex += relevanceIndex;
+              // console.log(relevanceIndex);
+              ++count;
+            }
+          });
+          let avgRelevance = parseFloat(
+            sumRelevanceIndex / count / 1000,
+            3
+          ).toFixed(3);
+          // console.log(sumRelevanceIndex, count, avgRelevance);
+          //   console.log(`User: ${user} \t\t Relevance: ${avgRelevance}`);
+          let result = { user: user, relevance: avgRelevance };
+          // console.log(result);
+          resolve(result);
+        } else {
+          resolve({ user: user, relevance: 0 });
+        }
+      }
+    });
+  });
+}
 
 // Get stream rules
 async function getRules() {
@@ -170,20 +226,26 @@ function streamTweets() {
 
   stream.on("data", async (data) => {
     try {
-      //console.log(data);
       if (data.title) {
         console.log(data);
       }
+      // console.log(data);
       const json = JSON.parse(data);
       // console.log(json.data);
       if (json.data.author_id != "83723557") {
-        //console.log(json);
-        var r1 = sentiment(json.data.text, "pt-br", options);
+        // console.dir(json, { depth: null });
+        let r1 = sentiment(json.data.text, "pt-br", options);
+        let userRelevance = await relevance(json.includes.users[0].username);
+        let impact = userRelevance.relevance * r1.score;
         sumScore = (await getHourSentiment()) + r1.score;
-        console.log(`(${r1.score}/${sumScore}) ${json.data.text}`);
+        console.log(
+          `(${r1.score}/${sumScore}) (${userRelevance.relevance}/${impact})  ${json.data.text}`
+        );
         // console.log(countWords(json.data.text));
 
         json.data.ts = new Date();
+        json.data.user_relevance = userRelevance.relevance;
+        json.data.impact = impact;
         json.data.sentiment = r1.score;
         json.data.fullSentiment = r1;
         const extraction_result = keyword_extractor.extract(json.data.text, {
@@ -199,6 +261,7 @@ function streamTweets() {
         console.log(`(BB): ${json.data.text}`);
       }
     } catch (error) {
+      // console.log(error);
       // if (error.title) {
       //   console.log(error);
       // }
@@ -274,7 +337,7 @@ async function getHourWords(db) {
     }
   }
   let result = _.orderBy(finalWords, ["count"], ["desc"]);
-  console.log(result);
+  console.dir(result, { depth: null });
   return result;
 }
 
