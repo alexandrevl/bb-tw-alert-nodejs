@@ -192,11 +192,9 @@ async function alertTemp(msg) {
   }
   let strFinal = `Twitter\`s Sentiment Temperature\n\nSentiment: ${
     hourSentiment.sum
-  } ${getSignalEmoji(
-    hourSentiment.sum
-  )}\n\nImpact: ${hourImpact} ${getImpactEmoji(
-    hourImpact
-  )}\n\nWords:\n${resultWordsStr}`;
+  } ${getSignalEmoji(hourSentiment.sum)}\n\nImpact: ${hourImpact.toLocaleString(
+    "pt-BR"
+  )} ${getImpactEmoji(hourImpact)}\n\nWords:\n${resultWordsStr}`;
   console.log(`Sent to ${chatId}: ${strFinal}`);
   bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
 }
@@ -346,11 +344,9 @@ async function sendStatus(msg) {
   }
   let strFinal = `Twitter\`s Sentiment Temperature\n\nSentiment: ${
     hourSentiment.sum
-  } ${getSignalEmoji(
-    hourSentiment.sum
-  )}\n\nImpact: ${hourImpact} ${getImpactEmoji(
-    hourImpact
-  )}\n\nWords:\n${resultWordsStr}`;
+  } ${getSignalEmoji(hourSentiment.sum)}\n\nImpact: ${hourImpact.toLocaleString(
+    "pt-BR"
+  )} ${getImpactEmoji(hourImpact)}\n\nWords:\n${resultWordsStr}`;
   console.log(`Sending to ${msg.chat.username}: ${strFinal}`);
   bot.sendMessage(chatId, strFinal, {
     disable_web_page_preview: true,
