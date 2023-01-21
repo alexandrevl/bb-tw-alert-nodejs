@@ -250,13 +250,10 @@ function streamTweets() {
         userRelevance.relevance = parseFloat(userRelevance.relevance);
         let impact = parseFloat(userRelevance.relevance) * r1.score;
         sumScore = (await getHourSentiment()) + r1.score;
-        let msg = `(${r1.score}/${sumScore})(${userRelevance.relevance}/${impact}) @${userRelevance.user}: ${json.data.text}`;
+        let msg = `(${r1.score}/${sumScore})(${userRelevance.relevance}/${impact}) @${userRelevance.user}: ${json.data.text} - https://twitter.com/u/status/${json.data.id}`;
         console.log(msg);
         if (impact >= 10 || impact <= -10 || userRelevance.relevance >= 5) {
-          socketTelegram.emit(
-            "alertRelevant",
-            `${msg} - https://twitter.com/u/status/${json.data.id}`
-          );
+          socketTelegram.emit("alertRelevant", msg);
         }
 
         // socketTelegram.emit("alertRelevant", msg);
