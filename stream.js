@@ -242,7 +242,7 @@ function streamTweets() {
       }
       // console.log(data);
       let json = JSON.parse(data);
-      // console.log(json.data);
+      console.log(json.data.id);
       if (json.data.author_id != "83723557") {
         // console.dir(json, { depth: null });
         let r1 = sentiment(json.data.text, "pt-br", options);
