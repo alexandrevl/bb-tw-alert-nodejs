@@ -39,7 +39,7 @@ let db = null;
 async function check() {
   console.log("Checking temperature...");
   console.time("checked in");
-  let tweetsArray = await compileHour();
+  let tweetsArray = await compileTweets();
   let analysedTweets = await analyse(tweetsArray);
   console.timeEnd("checked in");
   return analysedTweets;
@@ -79,7 +79,7 @@ async function analyse(tweets) {
   return tweets;
 }
 
-async function compileHour() {
+async function compileTweets() {
   let results = [];
   for (let index = 0; index < MINUTES; index++) {
     let tws = await checkMinutes(index);
@@ -88,26 +88,39 @@ async function compileHour() {
       hour = { sum: 0 };
     }
     let tw = {
-      minute: index,
+      minute: index + 1,
       count: tws.length,
       sumSentiment: 0,
+      sumImpact: 0,
+      sumRelevance: 0,
       avgSentiment: 0,
       hourSentiment: hour.sum,
       ts: new Date(),
       words: [],
     };
     let sumSentiment = 0;
+    let sumImpact = 0;
+    let sumRelevance = 0;
     if (tws.length > 0) {
       for (let i = 0; i < tws.length; i++) {
         const twIntern = tws[i];
         //tw.words.push(...twIntern.fullSentiment.tokens);
         sumSentiment += twIntern.sentiment;
+        sumImpact += twIntern.impact;
+        sumRelevance += twIntern.user_relevance;
       }
     }
     if (sumSentiment != 0) {
       tw.sumSentiment = sumSentiment;
       tw.avgSentiment = sumSentiment / tw.count;
     }
+    if (sumImpact != 0) {
+      tw.sumImpact = sumImpact;
+    }
+    if (sumRelevance != 0) {
+      tw.sumRelevance = sumRelevance;
+    }
+
     tw.words = await getHourWords();
     // tw.words = _.countBy(tw.words);
     // let resultWord = [];

@@ -90,6 +90,28 @@ async function getHourSentiment() {
   //console.log(result[0].sum);
   return result[0];
 }
+async function getHourImpact() {
+  const result = await db
+    .collection("tw_timeline")
+    .aggregate([
+      {
+        $match: {
+          ts: {
+            $gt: new Date(new Date().getTime() - 1000 * 60 * 60),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$id",
+          sum: { $sum: "$sumImpact" },
+        },
+      },
+    ])
+    .toArray();
+  //console.log(result[0].sum);
+  return result[0];
+}
 
 async function searchWords(skip) {
   const result = await db
@@ -111,6 +133,15 @@ function getSignalEmoji(sentiment) {
   if (sentiment < -40 && sentiment > -100) {
     result = "🟡";
   } else if (sentiment <= -100) {
+    result = "🔴";
+  }
+  return result;
+}
+function getImpactEmoji(impact) {
+  let result = "🟢";
+  if (impact < -20 && impact > -100) {
+    result = "🟡";
+  } else if (impact <= -100) {
     result = "🔴";
   }
   return result;
@@ -147,23 +178,22 @@ async function alertRelevant(msg) {
 }
 
 async function alertTemp(msg) {
-  // let [count, temperature, sumSentiment, resultWordsStr] = data;
-  // const chatId = "@bb_alert_tw";
-  // const resp = `TW Sentiment Temperature\n\nSentiment: ${sumSentiment}\nCount: ${count}\nWords: ${resultWordsStr}`;
-  // console.log(`Send to ${chatId}: ${resp}`);
-  // bot.sendMessage(chatId, resp);
-
   const chatId = "@bb_alert_tw";
   let hourSentiment = await getHourSentiment();
   let hourWords = await getHourWords();
+  let hourImpact = await getHourImpact();
   let resultWordsStr = "";
   for (let index = 0; index < hourWords.length; index++) {
     const word = hourWords[index];
     resultWordsStr += `   • ${word.word} (${word.count})\n`;
   }
-  let strFinal = `TW Sentiment Temperature\n\nSentiment: ${
+  let strFinal = `Twitter\`s Sentiment Temperature\n\nSentiment: ${
     hourSentiment.sum
-  } ${getSignalEmoji(hourSentiment.sum)}\n\nWords:\n${resultWordsStr}`;
+  } ${getSignalEmoji(
+    hourSentiment.sum
+  )}\n\nImpact: ${hourImpact} ${getImpactEmoji(
+    hourImpact
+  )}\n\nWords:\n${resultWordsStr}`;
   console.log(`Sent to ${chatId}: ${strFinal}`);
   bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
 }
@@ -305,6 +335,7 @@ async function sendStatus(msg) {
   console.log(`(status) Status to ${msg.from.username}`);
   let hourSentiment = await getHourSentiment();
   let hourWords = await getHourWords();
+  let hourImpact = await getHourImpact();
   let resultWordsStr = "";
   for (let index = 0; index < hourWords.length; index++) {
     const word = hourWords[index];
@@ -312,7 +343,11 @@ async function sendStatus(msg) {
   }
   let strFinal = `Twitter\`s Sentiment Temperature\n\nSentiment: ${
     hourSentiment.sum
-  } ${getSignalEmoji(hourSentiment.sum)}\n\nWords:\n${resultWordsStr}`;
+  } ${getSignalEmoji(
+    hourSentiment.sum
+  )}\n\nImpact: ${hourImpact} ${getImpactEmoji(
+    hourImpact
+  )}\n\nWords:\n${resultWordsStr}`;
   console.log(`Sending to ${msg.chat.username}: ${strFinal}`);
   bot.sendMessage(chatId, strFinal, {
     disable_web_page_preview: true,

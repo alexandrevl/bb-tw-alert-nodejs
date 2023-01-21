@@ -245,6 +245,9 @@ function streamTweets() {
         // console.dir(json, { depth: null });
         let r1 = sentiment(json.data.text, "pt-br", options);
         let userRelevance = await relevance(json.includes.users[0].username);
+        if (userRelevance.relevance == "NaN") {
+          userRelevance.relevance = 0;
+        }
         userRelevance.relevance = parseFloat(userRelevance.relevance);
         let impact = parseFloat(userRelevance.relevance) * r1.score;
         sumScore = (await getHourSentiment()) + r1.score;
