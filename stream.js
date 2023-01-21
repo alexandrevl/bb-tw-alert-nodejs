@@ -35,7 +35,6 @@ const rules = [
     tag: "carteira bb",
   },
 ];
-//console.log(TOKEN);
 
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
@@ -55,17 +54,14 @@ function relevance(user) {
         Authorization: `Bearer ${TOKEN}`,
       },
     };
-    console.log("User", user, options);
 
     request(options, (error, response, body) => {
       if (error) {
         console.log(error);
       } else {
         let data = JSON.parse(body);
-        console.dir(data, { depth: null });
         let sumRelevanceIndex = 0;
         let count = 0;
-        // console.log(user, data);
         if (data.meta.result_count != 0) {
           data.data.forEach((tweet) => {
             if (tweet.referenced_tweets == undefined && count < count_tweets) {
@@ -74,7 +70,6 @@ function relevance(user) {
               let replyIndex = tweet.public_metrics.reply_count * 20;
               let relevanceIndex = retweetIndex + likeIndex + replyIndex;
               sumRelevanceIndex += relevanceIndex;
-              // console.log(relevanceIndex);
               ++count;
             }
           });
@@ -82,13 +77,10 @@ function relevance(user) {
             sumRelevanceIndex / count / 1000,
             3
           ).toFixed(3);
-          // console.log(sumRelevanceIndex, count, avgRelevance);
-          //   console.log(`User: ${user} \t\t Relevance: ${avgRelevance}`);
           let result = { user: user, relevance: avgRelevance };
-          // console.log(result);
           resolve(result);
         } else {
-          resolve({ user: user, relevance: 0 });
+          resolve({ user: user, relevance: parseFloat(0).toFixed(3) });
         }
       }
     });
@@ -239,7 +231,7 @@ function streamTweets() {
         let impact = userRelevance.relevance * r1.score;
         sumScore = (await getHourSentiment()) + r1.score;
         console.log(
-          `(${r1.score}/${sumScore}) (${userRelevance.relevance}/${impact})  ${json.data.text}`
+          `(${r1.score}/${sumScore})(${userRelevance.relevance}/${impact}) ${json.data.text}`
         );
         // console.log(countWords(json.data.text));
 
