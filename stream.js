@@ -252,10 +252,11 @@ function streamTweets() {
         sumScore = (await getHourSentiment()) + r1.score;
         let msg = `(${r1.score}/${sumScore})(${userRelevance.relevance}/${impact}) @${userRelevance.user}: ${json.data.text}`;
         console.log(msg);
-        if (impact >= 10 || impact <= -10) {
+        if (impact >= 10 || impact <= -10 || userRelevance.relevance >= 5) {
           socketTelegram.emit("alertRelevant", msg);
         }
-        socketTelegram.emit("alertRelevant", msg);
+
+        // socketTelegram.emit("alertRelevant", msg);
 
         json.data.ts = new Date();
         json.data.user_relevance = userRelevance.relevance;
