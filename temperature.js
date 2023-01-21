@@ -16,10 +16,9 @@ const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${pro
 const client = new MongoClient(url);
 
 let socketTelegram = null;
-
 function keepAlive() {
+  socketTelegram = io(`ws://${process.env.TELEGRAM_SERVER}:8000`);
   console.log("Connecting to telegram-server...");
-  socketTelegram = io("ws://144.22.144.218:8000");
   socketTelegram.on("connect", () => {
     console.log("Connected to telegram-server");
   });
@@ -27,10 +26,11 @@ function keepAlive() {
     console.log("Disconnected from telegram-server");
   });
   socketTelegram.on("connect_error", (error) => {
-    console.log("Connection error: ", error);
+    console.log("Connection telegram-server error");
+    console.log("Trying again in 5 seconds...");
     setTimeout(() => {
       keepAlive();
-    }, 2000);
+    }, 5000);
   });
 }
 keepAlive();
