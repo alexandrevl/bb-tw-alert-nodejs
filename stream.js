@@ -23,7 +23,7 @@ function keepAlive() {
   });
   socket.on("connect_error", (error) => {
     console.log("Connection error: ", error);
-    setInterval(() => {
+    setTimeout(() => {
       keepAlive();
     }, 2000);
   });
