@@ -15,16 +15,18 @@ const MINUTES = 1;
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
 
+let socketTelegram = null;
+
 function keepAlive() {
-  const socket = io("ws://144.22.144.218:8000");
+  socketTelegram = io("ws://144.22.144.218:8000");
   console.log("Connecting to telegram-server...");
-  socket.on("connect", () => {
+  socketTelegram.on("connect", () => {
     console.log("Connected to telegram-server");
   });
-  socket.on("disconnect", () => {
+  socketTelegram.on("disconnect", () => {
     console.log("Disconnected from telegram-server");
   });
-  socket.on("connect_error", (error) => {
+  socketTelegram.on("connect_error", (error) => {
     console.log("Connection error: ", error);
     setTimeout(() => {
       keepAlive();
