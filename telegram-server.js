@@ -327,6 +327,9 @@ async function init() {
     client.on("alertTemp", (data) => {
       alertTemp(data);
     });
+    client.on("alertRelevant", (data) => {
+      alertRelevant(data);
+    });
   });
   io.listen(8000);
   await connectMongo();
