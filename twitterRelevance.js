@@ -27,6 +27,7 @@ function relevance(user) {
         // console.dir(data, { depth: null });
         let sumRelevanceIndex = 0;
         let count = 0;
+        let medianArray = [];
         if (data.meta.result_count != 0) {
           data.data.forEach((tweet) => {
             if (tweet.referenced_tweets == undefined && count < count_tweets) {
@@ -36,12 +37,16 @@ function relevance(user) {
               let replyIndex = tweet.public_metrics.reply_count * 20;
               let relevanceIndex = retweetIndex + likeIndex + replyIndex;
               sumRelevanceIndex += relevanceIndex;
+              medianArray.push(relevanceIndex);
               ++count;
             }
           });
+
           let avgRelevance = parseFloat(
             sumRelevanceIndex / count / 1000
           ).toFixed(3);
+          avgRelevance = median(medianArray);
+          avgRelevance = parseFloat(avgRelevance / 1000).toFixed(3);
           let result = { user: user, relevance: avgRelevance };
           resolve(result);
         } else {
@@ -51,6 +56,11 @@ function relevance(user) {
     });
   });
 }
+const median = (arr) => {
+  const mid = Math.floor(arr.length / 2),
+    nums = [...arr].sort((a, b) => a - b);
+  return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
+};
 
 async function main() {
   let userArray = [

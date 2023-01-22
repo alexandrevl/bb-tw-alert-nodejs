@@ -80,22 +80,29 @@ function relevance(user) {
         resolve({ user: user, relevance: parseFloat(0).toFixed(3) });
       } else {
         let data = JSON.parse(body);
+        // console.dir(data, { depth: null });
         let sumRelevanceIndex = 0;
         let count = 0;
+        let medianArray = [];
         if (data.meta.result_count != 0) {
           data.data.forEach((tweet) => {
             if (tweet.referenced_tweets == undefined && count < count_tweets) {
+              // console.log(tweet);
               let retweetIndex = tweet.public_metrics.retweet_count * 10;
               let likeIndex = tweet.public_metrics.like_count;
               let replyIndex = tweet.public_metrics.reply_count * 20;
               let relevanceIndex = retweetIndex + likeIndex + replyIndex;
               sumRelevanceIndex += relevanceIndex;
+              medianArray.push(relevanceIndex);
               ++count;
             }
           });
+
           let avgRelevance = parseFloat(
             sumRelevanceIndex / count / 1000
           ).toFixed(3);
+          avgRelevance = median(medianArray);
+          avgRelevance = parseFloat(avgRelevance / 1000).toFixed(3);
           let result = { user: user, relevance: avgRelevance };
           resolve(result);
         } else {
@@ -105,6 +112,11 @@ function relevance(user) {
     });
   });
 }
+const median = (arr) => {
+  const mid = Math.floor(arr.length / 2),
+    nums = [...arr].sort((a, b) => a - b);
+  return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
+};
 
 // Get stream rules
 async function getRules() {
@@ -255,7 +267,7 @@ function streamTweets() {
         sumScore = (await getHourSentiment()) + r1.score;
         let msg = `(${r1.score}/${sumScore})(${userRelevance.relevance}/${impact}) @${userRelevance.user}: ${json.data.text} - https://twitter.com/u/status/${json.data.id}`;
         console.log(msg);
-        if (impact >= 10 || impact <= -10 || userRelevance.relevance >= 10) {
+        if (impact >= 10 || impact <= -10 || userRelevance.relevance >= 5) {
           socketTelegram.emit("alertRelevant", msg);
         }
 
