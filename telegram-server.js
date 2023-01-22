@@ -360,7 +360,7 @@ async function sendStatus(msg) {
 
 async function init() {
   io.on("connection", async (client) => {
-    console.log("New client connected");
+    console.log(`New client connected ${client.id}`);
     client.emit("welcome", "welcome man");
     client.on("alertTemp", (data) => {
       alertTemp(data);
@@ -368,6 +368,9 @@ async function init() {
     client.on("alertRelevant", (data) => {
       alertRelevant(data);
     });
+  });
+  io.on("disconnect", () => {
+    console.log(`Client disconnected ${client.id}`);
   });
   io.listen(8000);
   await connectMongo();
