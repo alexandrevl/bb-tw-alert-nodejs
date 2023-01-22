@@ -249,11 +249,13 @@ function streamTweets() {
           userRelevance.relevance = 0;
         }
         userRelevance.relevance = parseFloat(userRelevance.relevance);
-        let impact = parseFloat(userRelevance.relevance) * r1.score;
+        let impact = parseFloat(
+          parseFloat(userRelevance.relevance) * r1.score
+        ).toFixed(3);
         sumScore = (await getHourSentiment()) + r1.score;
         let msg = `(${r1.score}/${sumScore})(${userRelevance.relevance}/${impact}) @${userRelevance.user}: ${json.data.text} - https://twitter.com/u/status/${json.data.id}`;
         console.log(msg);
-        if (impact >= 10 || impact <= -10 || userRelevance.relevance >= 5) {
+        if (impact >= 10 || impact <= -10 || userRelevance.relevance >= 10) {
           socketTelegram.emit("alertRelevant", msg);
         }
 
