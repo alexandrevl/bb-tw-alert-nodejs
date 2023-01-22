@@ -261,11 +261,14 @@ function streamTweets() {
           userRelevance.relevance = 0;
         }
         userRelevance.relevance = parseFloat(userRelevance.relevance);
+
+        //Calculo do impacto
         let relevanceFixed = userRelevance.relevance;
         if (relevanceFixed < 0.1) {
           relevanceFixed = 0.1;
         }
         let impact = parseFloat(relevanceFixed * r1.score);
+
         sumScore = (await getHourSentiment()) + r1.score;
         let msg = `(${r1.score}/${sumScore})(${relevanceFixed.toFixed(
           3
@@ -280,7 +283,7 @@ function streamTweets() {
         // socketTelegram.emit("alertRelevant", msg);
 
         json.data.ts = new Date();
-        json.data.user_relevance = relevanceFixed;
+        json.data.user_relevance = userRelevance.relevance;
         json.data.impact = parseFloat(impact);
         json.data.sentiment = r1.score;
         json.data.fullSentiment = r1;
