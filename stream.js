@@ -60,13 +60,13 @@ const client = new MongoClient(url);
 
 function relevance(user) {
   return new Promise((resolve, reject) => {
-    const count_tweets = 20;
+    const count_tweets = 100;
     const options = {
       url: "https://api.twitter.com/2/tweets/search/recent",
       method: "GET",
       qs: {
         query: `from:${user} -is:retweet -is:reply`,
-        max_results: 20,
+        max_results: 100,
         "tweet.fields": "public_metrics,referenced_tweets",
       },
       headers: {
