@@ -101,7 +101,7 @@ function relevance(user) {
           let avgRelevance = parseFloat(
             sumRelevanceIndex / count / 1000
           ).toFixed(3);
-          avgRelevance = median(medianArray);
+          avgRelevance = parseFloat(median(medianArray));
           avgRelevance = parseFloat(avgRelevance / 1000).toFixed(3);
           let result = { user: user, relevance: avgRelevance };
           resolve(result);
