@@ -25,9 +25,9 @@ function keepAliveTelegram() {
   socketTelegram.on("connect_error", (error) => {
     console.log("Connection telegram-server error");
     console.log("Trying again in 5 seconds...");
-    setTimeout(() => {
-      keepAliveTelegram();
-    }, 5000);
+    // setTimeout(() => {
+    //   keepAliveTelegram();
+    // }, 5000);
   });
 }
 
