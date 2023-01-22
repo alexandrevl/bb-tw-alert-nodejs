@@ -20,7 +20,7 @@ function keepAlive() {
   socketTelegram = io(`ws://${process.env.TELEGRAM_SERVER}:8000`);
   console.log("Connecting to telegram-server...");
   socketTelegram.on("connect", () => {
-    console.log("Connected to telegram-server");
+    console.log(`Connected to telegram-server: ${socketTelegram.id}`);
   });
   socketTelegram.on("disconnect", () => {
     console.log("Disconnected from telegram-server");
