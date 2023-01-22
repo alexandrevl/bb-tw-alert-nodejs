@@ -261,13 +261,19 @@ function streamTweets() {
           userRelevance.relevance = 0;
         }
         userRelevance.relevance = parseFloat(userRelevance.relevance);
-
+        sumScore = (await getHourSentiment()) + r1.score;
         //Calculo do impacto
         let relevanceFixed = userRelevance.relevance;
         if (relevanceFixed < 0.1) {
           relevanceFixed = 0.1;
         }
-        let impact = parseFloat(relevanceFixed * r1.score);
+        let impact = parseFloat(relevanceFixed);
+        if (sumScore < 0) {
+          impact = parseFloat(relevanceFixed * -1);
+        }
+        if (r1.score != 0) {
+          impact = parseFloat(relevanceFixed * r1.score);
+        }
         if (impact < 0.1 && impact >= 0) {
           impact = 0.1;
         } else if (impact > -0.1 && impact < 0) {
@@ -275,7 +281,6 @@ function streamTweets() {
         }
         //
 
-        sumScore = (await getHourSentiment()) + r1.score;
         let msg = `(${r1.score}/${sumScore})(${userRelevance.relevance.toFixed(
           3
         )}/${impact.toFixed(3)}) @${userRelevance.user}: ${
