@@ -271,7 +271,7 @@ function streamTweets() {
           impact = parseFloat(relevanceFixed * -1);
         }
         if (r1.score != 0) {
-          impact = parseFloat(relevanceFixed * r1.score);
+          impact = parseFloat(Math.abs(relevanceFixed) * r1.score);
         }
         if (impact < 0.1 && impact >= 0) {
           impact = 0.1;
