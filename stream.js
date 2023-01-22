@@ -262,6 +262,9 @@ function streamTweets() {
         }
         userRelevance.relevance = parseFloat(userRelevance.relevance);
         let impact = parseFloat(parseFloat(userRelevance.relevance) * r1.score);
+        if (impact < 0.1) {
+          impact = 0.1;
+        }
         sumScore = (await getHourSentiment()) + r1.score;
         let msg = `(${r1.score}/${sumScore})(${userRelevance.relevance.toFixed(
           3
