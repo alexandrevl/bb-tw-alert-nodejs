@@ -13,7 +13,7 @@ const streamURL =
   "https://api.twitter.com/2/tweets/search/stream?tweet.fields=author_id,public_metrics&expansions=author_id&user.fields=username";
 
 let socketTelegram = null;
-function keepAlive() {
+function keepAliveTelegram() {
   socketTelegram = io(`ws://${process.env.TELEGRAM_SERVER}:8000`);
   console.log("Connecting to telegram-server...");
   socketTelegram.on("connect", () => {
@@ -26,11 +26,10 @@ function keepAlive() {
     console.log("Connection telegram-server error");
     console.log("Trying again in 5 seconds...");
     setTimeout(() => {
-      keepAlive();
+      keepAliveTelegram();
     }, 5000);
   });
 }
-keepAlive();
 
 const rules = [
   {
@@ -341,6 +340,7 @@ let db = null;
     await deleteRules(currentRules);
     currentRules = await setRules();
     console.log(currentRules);
+    keepAliveTelegram();
   } catch (error) {
     console.log(error);
     process.exit(1);

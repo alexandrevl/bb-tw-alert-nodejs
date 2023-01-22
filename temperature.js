@@ -16,7 +16,7 @@ const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${pro
 const client = new MongoClient(url);
 
 let socketTelegram = null;
-function keepAlive() {
+function keepAliveTelegram() {
   socketTelegram = io(`ws://${process.env.TELEGRAM_SERVER}:8000`);
   console.log("Connecting to telegram-server...");
   socketTelegram.on("connect", () => {
@@ -29,11 +29,10 @@ function keepAlive() {
     console.log("Connection telegram-server error");
     console.log("Trying again in 5 seconds...");
     setTimeout(() => {
-      keepAlive();
+      keepAliveTelegram();
     }, 5000);
   });
 }
-keepAlive();
 
 let db = null;
 async function check() {
@@ -233,6 +232,7 @@ async function main() {
     console.log(timeline[0]);
     //console.log(`Cron: done`);
   });
+  keepAliveTelegram();
   //   await check();
 }
 if (require.main === module) {
