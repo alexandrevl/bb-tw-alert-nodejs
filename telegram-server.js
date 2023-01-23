@@ -142,9 +142,9 @@ function getSignalEmoji(sentiment) {
 }
 function getImpactEmoji(impact) {
   let result = "🟢";
-  if (impact < -5 && impact > -20) {
+  if (impact < -10 && impact > -30) {
     result = "🟡";
-  } else if (impact <= -20) {
+  } else if (impact <= -30) {
     result = "🔴";
   }
   return result;

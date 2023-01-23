@@ -100,6 +100,8 @@ async function main() {
     "neymarjr",
     "bbalerta",
     "goatoftheplague",
+    "nilmoretto",
+    "cdnleon",
   ];
   let arrayRelevance = [];
   userArray.forEach(async (user) => {
