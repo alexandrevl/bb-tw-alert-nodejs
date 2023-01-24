@@ -109,6 +109,9 @@ async function compileTweets() {
         sumRelevance += twIntern.user_relevance;
       }
     }
+    if (isNaN(sumImpact)) {
+      sumImpact = 0;
+    }
     if (sumSentiment != 0) {
       tw.sumSentiment = sumSentiment;
       tw.avgSentiment = sumSentiment / tw.count;
