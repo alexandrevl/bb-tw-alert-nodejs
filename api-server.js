@@ -1,4 +1,4 @@
-const config = require("dotenv").config();
+require("dotenv").config();
 const { MongoClient } = require("mongodb");
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);

@@ -1,5 +1,5 @@
 #!  node
-const config = require("dotenv").config();
+require("dotenv").config();
 const _ = require("lodash");
 const needle = require("needle");
 const { MongoClient } = require("mongodb");

@@ -1,10 +1,10 @@
+require("dotenv").config();
 const needle = require("needle");
-const request = require("request");
-const config = require("dotenv").config();
 const { MongoClient } = require("mongodb");
 const sentiment = require("sentiment-multi-language");
 const keyword_extractor = require("keyword-extractor");
 const io = require("socket.io-client");
+const relevance = require("./relevance");
 var _ = require("lodash");
 const TOKEN = process.env.TW_BEARER;
 //Twitter`s API doc: https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/api-reference/get-tweets-search-stream
@@ -56,66 +56,6 @@ const rules = [
 
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
-
-function relevance(user) {
-  return new Promise((resolve, reject) => {
-    const count_tweets = 100;
-    const options = {
-      url: "https://api.twitter.com/2/tweets/search/recent",
-      method: "GET",
-      qs: {
-        query: `from:${user} -is:retweet -is:reply`,
-        max_results: 100,
-        "tweet.fields": "public_metrics,referenced_tweets",
-      },
-      headers: {
-        Authorization: `Bearer ${TOKEN}`,
-      },
-    };
-
-    request(options, (error, response, body) => {
-      if (error) {
-        console.log(error);
-        resolve({ user: user, relevance: parseFloat(0).toFixed(3) });
-      } else {
-        let data = JSON.parse(body);
-        // console.dir(data, { depth: null });
-        let sumRelevanceIndex = 0;
-        let count = 0;
-        let medianArray = [];
-        if (data.meta.result_count != 0) {
-          data.data.forEach((tweet) => {
-            if (tweet.referenced_tweets == undefined && count < count_tweets) {
-              // console.log(tweet);
-              let retweetIndex = tweet.public_metrics.retweet_count * 10;
-              let likeIndex = tweet.public_metrics.like_count;
-              let replyIndex = tweet.public_metrics.reply_count * 20;
-              let relevanceIndex = retweetIndex + likeIndex + replyIndex;
-              sumRelevanceIndex += relevanceIndex;
-              medianArray.push(relevanceIndex);
-              ++count;
-            }
-          });
-
-          let avgRelevance = parseFloat(
-            sumRelevanceIndex / count / 1000
-          ).toFixed(3);
-          avgRelevance = parseFloat(median(medianArray));
-          avgRelevance = parseFloat(avgRelevance / 1000).toFixed(3);
-          let result = { user: user, relevance: avgRelevance };
-          resolve(result);
-        } else {
-          resolve({ user: user, relevance: parseFloat(0).toFixed(3) });
-        }
-      }
-    });
-  });
-}
-const median = (arr) => {
-  const mid = Math.floor(arr.length / 2),
-    nums = [...arr].sort((a, b) => a - b);
-  return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
-};
 
 // Get stream rules
 async function getRules() {
@@ -230,7 +170,7 @@ var options = {
     indisponibilidade: -3,
   },
 };
-let isCoolDown = false;
+
 let sumScore = 0;
 let stream = null;
 console.time("recycled in");
@@ -255,7 +195,9 @@ function streamTweets() {
       if (json.data.author_id != "83723557") {
         // console.dir(json, { depth: null });
         let r1 = sentiment(json.data.text, "pt-br", options);
-        let userRelevance = await relevance(json.includes.users[0].username);
+        let userRelevance = await relevance.relevance(
+          json.includes.users[0].username
+        );
         if (userRelevance.relevance == "NaN") {
           userRelevance.relevance = 0;
         }
