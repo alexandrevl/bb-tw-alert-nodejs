@@ -192,11 +192,13 @@ function streamTweets() {
       if (data.title) {
         console.log(data);
       }
+      // console.log(data);
       let json = JSON.parse(data);
       if (json.data.author_id != "83723557") {
         // console.dir(json, { depth: null });
         let r1 = sentiment(json.data.text, "pt-br", options);
         let userRelevance = await relevance.relevance(
+          db,
           json.includes.users[0].username
         );
         if (userRelevance.relevance == "NaN") {
@@ -204,7 +206,11 @@ function streamTweets() {
         }
         userRelevance.relevance = parseFloat(userRelevance.relevance);
         let temperatureScore = await temperature.getHourSentiment(db);
-        sumScore = temperatureScore.sum + r1.score;
+        if (temperatureScore != null) {
+          sumScore = temperatureScore.sum + r1.score;
+        } else {
+          sumScore = r1.score;
+        }
         //Calculo do impacto
         let relevanceFixed = userRelevance.relevance;
         if (relevanceFixed < 0.1) {

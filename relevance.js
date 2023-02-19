@@ -4,7 +4,7 @@ const { MongoClient } = require("mongodb");
 const { now } = require("lodash");
 const TOKEN = process.env.TW_BEARER;
 
-async function relevance(user) {
+async function relevance(db, user) {
   let relevance_db = await getRelevance(db, user);
   if (relevance_db == null) {
     return new Promise((resolve, reject) => {
@@ -14,7 +14,7 @@ async function relevance(user) {
         method: "GET",
         qs: {
           query: `from:${user} -is:retweet -is:reply`,
-          max_results: 100,
+          max_results: 20,
           "tweet.fields": "public_metrics,referenced_tweets",
         },
         headers: {
@@ -59,7 +59,14 @@ async function relevance(user) {
             insertMany(db, result);
             resolve(result);
           } else {
-            resolve({ user: user, relevance: parseFloat(0).toFixed(2) });
+            let now = new Date();
+            let userToResponse = {
+              user: user,
+              relevance: parseFloat(0).toFixed(2),
+              data: now,
+            };
+            insertMany(db, userToResponse);
+            resolve(userToResponse);
           }
         }
       });
@@ -85,7 +92,7 @@ async function main() {
     await client.connect();
     db = client.db("twitter");
     console.log("Mongo connected");
-    console.log(await relevance("1209109733015216130"));
+    console.log(await relevance(db, "alexandrevl"));
   } catch (error) {
     console.log(error);
     process.exit(1);
@@ -99,14 +106,14 @@ if (require.main === module) {
 //Add relevance to mongodb
 async function insertMany(db, data) {
   const options = { ordered: true };
-  const result = await db.collection("relevance").insertMany(data, options);
+  const result = await db.collection("relevance").insertMany([data], options);
   return result;
 }
 //get relevance from mongodb
 async function getRelevance(db, user) {
   let result = await db.collection("relevance").find({ user: user }).toArray();
   if (result.length != 0) {
-    return result;
+    return result[0];
   } else {
     return null;
   }

@@ -297,7 +297,7 @@ async function getHourWords(db) {
 exports.getHourWords = getHourWords;
 
 async function getHourSentiment(db) {
-  //console.log("getHourSentiment");
+  // console.log("getHourSentiment");
   const result = await db
     .collection("tw_timeline")
     .aggregate([
@@ -316,7 +316,7 @@ async function getHourSentiment(db) {
       },
     ])
     .toArray();
-  //console.log(result[0].sum);
+  // console.log(result);
   return result[0];
 }
 exports.getHourSentiment = getHourSentiment;
