@@ -28,7 +28,7 @@ async function relevance(db, user) {
           resolve({ user: user, relevance: parseFloat(0).toFixed(3) });
         } else {
           let data = JSON.parse(body);
-          console.dir(data, { depth: null });
+          // console.dir(data, { depth: null });
           let sumRelevanceIndex = 0;
           let count = 0;
           let medianArray = [];
@@ -52,9 +52,13 @@ async function relevance(db, user) {
             let avgRelevance = parseFloat(
               sumRelevanceIndex / count / 1000
             ).toFixed(3);
+
             avgRelevance = parseFloat(median(medianArray));
             avgRelevance = parseFloat(avgRelevance / 1000).toFixed(2);
             let now = new Date();
+            if (isNaN(avgRelevance)) {
+              avgRelevance = parseFloat(0).toFixed(2);
+            }
             let result = { user: user, relevance: avgRelevance, data: now };
             insertMany(db, result);
             resolve(result);
@@ -92,7 +96,7 @@ async function main() {
     await client.connect();
     db = client.db("twitter");
     console.log("Mongo connected");
-    console.log(await relevance(db, "alexandrevl"));
+    console.log(await relevance(db, "STF_oficial"));
   } catch (error) {
     console.log(error);
     process.exit(1);
