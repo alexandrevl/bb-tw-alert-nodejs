@@ -14,7 +14,7 @@ async function relevance(db, user) {
         method: "GET",
         qs: {
           query: `from:${user} -is:retweet -is:reply`,
-          max_results: 20,
+          max_results: 10,
           "tweet.fields": "public_metrics,referenced_tweets",
         },
         headers: {
