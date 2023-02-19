@@ -54,7 +54,7 @@ async function analyse(tweets) {
         console.log(
           `Changes in sentiments (Count: ${tw.count}/SumSentiment: ${tw.sumSentiment})`
         );
-        let hourWords = await getHourWords();
+        let hourWords = await getHourWords(db);
         let resultWordsStr = "";
         for (let index = 0; index < hourWords.length; index++) {
           const word = hourWords[index];
@@ -66,12 +66,12 @@ async function analyse(tweets) {
           tw.sumSentiment,
           resultWordsStr,
         ]);
-        await sendMsgTeams(
-          tw.count,
-          tw.avgSentiment,
-          tw.sumSentiment,
-          resultWordsStr
-        );
+        // await sendMsgTeams(
+        //   tw.count,
+        //   tw.avgSentiment,
+        //   tw.sumSentiment,
+        //   resultWordsStr
+        // );
       }
     }
   }
@@ -82,7 +82,7 @@ async function compileTweets() {
   let results = [];
   for (let index = 0; index < MINUTES; index++) {
     let tws = await checkMinutes(index);
-    let hour = await getHourSentiment();
+    let hour = await getHourSentiment(db);
     if (hour == null) {
       hour = { sum: 0 };
     }
@@ -123,7 +123,7 @@ async function compileTweets() {
       tw.sumRelevance = sumRelevance;
     }
 
-    tw.words = await getHourWords();
+    tw.words = await getHourWords(db);
     // tw.words = _.countBy(tw.words);
     // let resultWord = [];
     // for (let index = 0; index < tw.words.length; index++) {
@@ -161,53 +161,53 @@ async function checkMinutes(minutes) {
     .toArray();
   return result;
 }
-async function sendMsgTeams(count, temperature, sumSentiment, resultWordsStr) {
-  console.log("Sending msg to Teams");
-  const data = {
-    "@type": "MessageCard",
-    "@context": "http://schema.org/extensions",
-    themeColor: "0076D7",
-    summary: "Temperatura Twitter",
-    sections: [
-      {
-        activityTitle: "Alerta de mudança de temperatura do twitter",
-        activitySubtitle:
-          'Os dados coletados são da combinação de palavras "banco do brasil"',
-        facts: [
-          {
-            name: "Temperatura do minuto",
-            value: sumSentiment,
-          },
-          {
-            name: "Quantidade tweets",
-            value: count,
-          },
-          {
-            name: "Temp média do minuto",
-            value: temperature,
-          },
-          {
-            name: "Link",
-            value:
-              "https://twitter.com/search?q=%22banco%20do%20brasil%22&f=live",
-          },
-          {
-            name: "Palavras relacionadas",
-            value: resultWordsStr,
-          },
-        ],
-        markdown: true,
-      },
-    ],
-  };
+// async function sendMsgTeams(count, temperature, sumSentiment, resultWordsStr) {
+//   console.log("Sending msg to Teams");
+//   const data = {
+//     "@type": "MessageCard",
+//     "@context": "http://schema.org/extensions",
+//     themeColor: "0076D7",
+//     summary: "Temperatura Twitter",
+//     sections: [
+//       {
+//         activityTitle: "Alerta de mudança de temperatura do twitter",
+//         activitySubtitle:
+//           'Os dados coletados são da combinação de palavras "banco do brasil"',
+//         facts: [
+//           {
+//             name: "Temperatura do minuto",
+//             value: sumSentiment,
+//           },
+//           {
+//             name: "Quantidade tweets",
+//             value: count,
+//           },
+//           {
+//             name: "Temp média do minuto",
+//             value: temperature,
+//           },
+//           {
+//             name: "Link",
+//             value:
+//               "https://twitter.com/search?q=%22banco%20do%20brasil%22&f=live",
+//           },
+//           {
+//             name: "Palavras relacionadas",
+//             value: resultWordsStr,
+//           },
+//         ],
+//         markdown: true,
+//       },
+//     ],
+//   };
 
-  const response = await needle("post", TEAMS_URL, data, {
-    headers: {
-      "content-type": "application/json",
-    },
-  });
-  return response;
-}
+//   const response = await needle("post", TEAMS_URL, data, {
+//     headers: {
+//       "content-type": "application/json",
+//     },
+//   });
+//   return response;
+// }
 async function connectMongo() {
   console.log("Connecting mongo...");
   await client.connect();
@@ -248,7 +248,7 @@ async function insertMany(data) {
   return result;
 }
 
-async function getHourWords() {
+async function getHourWords(db) {
   const hours = 1;
   let qtWordsDisplay = 10;
   let words = await db
@@ -294,8 +294,9 @@ async function getHourWords() {
   }
   return result;
 }
+exports.getHourWords = getHourWords;
 
-async function getHourSentiment() {
+async function getHourSentiment(db) {
   //console.log("getHourSentiment");
   const result = await db
     .collection("tw_timeline")
@@ -318,3 +319,28 @@ async function getHourSentiment() {
   //console.log(result[0].sum);
   return result[0];
 }
+exports.getHourSentiment = getHourSentiment;
+function similarity(array1, array2) {
+  let common = 0;
+
+  for (let i = 0; i < array1.length; i++) {
+    for (let j = 0; j < array2.length; j++) {
+      if (array1[i] === array2[j]) {
+        common++;
+        break;
+      }
+    }
+  }
+
+  return common / Math.max(array1.length, array2.length);
+}
+function hasSibling(obj, objects) {
+  for (let i = 0; i < objects.length; i++) {
+    if (similarity(obj.words, objects[i].words) >= 0.9) {
+      return true;
+    }
+  }
+
+  return false;
+}
+exports.hasSibling = hasSibling;

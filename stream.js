@@ -5,6 +5,7 @@ const sentiment = require("sentiment-multi-language");
 const keyword_extractor = require("keyword-extractor");
 const io = require("socket.io-client");
 const relevance = require("./relevance");
+const temperature = require("./temperature");
 var _ = require("lodash");
 const TOKEN = process.env.TW_BEARER;
 //Twitter`s API doc: https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/api-reference/get-tweets-search-stream
@@ -202,7 +203,8 @@ function streamTweets() {
           userRelevance.relevance = 0;
         }
         userRelevance.relevance = parseFloat(userRelevance.relevance);
-        sumScore = (await getHourSentiment()) + r1.score;
+        let temperatureScore = await temperature.getHourSentiment(db);
+        sumScore = temperatureScore.sum + r1.score;
         //Calculo do impacto
         let relevanceFixed = userRelevance.relevance;
         if (relevanceFixed < 0.1) {
@@ -233,7 +235,7 @@ function streamTweets() {
         }
 
         // socketTelegram.emit("alertRelevant", msg);
-
+        // let hasSibling = await temperature.hasSibling(db, json.data.id);
         json.data.ts = new Date();
         json.data.user_relevance = userRelevance.relevance;
         json.data.impact = parseFloat(impact);
@@ -277,7 +279,7 @@ let db = null;
     db = client.db("twitter");
     //getHourSentiment();
     console.log("Mongo connected");
-    getHourWords(db);
+    // temperature.getHourWords(db);
     currentRules = await getRules();
     await deleteRules(currentRules);
     currentRules = await setRules();
@@ -299,55 +301,55 @@ async function insertMany(data) {
   return result;
 }
 
-async function getHourWords(db) {
-  let words = await db
-    .collection("tw_timeline")
-    .find({
-      ts: {
-        $gt: new Date(new Date().getTime() - 1000 * 60 * 60 * 1),
-      },
-    })
-    .toArray();
+// async function getHourWords(db) {
+//   let words = await db
+//     .collection("tw_timeline")
+//     .find({
+//       ts: {
+//         $gt: new Date(new Date().getTime() - 1000 * 60 * 60 * 1),
+//       },
+//     })
+//     .toArray();
 
-  let totalWords = [];
-  for (let i = 0; i < words.length; i++) {
-    let word = words[i];
-    totalWords = totalWords.concat(word.words);
-  }
-  // console.log({totalWords})
-  let wordsCounted = _.countBy(totalWords);
-  let finalWords = [];
-  for (const [key, value] of Object.entries(wordsCounted)) {
-    if (
-      !key.includes("banco") &&
-      key != "rt" &&
-      key != "bb" &&
-      key != "dm" &&
-      !key.includes("brasil")
-    ) {
-      finalWords.push({ word: key, count: value });
-    }
-  }
-  let result = _.orderBy(finalWords, ["count"], ["desc"]);
-  console.dir(result, { depth: null });
-  return result;
-}
+//   let totalWords = [];
+//   for (let i = 0; i < words.length; i++) {
+//     let word = words[i];
+//     totalWords = totalWords.concat(word.words);
+//   }
+//   // console.log({totalWords})
+//   let wordsCounted = _.countBy(totalWords);
+//   let finalWords = [];
+//   for (const [key, value] of Object.entries(wordsCounted)) {
+//     if (
+//       !key.includes("banco") &&
+//       key != "rt" &&
+//       key != "bb" &&
+//       key != "dm" &&
+//       !key.includes("brasil")
+//     ) {
+//       finalWords.push({ word: key, count: value });
+//     }
+//   }
+//   let result = _.orderBy(finalWords, ["count"], ["desc"]);
+//   console.dir(result, { depth: null });
+//   return result;
+// }
 
-async function getHourSentiment() {
-  //console.log("getHourSentiment");
-  const result = await db
-    .collection("tw_timeline")
-    .aggregate([
-      {
-        $match: {
-          ts: {
-            $gt: new Date(new Date().getTime() - 1000 * 60 * 60),
-          },
-        },
-      },
-      { $group: { _id: "$id", sum: { $sum: "$sumSentiment" } } },
-    ])
-    .toArray();
-  //console.log(result[0].sum);
-  return result[0].sum;
-}
+// async function getHourSentiment() {
+//   //console.log("getHourSentiment");
+//   const result = await db
+//     .collection("tw_timeline")
+//     .aggregate([
+//       {
+//         $match: {
+//           ts: {
+//             $gt: new Date(new Date().getTime() - 1000 * 60 * 60),
+//           },
+//         },
+//       },
+//       { $group: { _id: "$id", sum: { $sum: "$sumSentiment" } } },
+//     ])
+//     .toArray();
+//   //console.log(result[0].sum);
+//   return result[0].sum;
+// }
