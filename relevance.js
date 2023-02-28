@@ -8,13 +8,13 @@ async function relevance(db, user) {
   let relevance_db = await getRelevance(db, user);
   if (relevance_db == null) {
     return new Promise((resolve, reject) => {
-      const count_tweets = 100;
+      const count_tweets = 10;
       const options = {
         url: "https://api.twitter.com/2/tweets/search/recent",
         method: "GET",
         qs: {
           query: `from:${user} -is:retweet -is:reply`,
-          max_results: 10,
+          max_results: count_tweets,
           "tweet.fields": "public_metrics,referenced_tweets",
         },
         headers: {
