@@ -128,7 +128,7 @@ Dados:
     # print(limited_text)
     response_chatgpt = await get_chatgpt_response(limited_text)
     start_index = response_chatgpt.find("Análise dos últimos 10 minutos:") + len("Análise dos últimos 10 minutos:")
-    result_final = "Análise dos últimos 10 minutos:" + response_chatgpt[start_index:]
+    result_final = response_chatgpt[start_index:]
     return result_final
 
 if __name__ == "__main__":
