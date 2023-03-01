@@ -107,7 +107,6 @@ async def get_10min():
     init_string = """
 Faça uma analise dos tweets e explique o que pode estar acontecendo (NÃO diga que os tweets estão acima ou abaixo). Já sabemos que são TODOS sobre o banco do brasil, e que os dados são dos últimos 10 minutos. 
 Complemente texto com percentuais.Sempre que falar de percentuais use números.
-Pelo menos 2 parágrafos.
 Toda vez que aparacer RT (maisucula e com espaço depois) é um retweet
 Não precisa concluir, só faça a análise. Os dados estão em modelo CSV e os campos são:
 text = texto do tweet
