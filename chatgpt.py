@@ -99,7 +99,7 @@ async def get_chatgpt_response(text_question):
 
     # print(response_openai)
     response_message = response_openai.choices[0].text
-    # print("Response: " + response_openai)
+    # print("Response: " + response_message)
     return response_message
 
 async def main():
@@ -110,6 +110,7 @@ async def get_10min():
     init_string = """
 Faça uma análise dos tweets e sugira o que pode estar acontecendo (NÃO diga que os tweets estão acima ou abaixo). 
 São tweets sobre o Banco do brasil, e os dados são dos últimos 10 minutos. 
+Use \n para quebrar linha.
 Complemente texto com percentuais. Sempre que falar de percentuais use números.
 Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet.
 Não precisa concluir, só faça a análise. 
