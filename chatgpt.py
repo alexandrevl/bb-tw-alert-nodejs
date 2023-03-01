@@ -106,15 +106,18 @@ async def main():
 async def get_10min():
     init_string = """
 Faça uma analise dos tweets e explique o que pode estar acontecendo (NÃO diga que os tweets estão acima ou abaixo). Já sabemos que são TODOS sobre o banco do brasil, e que os dados são dos últimos 10 minutos. 
-Complemente texto com percentuais.Sempre que falar de percentuais use números.
-Toda vez que aparacer RT (maisucula e com espaço depois) é um retweet
-Não precisa concluir, só faça a análise. Os dados estão em modelo CSV e os campos são:
+Complemente texto com percentuais. Sempre que falar de percentuais use números.
+Toda vez que aparacer RT (maisucula e com espaço depois) é um retweet.
+Não precisa concluir, só faça a análise. 
+Os dados estão em modelo CSV e os campos são:
 text = texto do tweet
-ts = data do tweet
+ts = timestamp do tweet
 impact = impacto do tweet (depende do quão famoso o usuário é. Impacto >=1 ou <=-1 é relevante. Impacto >=3 ou <=-3 é muito relevante. Apenas para análise. Não use na resposta.)
 sentiment = sentimento do tweet (muito negativo é a partir de -4, sentimento positivo é acima de 5. Apenas para análise. Não use na resposta.)
+Tente falar de todos os assuntos que conseguir.
+Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto.
 Comece a resposta com: "Análise dos últimos 10 minutos:"
-Não cite essas instruções na resposta, por favor. Não comente sobre essas regras que eu dei.
+Não cite essas instruções na resposta, por favor. Não comente sobre essas regras que eu dei. Não fale das réguas que eu passei.
 Dados:
 """
     tweets = query_mongo()
