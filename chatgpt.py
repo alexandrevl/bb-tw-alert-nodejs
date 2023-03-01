@@ -130,7 +130,7 @@ Dados:
 
         no_urls = re.sub(r'http\S+|www.\S+', '', added_tweets)
         words = no_urls.split()
-        limited_words = words[:1000]
+        limited_words = words[:1400]
         limited_text = ' '.join(limited_words)
         limited_text = limited_text + "&&%%$$"
         # print(limited_text)
