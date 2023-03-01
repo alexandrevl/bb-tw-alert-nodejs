@@ -231,11 +231,11 @@ bot.onText(/\/10min/, (msg) => {
       // console.log(`stdout: ${data}`);
       strFinalApp = data;
       console.log(`10min - ChatGPT - Final Response (${chatId}): ` + strFinalApp);
-      bot.sendMessage(chatId, strFinalApp, { parse_mode: "Markdown" });
+      bot.sendMessage(chatId, strFinalApp);
       isProcessing = false;
     });
     if (isProcessing) {
-      bot.sendMessage(chatId, "Analisando dados... Aguarde...", { parse_mode: "Markdown" });
+      bot.sendMessage(chatId, "Analisando dados... Aguarde...");
     }
   } catch (error) {
     console.log(error);
