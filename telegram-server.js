@@ -225,14 +225,18 @@ bot.onText(/\/10min/, (msg) => {
     const chatId = msg.chat.id;
     console.log(`10min - ChatGPT - Start to: ` + chatId);
     const pythonProcess = spawn('python3', ['/usr/src/app/chatgpt.py']);
-    bot.sendMessage(chatId, "Analisando dados... Aguarde...");
     let strFinalApp = "Não tivemos tweets nos últimos 10 minutos.";
+    let isProcessing = true;
     pythonProcess.stdout.on('data', (data) => {
-      console.log(`stdout: ${data}`);
+      // console.log(`stdout: ${data}`);
       strFinalApp = data;
       console.log(`10min - ChatGPT - Final Response (${chatId}): ` + strFinalApp);
       bot.sendMessage(chatId, strFinalApp);
+      isProcessing = false;
     });
+    if (isProcessing) {
+      bot.sendMessage(chatId, "Analisando dados... Aguarde...");
+    }
   } catch (error) {
     console.log(error);
   }
