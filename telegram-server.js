@@ -7,6 +7,8 @@ const _ = require("lodash");
 const moment = require("moment");
 const TelegramBot = require("node-telegram-bot-api");
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
+const { spawn } = require('child_process');
+
 
 let db = null;
 const SEARCH = 0;
@@ -190,13 +192,12 @@ async function alertTemp(msg) {
     const word = hourWords[index];
     resultWordsStr += `   • ${word.word} (${word.count})\n`;
   }
-  let strFinal = `Twitter\`s Sentiment Temperature\n\nSentiment: ${
-    hourSentiment.sum
-  } ${getSignalEmoji(hourSentiment.sum)}\n\nImpact: ${hourImpact
-    .toFixed(1)
-    .toLocaleString("pt-BR")} ${getImpactEmoji(
-    hourImpact
-  )}\n\nWords:\n${resultWordsStr}`;
+  let strFinal = `Twitter\`s Sentiment Temperature\n\nSentiment: ${hourSentiment.sum
+    } ${getSignalEmoji(hourSentiment.sum)}\n\nImpact: ${hourImpact
+      .toFixed(1)
+      .toLocaleString("pt-BR")} ${getImpactEmoji(
+        hourImpact
+      )}\n\nWords:\n${resultWordsStr}`;
   console.log(`Sent to ${chatId}: ${strFinal}`);
   bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
 }
@@ -218,6 +219,18 @@ bot.onText(/\/app/, (msg) => {
 });
 bot.onText(/\/latest/, (msg) => {
   if (db != null) sendSearch(msg, ["", " "], 0);
+});
+bot.onText(/\/10min/, (msg) => {
+  const chatId = msg.chat.id;
+  const pythonProcess = spawn('python3', ['chatgpt.py']);
+  bot.sendMessage(chatId, "Buscando dados... Aguarde...");
+  let strFinalApp = "Não tem nada";
+  pythonProcess.stdout.on('data', (data) => {
+    console.log(`stdout: ${data}`);
+    strFinalApp = data;
+    bot.sendMessage(chatId, strFinalApp);
+  });
+
 });
 
 bot.onText(/\/start/, (msg) => {
@@ -253,8 +266,7 @@ async function sendSearch(msg, match, skip) {
   if (match[1] != "*" && words[0].ts != 0) {
     match[1] = match[1].slice(0, 39);
     console.log(
-      `(search) Search to ${msg.from.username}: ${
-        match[1] == " " ? "latest" : match[1]
+      `(search) Search to ${msg.from.username}: ${match[1] == " " ? "latest" : match[1]
       }`
     );
     strFinalApp = `Result for search: ${match[1]}\n\n`;
@@ -344,13 +356,12 @@ async function sendStatus(msg) {
     const word = hourWords[index];
     resultWordsStr += `   • ${word.word} (${word.count})\n`;
   }
-  let strFinal = `Twitter\`s Sentiment Temperature\n\nSentiment: ${
-    hourSentiment.sum
-  } ${getSignalEmoji(hourSentiment.sum)}\n\nImpact: ${hourImpact
-    .toFixed(1)
-    .toLocaleString("pt-BR")} ${getImpactEmoji(
-    hourImpact
-  )}\n\nWords:\n${resultWordsStr}`;
+  let strFinal = `Twitter\`s Sentiment Temperature\n\nSentiment: ${hourSentiment.sum
+    } ${getSignalEmoji(hourSentiment.sum)}\n\nImpact: ${hourImpact
+      .toFixed(1)
+      .toLocaleString("pt-BR")} ${getImpactEmoji(
+        hourImpact
+      )}\n\nWords:\n${resultWordsStr}`;
   console.log(`Sending to ${msg.chat.username}: ${strFinal}`);
   bot.sendMessage(chatId, strFinal, {
     disable_web_page_preview: true,
