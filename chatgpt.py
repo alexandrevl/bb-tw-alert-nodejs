@@ -87,11 +87,14 @@ async def get_chatgpt_response(text_question):
     # )
     response_openai = openai.Completion.create(
         engine='text-davinci-003',  # Determines the quality, speed, and cost.
-        temperature=1,            # Level of creativity in the response
-        prompt=(text_question),              # What the user typed in
-        max_tokens=400,             # Maximum tokens in the prompt AND response
+        temperature=0.1,            # Level of creativity in the response
+        prompt=text_question,              # What the user typed in
+        max_tokens=512,             # Maximum tokens in the prompt AND response
         n=1,                        # The number of completions to generate
         stop=None,                  # An optional setting to control response generation
+        top_p=1,                    # An optional setting to control response generation
+        frequency_penalty=0,        # An optional setting to control response generation
+        presence_penalty=0,         # An optional setting to control response generation
     )
 
     # print(response_openai)
