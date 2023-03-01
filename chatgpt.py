@@ -115,22 +115,25 @@ Comece a resposta com: "Análise dos últimos 10 minutos:"
 Dados:
 """
     tweets = query_mongo()
-    csv_tweets = data_to_csv(tweets, ['text', 'ts', 'impact', 'sentiment'])
-    added_tweets = init_string + csv_tweets
-    # print(added_tweets)
+    if (len(tweets) > 0):
+        csv_tweets = data_to_csv(tweets, ['text', 'ts', 'impact', 'sentiment'])
+        added_tweets = init_string + csv_tweets
+        # print(added_tweets)
 
-    # print(len(words))
+        # print(len(words))
 
-    no_urls = re.sub(r'http\S+|www.\S+', '', added_tweets)
-    words = no_urls.split()
-    limited_words = words[:1000]
-    limited_text = ' '.join(limited_words)
-    limited_text = limited_text + "&&%%$$"
-    # print(limited_text)
-    response_chatgpt = await get_chatgpt_response(limited_text)
-    start_index = response_chatgpt.find("Análise dos últimos 10 minutos:") + len("Análise dos últimos 10 minutos:")
-    result_final = response_chatgpt[start_index:]
-    return result_final
+        no_urls = re.sub(r'http\S+|www.\S+', '', added_tweets)
+        words = no_urls.split()
+        limited_words = words[:1000]
+        limited_text = ' '.join(limited_words)
+        limited_text = limited_text + "&&%%$$"
+        # print(limited_text)
+        response_chatgpt = await get_chatgpt_response(limited_text)
+        start_index = response_chatgpt.find("Análise dos últimos 10 minutos:") + len("Análise dos últimos 10 minutos:")
+        result_final = response_chatgpt[start_index:]
+        return result_final
+    else:
+        return "Não há tweets nos últimos 10 minutos"
 
 if __name__ == "__main__":
     asyncio.run(main())
