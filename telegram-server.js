@@ -225,7 +225,7 @@ bot.onText(/\/10min/, (msg) => {
     const chatId = msg.chat.id;
     console.log(`10min - ChatGPT - Start to: ` + chatId);
     const pythonProcess = spawn('python3', ['/usr/src/app/chatgpt.py']);
-    bot.sendMessage(chatId, "Buscando dados... Aguarde...");
+    bot.sendMessage(chatId, "Analisando dados... Aguarde...");
     let strFinalApp = "Não tem nada";
     pythonProcess.stdout.on('data', (data) => {
       console.log(`stdout: ${data}`);

@@ -9,4 +9,4 @@ deploy:
     - chmod 700 ~/.ssh
     - ssh-keyscan -t rsa 144.22.144.218>> ~/.ssh/known_hosts
   script:
-    - ssh -o StrictHostKeyChecking=no ubuntu@144.22.144.218 "cd bb-tw-alert/nodejs/; docker-compose down; git pull; npm install; pip3 install -r requirements.txt; docker-compose up -d"
+    - ssh -o StrictHostKeyChecking=no ubuntu@144.22.144.218 "cd bb-tw-alert/nodejs/; docker-compose down; git pull; npm install; pip3 install openai pymongo; docker-compose up -d"
