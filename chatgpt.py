@@ -132,8 +132,8 @@ Dados:
         limited_text = limited_text + "&&%%$$"
         # print(limited_text)
         response_chatgpt = await get_chatgpt_response(limited_text)
-        start_index = response_chatgpt.find("Análise dos últimos 10 minutos: ") + len("Análise dos últimos 10 minutos: ")
-        result_final = response_chatgpt[start_index:]
+        start_index = response_chatgpt.find("Análise dos últimos 10 minutos:") + len("Análise dos últimos 10 minutos:")
+        result_final = response_chatgpt[start_index:].strip()
         # Insert the response message into the 'chat_gpt_response' collection with a timestamp
         chat_gpt_collection = client[database_name]['chat_gpt_response']
         chat_gpt_doc = {
