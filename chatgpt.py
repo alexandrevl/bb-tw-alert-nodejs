@@ -87,7 +87,7 @@ async def get_chatgpt_response(text_question):
     # )
     response_openai = openai.Completion.create(
         engine='text-davinci-003',  # Determines the quality, speed, and cost.
-        temperature=0.1,            # Level of creativity in the response
+        temperature=0.5,            # Level of creativity in the response
         prompt=text_question,              # What the user typed in
         max_tokens=512,             # Maximum tokens in the prompt AND response
         n=1,                        # The number of completions to generate
@@ -108,9 +108,10 @@ async def main():
 
 async def get_10min():
     init_string = """
-Faça uma análise dos tweets e sugira o que pode estar acontecendo (NÃO diga que os tweets estão acima ou abaixo). 
+Faça uma análise dos tweets e sugira o que pode estar acontecendo.
 São tweets sobre o Banco do brasil, e os dados são dos últimos 10 minutos. 
-Use \n para quebrar linha.
+Use "\n" para quebrar linha.
+Tente identificar tendências.
 Complemente texto com percentuais. Sempre que falar de percentuais use números.
 Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet.
 Não precisa concluir, só faça a análise. 
