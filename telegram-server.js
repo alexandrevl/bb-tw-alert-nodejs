@@ -220,23 +220,23 @@ bot.onText(/\/app/, (msg) => {
 bot.onText(/\/latest/, (msg) => {
   if (db != null) sendSearch(msg, ["", " "], 0);
 });
-// bot.onText(/\/10min/, (msg) => {
-//   try {
-//     const chatId = msg.chat.id;
-//     console.log(`10min - ChatGPT - Start to: ` + chatId);
-//     const pythonProcess = spawn('python3', ['chatgpt.py']);
-//     bot.sendMessage(chatId, "Buscando dados... Aguarde...");
-//     let strFinalApp = "Não tem nada";
-//     pythonProcess.stdout.on('data', (data) => {
-//       console.log(`stdout: ${data}`);
-//       strFinalApp = data;
-//       console.log(`10min - ChatGPT - Final Response (${chatId}): ` + strFinalApp);
-//       bot.sendMessage(chatId, strFinalApp);
-//     });
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
+bot.onText(/\/10min/, (msg) => {
+  try {
+    const chatId = msg.chat.id;
+    console.log(`10min - ChatGPT - Start to: ` + chatId);
+    const pythonProcess = spawn('python3', ['/usr/src/app/chatgpt.py']);
+    bot.sendMessage(chatId, "Buscando dados... Aguarde...");
+    let strFinalApp = "Não tem nada";
+    pythonProcess.stdout.on('data', (data) => {
+      console.log(`stdout: ${data}`);
+      strFinalApp = data;
+      console.log(`10min - ChatGPT - Final Response (${chatId}): ` + strFinalApp);
+      bot.sendMessage(chatId, strFinalApp);
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
