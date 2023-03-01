@@ -30,17 +30,17 @@ def data_to_csv(data, fields):
     # return the CSV data as a string
     return csv_string
 
+username = 'root'
+password = 'Canygra01'
+database_name = 'twitter'
+
+# Connect to MongoDB with authentication
+client = MongoClient(f'mongodb://{username}:{password}@144.22.144.218:27017/')
 
 def query_mongo():
-    username = 'root'
-    password = 'Canygra01'
-    database_name = 'twitter'
     collection_name = 'raw_data_stream'
     minutes_back = 10
     limit = 100
-    # Connect to MongoDB with authentication
-    client = MongoClient(f'mongodb://{username}:{password}@144.22.144.218:27017/')
-
     # Get the collection
     collection = client[database_name][collection_name]
 
@@ -129,8 +129,15 @@ Dados:
         limited_text = limited_text + "&&%%$$"
         # print(limited_text)
         response_chatgpt = await get_chatgpt_response(limited_text)
-        start_index = response_chatgpt.find("Análise dos últimos 10 minutos:") + len("Análise dos últimos 10 minutos:")
+        start_index = response_chatgpt.find("Análise dos últimos 10 minutos: ") + len("Análise dos últimos 10 minutos: ")
         result_final = response_chatgpt[start_index:]
+        # Insert the response message into the 'chat_gpt_response' collection with a timestamp
+        chat_gpt_collection = client[database_name]['chat_gpt_response']
+        chat_gpt_doc = {
+            'timestamp': datetime.now(),
+            'response_message': result_final
+        }
+        chat_gpt_collection.insert_one(chat_gpt_doc)
         return result_final
     else:
         return "Não há tweets nos últimos 10 minutos"
