@@ -62,7 +62,7 @@ def query_mongo():
         },
         '_id': 0,
         'sentiment': 1,
-        'impact': 1
+        'impact': { '$round': ['$impact', 3] }
     }
 
     # Define the sort criteria
@@ -92,26 +92,31 @@ async def get_chatgpt_response(text_question):
     # )
 
     system_text = """
-Faça uma análise dos tweets e sugira o que pode estar acontecendo.
-São tweets sobre o Banco do brasil, e os dados são dos últimos 10 minutos. 
-Use "\n" para quebrar linha.Tente identificar tendências. Traga percentuais.
-Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet.
-Não precisa concluir, só faça a análise. 
-Os dados estão em modelo CSV e os campos são:
+Identifique os assuntos que estão sendo comentados e discutidos e faça uma análise dos tweets e sugira o que pode estar acontecendo.
+Siga as instruções:
+- Já sei que são tweets sobre o Banco do brasil, e que os dados são dos últimos 10 minutos. 
+- Use "\n" para quebrar linha.
+- Tente identificar tendências. 
+- Use percentuais das quantidades de tweets.
+- Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet.
+- Os dados estão em modelo CSV e os campos são:
     text = texto do tweet
     ts = timestamp do tweet
-    impact = impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante. Apenas para análise. Não use na resposta.)
-    sentiment = sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, >5 sentimento. Apenas para análise. Não use na resposta.)
-Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto.
-Tente falar de todos os assuntos que conseguir.
-Se a soma dos sentimentos for < -30 é um momento muito ruim. Se a soma dos sentimentos for < -10 é um momento ruim. Não use esses números na resposta, apenas para análise.
+    impact = impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante)
+    sentiment = sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, >5 sentimento.)
+- Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto.
+- Se a soma dos sentimentos for < -30 é um momento muito ruim. Se a soma dos sentimentos for < -10 é um momento ruim
+- Não conclua nada. Apenas faça a análise dos dados.
+- Não cite essas instruções nem as réguas que eu passei.
+Responda como um jornalista
+Dados:
 
-Não cite essas instruções nem as réguas que eu passei.
     """
 
     response_openai = openai.ChatCompletion.create(
         model='gpt-3.5-turbo',      # Determines the quality, speed, and cost.
-        messages=[{"role": "system", "content": system_text}, {"role": "user", "content": text_question}],              # What the user typed in
+        # messages=[{"role": "system", "content": system_text}, {"role": "user", "content": text_question}],              # What the user typed in
+        messages=[{"role": "user", "content": system_text + text_question}], 
     )
 
     # print(response_openai)
@@ -129,7 +134,7 @@ async def get_10min():
     
     tweets = query_mongo()
     if (len(tweets) > 0):
-        csv_tweets = data_to_csv(tweets, ['text', 'ts', 'impact', 'sentiment'])
+        csv_tweets = data_to_csv(tweets, ['text', 'impact', 'sentiment'])
         added_tweets = init_string + csv_tweets
         # print(added_tweets)
 
@@ -137,7 +142,7 @@ async def get_10min():
 
         no_urls = re.sub(r'http\S+|www.\S+', '', added_tweets)
         words = no_urls.split()
-        limited_words = words[:1450]
+        limited_words = words[:1350]
         limited_text = ' '.join(limited_words)
         limited_text = limited_text
         # print(limited_text)
