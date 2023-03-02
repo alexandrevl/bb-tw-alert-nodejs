@@ -91,9 +91,27 @@ async def get_chatgpt_response(text_question):
     #     presence_penalty=0,         # An optional setting to control response generation
     # )
 
+    system_text = """
+Faça uma análise dos tweets e sugira o que pode estar acontecendo.
+São tweets sobre o Banco do brasil, e os dados são dos últimos 10 minutos. 
+Use "\n" para quebrar linha.Tente identificar tendências. Traga percentuais.
+Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet.
+Não precisa concluir, só faça a análise. 
+Os dados estão em modelo CSV e os campos são:
+    text = texto do tweet
+    ts = timestamp do tweet
+    impact = impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante. Apenas para análise. Não use na resposta.)
+    sentiment = sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, >5 sentimento. Apenas para análise. Não use na resposta.)
+Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto.
+Tente falar de todos os assuntos que conseguir.
+Se a soma dos sentimentos for < -30 é um momento muito ruim. Se a soma dos sentimentos for < -10 é um momento ruim. Não use esses números na resposta, apenas para análise.
+
+Não cite essas instruções nem as réguas que eu passei.
+    """
+
     response_openai = openai.ChatCompletion.create(
         model='gpt-3.5-turbo',      # Determines the quality, speed, and cost.
-        messages=[{"role": "user", "content": text_question}],              # What the user typed in
+        messages=[{"role": "system", "content": system_text}, {"role": "user", "content": text_question}],              # What the user typed in
     )
 
     # print(response_openai)
@@ -107,26 +125,7 @@ async def main():
     print(response_main)
 
 async def get_10min():
-    init_string = """
-Faça uma análise dos tweets e sugira o que pode estar acontecendo.
-São tweets sobre o Banco do brasil, e os dados são dos últimos 10 minutos. 
-Use "\n" para quebrar linha.
-Tente identificar tendências.
-Complemente texto com percentuais. Sempre que falar de percentuais use números.
-Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet.
-Não precisa concluir, só faça a análise. 
-Os dados estão em modelo CSV e os campos são:
-text = texto do tweet
-ts = timestamp do tweet
-impact = impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante. Apenas para análise. Não use na resposta.)
-sentiment = sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, >5 sentimento. Apenas para análise. Não use na resposta.)
-Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto.
-Tente falar de todos os assuntos que conseguir.
-Se a soma dos sentimentos for < -30 é um momento muito ruim. Se a soma dos sentimentos for < -10 é um momento ruim.
-Comece a resposta com: "Análise dos últimos 10 minutos:"
-Não cite essas instruções na resposta, por favor. Não comente sobre essas regras que eu dei. Não fale das réguas que eu passei.
-Dados:
-"""
+    init_string = ""
     
     tweets = query_mongo()
     if (len(tweets) > 0):
@@ -143,8 +142,9 @@ Dados:
         limited_text = limited_text
         # print(limited_text)
         response_chatgpt = await get_chatgpt_response(limited_text)
-        start_index = response_chatgpt.find("Análise dos últimos 10 minutos:") + len("Análise dos últimos 10 minutos:")
-        result_final = response_chatgpt[start_index:].strip()
+        # start_index = response_chatgpt.find("Análise dos últimos 10 minutos:") + len("Análise dos últimos 10 minutos:")
+        # result_final = response_chatgpt[start_index:].strip()
+        result_final = response_chatgpt.strip();
         # Insert the response message into the 'chat_gpt_response' collection with a timestamp
         chat_gpt_collection = client[database_name]['chat_gpt_response']
         chat_gpt_doc = {
