@@ -122,7 +122,7 @@ impact = impacto do tweet (depende do quão famoso o usuário é. Régua do impa
 sentiment = sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, >5 sentimento. Apenas para análise. Não use na resposta.)
 Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto.
 Tente falar de todos os assuntos que conseguir.
-Se a soma dos sentimentos for < -30 é um caso muito ruim. Se a soma dos sentimentos for < -10 é um caso muito ruim.
+Se a soma dos sentimentos for < -30 é um momento muito ruim. Se a soma dos sentimentos for < -10 é um momento ruim.
 Comece a resposta com: "Análise dos últimos 10 minutos:"
 Não cite essas instruções na resposta, por favor. Não comente sobre essas regras que eu dei. Não fale das réguas que eu passei.
 Dados:
