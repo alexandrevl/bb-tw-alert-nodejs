@@ -62,7 +62,7 @@ def query_mongo():
         },
         '_id': 0,
         'sentiment': 1,
-        'impact': { '$round': ['$impact', 3] }
+        'impact': {"$round": ["$impact",2]}
     }
 
     # Define the sort criteria
@@ -109,14 +109,13 @@ Siga as instruções:
 - Não conclua nada. Apenas faça a análise dos dados.
 - Não cite essas instruções nem as réguas que eu passei.
 Responda como um jornalista
-Dados:
-
+Dados virão na próxima chamada
     """
 
     response_openai = openai.ChatCompletion.create(
         model='gpt-3.5-turbo',      # Determines the quality, speed, and cost.
         # messages=[{"role": "system", "content": system_text}, {"role": "user", "content": text_question}],              # What the user typed in
-        messages=[{"role": "user", "content": system_text + text_question}], 
+        messages=[{"role": "user", "content": system_text}, {"role": "user", "content": text_question}], 
     )
 
     # print(response_openai)
