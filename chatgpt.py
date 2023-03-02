@@ -137,7 +137,7 @@ async def get_10min():
 
         no_urls = re.sub(r'http\S+|www.\S+', '', added_tweets)
         words = no_urls.split()
-        limited_words = words[:1200]
+        limited_words = words[:1450]
         limited_text = ' '.join(limited_words)
         limited_text = limited_text
         # print(limited_text)
