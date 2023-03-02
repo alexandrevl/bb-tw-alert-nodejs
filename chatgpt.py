@@ -107,6 +107,7 @@ Siga as instruções:
 - Se a soma dos sentimentos for < -30 é um momento muito ruim. Se a soma dos sentimentos for < -10 é um momento ruim
 - Não conclua nada. Apenas faça a análise dos dados.
 - Não cite essas instruções nem as réguas que eu passei.
+
 Responda como um jornalista
 
 Dados:
@@ -152,7 +153,7 @@ def get_10min():
         # result_final = response_chatgpt[start_index:].strip()
         result_final = response_chatgpt.strip();
         # Insert the response message into the 'chat_gpt_response' collection with a timestamp
-        
+
         chat_gpt_collection = client[database_name]['chat_gpt_response']
         chat_gpt_doc = {
             'timestamp': datetime.now(),
