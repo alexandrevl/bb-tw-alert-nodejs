@@ -13,6 +13,7 @@ const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL =
   "https://api.twitter.com/2/tweets/search/stream?tweet.fields=author_id,public_metrics&expansions=author_id&user.fields=username";
 
+
 let socketTelegram = null;
 function keepAliveTelegram() {
   socketTelegram = io(`ws://${process.env.TELEGRAM_SERVER}:8000`);
@@ -232,9 +233,8 @@ function streamTweets() {
 
         let msg = `(${r1.score}/${sumScore})(${userRelevance.relevance.toFixed(
           3
-        )}/${impact.toFixed(3)}) @${userRelevance.user}: ${
-          json.data.text
-        } - https://twitter.com/u/status/${json.data.id}`;
+        )}/${impact.toFixed(3)}) @${userRelevance.user}: ${json.data.text
+          } - https://twitter.com/u/status/${json.data.id}`;
         console.log(msg);
         if (impact >= 10 || impact <= -10 || relevanceFixed >= 5) {
           socketTelegram.emit("alertRelevant", msg);

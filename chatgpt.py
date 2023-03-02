@@ -77,28 +77,28 @@ def query_mongo():
 async def get_chatgpt_response(text_question):
     # print("Getting response from ChatGPT: " + text_question);
     openai.api_key = "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"
-    # completions = openai.Completion.create(
-    #     engine="text-davinci-002",
-    #     prompt=prompt,
-    #     max_tokens=1024,
-    #     n=1,
-    #     stop=None,
-    #     temperature=0.5,
+
+
+    # response_openai = openai.Completion.create(
+    #     engine='text-davinci-003',  # Determines the quality, speed, and cost.
+    #     temperature=0.5,            # Level of creativity in the response
+    #     prompt=text_question,              # What the user typed in
+    #     max_tokens=512,             # Maximum tokens in the prompt AND response
+    #     n=1,                        # The number of completions to generate
+    #     stop=None,                  # An optional setting to control response generation
+    #     top_p=1,                    # An optional setting to control response generation
+    #     frequency_penalty=0,        # An optional setting to control response generation
+    #     presence_penalty=0,         # An optional setting to control response generation
     # )
-    response_openai = openai.Completion.create(
-        engine='text-davinci-003',  # Determines the quality, speed, and cost.
-        temperature=0.5,            # Level of creativity in the response
-        prompt=text_question,              # What the user typed in
-        max_tokens=512,             # Maximum tokens in the prompt AND response
-        n=1,                        # The number of completions to generate
-        stop=None,                  # An optional setting to control response generation
-        top_p=1,                    # An optional setting to control response generation
-        frequency_penalty=0,        # An optional setting to control response generation
-        presence_penalty=0,         # An optional setting to control response generation
+
+    response_openai = openai.ChatCompletion.create(
+        model='gpt-3.5-turbo',      # Determines the quality, speed, and cost.
+        messages=[{"role": "user", "content": text_question}],              # What the user typed in
     )
 
     # print(response_openai)
-    response_message = response_openai.choices[0].text
+    # response_message = response_openai.choices[0].text
+    response_message = response_openai.choices[0].message.content
     # print("Response: " + response_message)
     return response_message
 
@@ -127,6 +127,7 @@ Comece a resposta com: "Análise dos últimos 10 minutos:"
 Não cite essas instruções na resposta, por favor. Não comente sobre essas regras que eu dei. Não fale das réguas que eu passei.
 Dados:
 """
+    
     tweets = query_mongo()
     if (len(tweets) > 0):
         csv_tweets = data_to_csv(tweets, ['text', 'ts', 'impact', 'sentiment'])
