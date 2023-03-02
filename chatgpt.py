@@ -1,6 +1,5 @@
 import os
 import openai
-import asyncio
 import re
 import string
 
@@ -74,7 +73,7 @@ def query_mongo():
 
 
 
-async def get_chatgpt_response(text_question):
+def get_chatgpt_response(text_question):
     # print("Getting response from ChatGPT: " + text_question);
     openai.api_key = "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"
 
@@ -109,13 +108,16 @@ Siga as instruções:
 - Não conclua nada. Apenas faça a análise dos dados.
 - Não cite essas instruções nem as réguas que eu passei.
 Responda como um jornalista
-Dados virão na próxima chamada
+
+Dados:
+
     """
 
     response_openai = openai.ChatCompletion.create(
         model='gpt-3.5-turbo',      # Determines the quality, speed, and cost.
         # messages=[{"role": "system", "content": system_text}, {"role": "user", "content": text_question}],              # What the user typed in
-        messages=[{"role": "user", "content": system_text}, {"role": "user", "content": text_question}], 
+        # messages=[{"role": "user", "content": system_text}, {"role": "user", "content": text_question}], 
+        messages=[{"role": "user", "content": system_text + text_question}], 
     )
 
     # print(response_openai)
@@ -124,11 +126,11 @@ Dados virão na próxima chamada
     # print("Response: " + response_message)
     return response_message
 
-async def main():
-    response_main = await get_10min()
+def main():
+    response_main = get_10min()
     print(response_main)
 
-async def get_10min():
+def get_10min():
     init_string = ""
     
     tweets = query_mongo()
@@ -141,15 +143,16 @@ async def get_10min():
 
         no_urls = re.sub(r'http\S+|www.\S+', '', added_tweets)
         words = no_urls.split()
-        limited_words = words[:1350]
+        limited_words = words[:1250]
         limited_text = ' '.join(limited_words)
         limited_text = limited_text
         # print(limited_text)
-        response_chatgpt = await get_chatgpt_response(limited_text)
+        response_chatgpt = get_chatgpt_response(limited_text)
         # start_index = response_chatgpt.find("Análise dos últimos 10 minutos:") + len("Análise dos últimos 10 minutos:")
         # result_final = response_chatgpt[start_index:].strip()
         result_final = response_chatgpt.strip();
         # Insert the response message into the 'chat_gpt_response' collection with a timestamp
+        
         chat_gpt_collection = client[database_name]['chat_gpt_response']
         chat_gpt_doc = {
             'timestamp': datetime.now(),
@@ -161,4 +164,4 @@ async def get_10min():
         return "Não há tweets nos últimos 10 minutos"
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
