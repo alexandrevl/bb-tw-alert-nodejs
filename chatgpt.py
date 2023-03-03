@@ -38,8 +38,8 @@ client = MongoClient(f'mongodb://{username}:{password}@144.22.144.218:27017/')
 
 def query_mongo():
     collection_name = 'raw_data_stream'
-    minutes_back = 20
-    limit = 1000
+    minutes_back = 40
+    limit = 400
     # Get the collection
     collection = client[database_name][collection_name]
 
@@ -111,7 +111,7 @@ Siga as instruções:
 - Use "\n" para quebrar linha.
 - Tente identificar tendências. 
 - Use percentuais das quantidades de tweets.
-- Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet.
+- Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet. Retweets são menos relevantes que tweets originais.
 - Os dados estão em modelo CSV e os campos são:
     text = texto do tweet
     impact = média do impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante)
