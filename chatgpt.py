@@ -39,7 +39,7 @@ client = MongoClient(f'mongodb://{username}:{password}@144.22.144.218:27017/')
 def query_mongo():
     collection_name = 'raw_data_stream'
     minutes_back = 10
-    limit = 100
+    limit = 500
     # Get the collection
     collection = client[database_name][collection_name]
 
@@ -50,26 +50,39 @@ def query_mongo():
         }
     }
 
-    # Define the projection
-    projection = {
-        'text': {
-            '$replaceAll': {
-                'input': '$text',
-                'find': '\n',
-                'replacement': ''
-            }
-        },
-        '_id': 0,
-        'sentiment': 1,
-        'impact': {"$round": ["$impact",2]}
-    }
-
-    # Define the sort criteria
-    sort_criteria = [('ts', -1)]
+    # Define the aggregation pipeline
+    pipeline = [
+        {'$match': query},
+        {'$replaceWith': {'text': {'$split': ['$text', '\n']}}},
+        {'$unwind': '$text'},
+        {'$group': {
+            '_id': '$text',
+            'qnt': {'$sum': 1},
+            'sentiment': { '$sum': "$sentiment"},
+            'impact': { '$sum': "$impact" }, 
+        }},
+        {'$project': {
+            '_id': 0,
+            'text': '$_id',
+            'qnt': 1,
+            'sentiment': {"$avg":"$sentiment"},
+            'impact': {"$avg":"$impact"},
+        }},
+        {'$sort': {'ts': -1, 'impact': 1, 'qnt': -1}},
+        {'$limit': limit}
+    ]
 
     # Execute the query and return the results
-    results = collection.find(query, projection).sort(sort_criteria).limit(limit)
+    results = collection.aggregate(pipeline)
+   
+
+    # qnt = 0
+    # for result in results:
+    #     qnt = qnt + 1
+    # # print(qnt)
+
     return list(results)
+
 
 
 
@@ -100,9 +113,9 @@ Siga as instruções:
 - Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet.
 - Os dados estão em modelo CSV e os campos são:
     text = texto do tweet
-    ts = timestamp do tweet
     impact = impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante)
     sentiment = sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, >5 sentimento.)
+    qnt = quantidade de vezes que o tweet apareceu
 - Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto.
 - Se a soma dos sentimentos for < -30 é um momento muito ruim. Se a soma dos sentimentos for < -10 é um momento ruim
 - Não conclua nada. Apenas faça a análise dos dados.
@@ -136,7 +149,7 @@ def get_10min():
     
     tweets = query_mongo()
     if (len(tweets) > 0):
-        csv_tweets = data_to_csv(tweets, ['text', 'impact', 'sentiment'])
+        csv_tweets = data_to_csv(tweets, ['qnt', 'text', 'sentiment', 'impact'])
         added_tweets = init_string + csv_tweets
         # print(added_tweets)
 
