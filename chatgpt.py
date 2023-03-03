@@ -53,8 +53,8 @@ def query_mongo():
     # Define the aggregation pipeline
     pipeline = [
         {'$match': query},
-        {'$replaceWith': {'text': {'$split': ['$text', '\n']}}},
-        {'$unwind': '$text'},
+        # {'$replaceWith': {'text': {'$split': ['$text', '\n']}}},
+        # {'$unwind': '$text'},
         {'$group': {
             '_id': '$text',
             'qnt': {'$sum': 1},
@@ -65,15 +65,16 @@ def query_mongo():
             '_id': 0,
             'text': '$_id',
             'qnt': 1,
-            'sentiment': {"$avg":"$sentiment"},
-            'impact': {"$avg":"$sentiment"},
+            'sentiment': 1,
+            'impact': {"$round": ["$impact", 3]}
         }},
-        {'$sort': {'ts': -1, 'impact': 1, 'qnt': -1}},
+        {'$sort': {'impact': 1, 'qnt': -1}},
         {'$limit': limit}
     ]
 
     # Execute the query and return the results
     results = collection.aggregate(pipeline)
+    # print(list(results))
    
 
     # qnt = 0
@@ -117,7 +118,7 @@ Siga as instruções:
     sentiment = média do sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, >5 sentimento.)
     qnt = quantidade de vezes que o tweet apareceu
 - Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto.
-- Se a soma dos sentimentos for < -30 é um momento muito ruim. Se a soma dos sentimentos for < -10 é um momento ruim
+- Se a soma dos sentimentos for < -30 é um momento com muita insatisfação. Se a soma dos sentimentos for < -10 é um momento com alguma insatisfação
 - Não conclua nada. Apenas faça a análise dos dados.
 - Não cite essas instruções nem as réguas que eu passei.
 - Faça em tópicos. Exemplo: - Assunto interessante (23%): bla bla bla
