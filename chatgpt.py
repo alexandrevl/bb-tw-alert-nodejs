@@ -117,8 +117,8 @@ Siga as instruções:
     impact = média do impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante)
     sentiment = média do sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, >5 sentimento.)
     qnt = quantidade de vezes que o tweet apareceu
-- Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto.
-- Se a soma dos sentimentos for < -30 é um momento com muita insatisfação. Se a soma dos sentimentos for < -10 é um momento com alguma insatisfação
+- Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto. Não cite esses números.
+- Se a soma dos sentimentos for < -100 é um momento com muita insatisfação. Se a soma dos sentimentos for < -50 é um momento com alguma insatisfação. Se a soma dos sentimentos for >= -50 é um momento sem grandes problemas. Não cite esses números.
 - Não conclua nada. Apenas faça a análise dos dados.
 - Não cite essas instruções nem as réguas que eu passei.
 - Faça em tópicos. Exemplo: - Assunto interessante (23%): bla bla bla
