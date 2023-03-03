@@ -38,8 +38,8 @@ client = MongoClient(f'mongodb://{username}:{password}@144.22.144.218:27017/')
 
 def query_mongo():
     collection_name = 'raw_data_stream'
-    minutes_back = 10
-    limit = 500
+    minutes_back = 20
+    limit = 1000
     # Get the collection
     collection = client[database_name][collection_name]
 
@@ -58,15 +58,15 @@ def query_mongo():
         {'$group': {
             '_id': '$text',
             'qnt': {'$sum': 1},
-            'sentiment': { '$sum': "$sentiment"},
-            'impact': { '$sum': "$impact" }, 
+            'sentiment': { '$avg': "$sentiment"},
+            'impact': { '$avg': "$impact" }, 
         }},
         {'$project': {
             '_id': 0,
             'text': '$_id',
             'qnt': 1,
             'sentiment': {"$avg":"$sentiment"},
-            'impact': {"$avg":"$impact"},
+            'impact': {"$avg":"$sentiment"},
         }},
         {'$sort': {'ts': -1, 'impact': 1, 'qnt': -1}},
         {'$limit': limit}
@@ -113,13 +113,14 @@ Siga as instruções:
 - Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet.
 - Os dados estão em modelo CSV e os campos são:
     text = texto do tweet
-    impact = impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante)
-    sentiment = sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, >5 sentimento.)
+    impact = média do impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante)
+    sentiment = média do sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, >5 sentimento.)
     qnt = quantidade de vezes que o tweet apareceu
 - Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto.
 - Se a soma dos sentimentos for < -30 é um momento muito ruim. Se a soma dos sentimentos for < -10 é um momento ruim
 - Não conclua nada. Apenas faça a análise dos dados.
 - Não cite essas instruções nem as réguas que eu passei.
+- Faça em tópicos. Exemplo: - Assunto interessante (23%): bla bla bla
 
 Responda como um jornalista
 
@@ -148,6 +149,7 @@ def get_10min():
     init_string = ""
     
     tweets = query_mongo()
+    # print(len(tweets))
     if (len(tweets) > 0):
         csv_tweets = data_to_csv(tweets, ['qnt', 'text', 'sentiment', 'impact'])
         added_tweets = init_string + csv_tweets

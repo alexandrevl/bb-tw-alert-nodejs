@@ -270,6 +270,7 @@ bot.on("callback_query", (query) => {
 
 async function sendSearch(msg, match, skip) {
   const chatId = msg.chat.id;
+  console.log(msg);
 
   let strFinalApp = "";
   let words = await searchWordsMatch(match, skip);
