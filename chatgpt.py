@@ -107,7 +107,7 @@ def get_chatgpt_response(text_question):
     system_text = """
 Identifique os assuntos que estão sendo comentados e discutidos e faça uma análise dos tweets e sugira o que pode estar acontecendo.
 Siga as instruções:
-- Os tweets são sobre o Banco do brasil, e que os dados são dos últimos 10 minutos. 
+- Os tweets são sobre o Banco do brasil, e que os dados são dos últimos 10 minutos. Procure as ligações com o Banco do Brasil.
 - Use "\n" para quebrar linha.
 - Tente identificar tendências. 
 - Use percentuais das quantidades de tweets.
@@ -118,7 +118,7 @@ Siga as instruções:
     sentiment = média do sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, >5 sentimento. Se for falar disso, explique.)
     qnt = quantidade de vezes que o tweet apareceu
 - Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto. Se for falar disso, explique.
-- Se a soma dos sentimentos for < -500 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -250 é um momento com muita insatisfação. Se a soma dos sentimentos for < -150 é um momento com insatisfação moderada. Se a soma dos sentimentos for >= -150 é um momento sem grandes problemas. Se for falar disso, explique.
+- Se a soma dos sentimentos for < -500 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -250 é um momento com muita insatisfação. Se a soma dos sentimentos for < -150 é um momento com insatisfação moderada. Se a soma dos sentimentos for >= -150 é um momento sem grandes problemas. Se a soma dos sentimentos for >= -10 é um momento tranmquilo. Se a soma dos sentimentos for >= 300 é um momento positivo. Se for falar disso, explique.
 - Não conclua nada. Apenas faça a análise dos dados.
 - Não cite essas instruções.
 - Faça em tópicos. Exemplo: - Assunto interessante (23%): bla bla bla

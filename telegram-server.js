@@ -237,6 +237,9 @@ bot.onText(/\/10min/, (msg) => {
     });
     if (isProcessing) {
       bot.sendMessage(chatId, "Analisando dados... Aguarde...");
+      setTimeout(() => {
+        bot.sendChatAction(chatId, "typing");
+      }, 3000);
     }
   } catch (error) {
     console.log(error);
