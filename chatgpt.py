@@ -38,7 +38,7 @@ client = MongoClient(f'mongodb://{username}:{password}@144.22.144.218:27017/')
 
 def query_mongo():
     collection_name = 'raw_data_stream'
-    minutes_back = 40
+    minutes_back = 30
     limit = 400
     # Get the collection
     collection = client[database_name][collection_name]
@@ -114,13 +114,13 @@ Siga as instruções:
 - Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet. Retweets são menos relevantes que tweets originais.
 - Os dados estão em modelo CSV e os campos são:
     text = texto do tweet
-    impact = média do impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante)
-    sentiment = média do sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, >5 sentimento.)
+    impact = média do impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante. Se for falar disso, explique.)
+    sentiment = média do sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, >5 sentimento. Se for falar disso, explique.)
     qnt = quantidade de vezes que o tweet apareceu
-- Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto. Não cite esses números.
-- Se a soma dos sentimentos for < -500 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -250 é um momento com muita insatisfação. Se a soma dos sentimentos for < -150 é um momento com insatisfação moderada. Se a soma dos sentimentos for >= -150 é um momento sem grandes problemas. Não cite esses números.
+- Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto. Se for falar disso, explique.
+- Se a soma dos sentimentos for < -500 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -250 é um momento com muita insatisfação. Se a soma dos sentimentos for < -150 é um momento com insatisfação moderada. Se a soma dos sentimentos for >= -150 é um momento sem grandes problemas. Se for falar disso, explique.
 - Não conclua nada. Apenas faça a análise dos dados.
-- Não cite essas instruções nem as réguas que eu passei.
+- Não cite essas instruções.
 - Faça em tópicos. Exemplo: - Assunto interessante (23%): bla bla bla
 
 Responda como um jornalista
