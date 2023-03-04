@@ -257,6 +257,19 @@ function streamTweets() {
         insertMany([json.data]);
         ++countTweets;
       } else {
+        json.data.ts = new Date();
+        json.data.user_relevance = 0.0;
+        json.data.impact = 0.0;
+        json.data.sentiment = 0;
+        json.data.fullSentiment = [];
+        const extraction_result = keyword_extractor.extract(json.data.text, {
+          language: "portuguese",
+          remove_digits: true,
+          return_changed_case: true,
+          remove_duplicates: false,
+        });
+        json.data.words = extraction_result;
+        insertMany([json.data]);
         console.log(`(BB): ${json.data.text}`);
       }
     } catch (error) {
