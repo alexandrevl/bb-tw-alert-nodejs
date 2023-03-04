@@ -239,7 +239,7 @@ bot.onText(/\/10min/, (msg) => {
       bot.sendMessage(chatId, "Analisando dados... Aguarde...");
       setTimeout(() => {
         bot.sendChatAction(chatId, "typing");
-      }, 3000);
+      }, 8000);
     }
   } catch (error) {
     console.log(error);
