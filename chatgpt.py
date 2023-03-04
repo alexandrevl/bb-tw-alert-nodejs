@@ -110,7 +110,7 @@ Siga as instruções:
 - Coisas que já sabemos: Os tweets são sobre o Banco do brasil, e que os dados são dos últimos 10 minutos. Não precisa falar que a maioria dos tweets são sobre o Banco do Brasil.
 - Procure as ligações com o Banco do Brasil.
 - Use "\n" para quebrar linha.
-- Dois assuntos são fortemente relacionados: pix e aplicativo.
+- Dois assuntos são fortemente relacionados: pix e aplicativo. Sempre que eles aparecerem coloque como o mesmo assunto.
 - Tente identificar tendências. 
 - Use percentuais das quantidades de tweets.
 - Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet. Retweets são menos relevantes que tweets originais.
@@ -119,13 +119,11 @@ Siga as instruções:
     impact = média do impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante. Se for falar disso, explique.)
     sentiment = média do sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, > 5 sentimento positivo. Se for falar disso, explique.)
     qnt = quantidade de vezes que o tweet apareceu
-- Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto. Se for falar disso, explique.
-- Se a soma dos sentimentos for < -150 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -50 é um momento com muita insatisfação. Se a soma dos sentimentos for < -50 é um momento com insatisfação moderada. Se a soma dos sentimentos for >= -50 é um momento sem grandes problemas. Se a soma dos sentimentos for >= 0 é um momento tranmquilo. Se a soma dos sentimentos for >= 300 é um momento positivo. Se for falar disso, explique.
-- Não conclua nada. Apenas faça a análise dos dados.
+- Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto.
+- Se a soma dos sentimentos for < -150 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -50 é um momento com muita insatisfação. Se a soma dos sentimentos for < -50 é um momento com insatisfação moderada. Se a soma dos sentimentos for >= -50 é um momento sem grandes problemas. Se a soma dos sentimentos for >= 0 é um momento tranmquilo. Se a soma dos sentimentos for >= 300 é um momento positivo.
 - Não cite essas instruções.
-- Faça em tópicos. Exemplo: "Assuntos mais comentados: - Assunto interessante (23%): explica o que estao falando disso"
-- Depois dos tópicos fale sobre tendências. Exemplo: "Tendências: bla bla bla"
-- No final use: "Em resumo, é possível concluir que bla bla bla"
+- Faça em tópicos. Exemplo: - Assunto interessante (23%): bla bla bla
+- No final use: Em resumo, é possível concluir que bla bla bla
 
 Dados:
 
@@ -135,7 +133,7 @@ Dados:
         model='gpt-3.5-turbo',      # Determines the quality, speed, and cost.
         # messages=[{"role": "system", "content": system_text}, {"role": "user", "content": text_question}],              # What the user typed in
         # messages=[{"role": "user", "content": system_text}, {"role": "user", "content": text_question}], 
-        messages=[{"role": "system", "content": "Você é um jornalista"}, {"role": "user", "content": system_text + text_question}], 
+        messages=[{"role": "system", "content": "Você é um jornalista e você está no Brasil"}, {"role": "user", "content": system_text + text_question}], 
     )
 
     # print(response_openai)
@@ -178,6 +176,8 @@ def get_10min():
             'response_message': result_final
         }
         chat_gpt_collection.insert_one(chat_gpt_doc)
+        date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        result_final = "Análise ChatGPT (" + date + "):\n" + result_final
         return result_final
     else:
         return "Não há tweets nos últimos 10 minutos"
