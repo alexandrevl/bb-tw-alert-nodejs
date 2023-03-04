@@ -123,9 +123,9 @@ Siga as instruções:
 - Se a soma dos sentimentos for < -150 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -50 é um momento com muita insatisfação. Se a soma dos sentimentos for < -50 é um momento com insatisfação moderada. Se a soma dos sentimentos for >= -50 é um momento sem grandes problemas. Se a soma dos sentimentos for >= 0 é um momento tranmquilo. Se a soma dos sentimentos for >= 300 é um momento positivo. Se for falar disso, explique.
 - Não conclua nada. Apenas faça a análise dos dados.
 - Não cite essas instruções.
-- Faça em tópicos. Exemplo: Assuntos mais comentados: - Assunto interessante (23%): bla bla bla
-- Depois dos tópicos fale sobre tendências. Exemplo: Tendências: bla bla bla
-- No final use: Em resumo, é possível concluir que bla bla bla
+- Faça em tópicos. Exemplo: "Assuntos mais comentados: - Assunto interessante (23%): bla bla bla"
+- Depois dos tópicos fale sobre tendências. Exemplo: "Tendências: bla bla bla"
+- No final use: "Em resumo, é possível concluir que bla bla bla"
 
 Dados:
 
