@@ -268,6 +268,7 @@ function streamTweets() {
           return_changed_case: true,
           remove_duplicates: false,
         });
+        json.data.text = "@BancoDoBrasil: " + json.data.text
         json.data.words = extraction_result;
         insertMany([json.data]);
         console.log(`(BB): ${json.data.text}`);
