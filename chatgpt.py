@@ -68,7 +68,7 @@ def query_mongo():
             'sentiment': 1,
             'impact': {"$round": ["$impact", 3]}
         }},
-        {'$sort': {'impact': 1, 'qnt': -1}},
+        {'$sort': {'ts': -1, 'impact': 1, 'qnt': -1}},
         {'$limit': limit}
     ]
 
@@ -107,8 +107,10 @@ def get_chatgpt_response(text_question):
     system_text = """
 Identifique os assuntos que estão sendo comentados e discutidos e faça uma análise dos tweets e sugira o que pode estar acontecendo.
 Siga as instruções:
-- Os tweets são sobre o Banco do brasil, e que os dados são dos últimos 10 minutos. Procure as ligações com o Banco do Brasil.
+- Coisas que já sabemos: Os tweets são sobre o Banco do brasil, e que os dados são dos últimos 10 minutos. Não precisa falar que a maioria dos tweets são sobre o Banco do Brasil.
+- Procure as ligações com o Banco do Brasil.
 - Use "\n" para quebrar linha.
+- Dois assuntos são fortemente relacionados: pix e aplicativo.
 - Tente identificar tendências. 
 - Use percentuais das quantidades de tweets.
 - Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet. Retweets são menos relevantes que tweets originais.
