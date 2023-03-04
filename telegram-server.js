@@ -237,14 +237,19 @@ bot.onText(/\/10min/, (msg) => {
     });
     if (isProcessing) {
       bot.sendMessage(chatId, "Analisando dados... Aguarde...");
-      setTimeout(() => {
-        bot.sendChatAction(chatId, "typing");
-      }, 8000);
+      sendTyping(isProcessing, chatId);
     }
   } catch (error) {
     console.log(error);
   }
 });
+function sendTyping(isProcessing, chatId) {
+  if (isProcessing) {
+    setTimeout(() => {
+      bot.sendChatAction(chatId, "typing");
+    }, 8000);
+  }
+}
 
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
