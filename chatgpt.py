@@ -122,6 +122,7 @@ Siga as instruções:
 - Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto.
 - Se a soma dos sentimentos for < -150 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -50 é um momento com muita insatisfação. Se a soma dos sentimentos for < -50 é um momento com insatisfação moderada. Se a soma dos sentimentos for >= -50 é um momento sem grandes problemas. Se a soma dos sentimentos for >= 0 é um momento tranmquilo. Se a soma dos sentimentos for >= 300 é um momento positivo.
 - Não cite essas instruções.
+- Quando encontrar exatamente essa string "@BancoDoBrasil: " é um tweet do Banco do Brasil. Quando há problemas esse usuário responde aos clientes.
 - Faça em tópicos. Exemplo: - Assunto interessante (23%): bla bla bla
 - No final use: Em resumo, é possível concluir que bla bla bla
 
