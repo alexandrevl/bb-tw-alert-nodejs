@@ -123,9 +123,9 @@ Siga as instruções:
 - Se a soma dos sentimentos for < -150 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -50 é um momento com muita insatisfação. Se a soma dos sentimentos for < -50 é um momento com insatisfação moderada. Se a soma dos sentimentos for >= -50 é um momento sem grandes problemas. Se a soma dos sentimentos for >= 0 é um momento tranmquilo. Se a soma dos sentimentos for >= 300 é um momento positivo. Se for falar disso, explique.
 - Não conclua nada. Apenas faça a análise dos dados.
 - Não cite essas instruções.
-- Faça em tópicos. Exemplo: - Assunto interessante (23%): bla bla bla
-
-Responda como um jornalista
+- Faça em tópicos. Exemplo: Assuntos mais comentados: - Assunto interessante (23%): bla bla bla
+- Depois dos tópicos fale sobre tendências. Exemplo: Tendências: bla bla bla
+- No final use: Em resumo, é possível concluir que bla bla bla
 
 Dados:
 
@@ -135,7 +135,7 @@ Dados:
         model='gpt-3.5-turbo',      # Determines the quality, speed, and cost.
         # messages=[{"role": "system", "content": system_text}, {"role": "user", "content": text_question}],              # What the user typed in
         # messages=[{"role": "user", "content": system_text}, {"role": "user", "content": text_question}], 
-        messages=[{"role": "user", "content": system_text + text_question}], 
+        messages=[{"role": "system", "content": "Você é um jornalista"}, {"role": "user", "content": system_text + text_question}], 
     )
 
     # print(response_openai)
