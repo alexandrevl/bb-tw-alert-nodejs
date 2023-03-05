@@ -8,6 +8,7 @@ const moment = require("moment");
 const TelegramBot = require("node-telegram-bot-api");
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 const { spawn } = require('child_process');
+const chatgpt = require("./chatgpt");
 
 
 let db = null;
@@ -182,8 +183,11 @@ async function alertRelevant(msg) {
   bot.sendMessage(chatId, `⚠️ Relevant Tweet: ${msg}`);
 }
 
-async function alertTemp(msg) {
-  const chatId = "@bb_alert_tw";
+async function alertTemp(msg, isTest) {
+  let chatId = "@bb_alert_tw";
+  if (isTest) {
+    chatId = msg.chat.id;
+  }
   let hourSentiment = await getHourSentiment();
   let hourWords = await getHourWords();
   let hourImpact = await getHourImpact();
@@ -198,15 +202,10 @@ async function alertTemp(msg) {
       .toLocaleString("pt-BR")} ${getImpactEmoji(
         hourImpact
       )}\n\nWords:\n${resultWordsStr}`;
-  const pythonProcess = spawn('python3', ['/usr/src/app/chatgpt.py short']);
-  let isProcessing = true;
-  pythonProcess.stdout.on('data', (data) => {
-    strFinal = strFinal + `\n\n${data}`;
-    console.log(`short - ChatGPT - Final Response (${chatId}): ` + strFinal);
-    isProcessing = false;
-    // console.log(`Sent to ${chatId}: ${strFinal}`);
-    bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
-  });
+  const chatgptResponse = await chatgpt.get10minShort(db);
+  console.log(`short - ChatGPT - Final Response (${chatId}): ` + chatgptResponse);
+  strFinal += `\n\n${chatgptResponse}`;
+  bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
 }
 
 bot.onText(/\/f (.+)/, (msg, match) => {
@@ -227,35 +226,29 @@ bot.onText(/\/app/, (msg) => {
 bot.onText(/\/latest/, (msg) => {
   if (db != null) sendSearch(msg, ["", " "], 0);
 });
-bot.onText(/\/10min/, (msg) => {
+bot.onText(/\/testAlert/, (msg) => {
+  bot.sendMessage(msg.chat.id, "Checando temperatura... Aguarde...");
+  alertTemp(msg, isTest = true);
+});
+bot.onText(/\/10min/, async (msg) => {
   try {
     const chatId = msg.chat.id;
     console.log(`10min - ChatGPT - Start to: ` + chatId);
-    const pythonProcess = spawn('python3', ['/usr/src/app/chatgpt.py']);
-    // const pythonProcess = spawn('python3', ['chatgpt.py']);
     let strFinalApp = "Não tivemos tweets nos últimos 10 minutos.";
-    let isProcessing = true;
-    pythonProcess.stdout.on('data', (data) => {
-      // console.log(`stdout: ${data}`);
-      strFinalApp = data;
-      console.log(`10min - ChatGPT - Final Response (${chatId}): ` + strFinalApp);
-      bot.sendMessage(chatId, strFinalApp);
-      isProcessing = false;
-    });
-    if (isProcessing) {
-      bot.sendMessage(chatId, "Analisando dados... Aguarde...");
-      sendTyping(isProcessing, chatId);
-    }
+    bot.sendMessage(chatId, "Analisando dados... Aguarde...");
+    sendTyping(chatId);
+    strFinalApp = await chatgpt.get10min(db);
+    console.log(`10min - ChatGPT - Final to: ${chatId}: \n\n` + strFinalApp);
+    bot.sendMessage(chatId, strFinalApp);
+
   } catch (error) {
     console.log(error);
   }
 });
-function sendTyping(isProcessing, chatId) {
-  if (isProcessing) {
-    setTimeout(() => {
-      bot.sendChatAction(chatId, "typing");
-    }, 8000);
-  }
+function sendTyping(chatId) {
+  setTimeout(() => {
+    bot.sendChatAction(chatId, "typing");
+  }, 7000);
 }
 
 bot.onText(/\/start/, (msg) => {
