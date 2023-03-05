@@ -380,7 +380,8 @@ async function sendStatus(msg) {
       .toFixed(1)
       .toLocaleString("pt-BR")} ${getImpactEmoji(
         hourImpact
-      )}\n\nWords:\n${resultWordsStr}`;
+      )}\n\nWords:\n${resultWordsStr}
+      \nChatGPT Analysis: /10min`;
   console.log(`Sending to ${msg.chat.username}: ${strFinal}`);
   bot.sendMessage(chatId, strFinal, {
     disable_web_page_preview: true,
