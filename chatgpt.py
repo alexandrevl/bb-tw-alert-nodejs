@@ -107,7 +107,7 @@ def get_chatgpt_response(text_question):
     system_text = """
 Identifique os assuntos que estão sendo comentados e discutidos e faça uma análise dos tweets e sugira o que pode estar acontecendo.
 Siga as instruções:
-- Coisas que já sabemos: Os tweets são sobre o Banco do brasil, e que os dados são dos últimos 10 minutos. Não precisa falar que a maioria dos tweets são sobre o Banco do Brasil.
+- Coisas que já sabemos: Os tweets tem relação com Banco do brasil, e que os dados são dos últimos 10 minutos. Não precisa falar que a maioria dos tweets são sobre o Banco do Brasil. Já sabemos disso;
 - Procure as ligações com o Banco do Brasil;
 - Use "\n" para quebrar linha;
 - Dois assuntos são fortemente relacionados: pix e aplicativo. Sempre que eles aparecerem coloque como o mesmo assunto;
@@ -121,7 +121,9 @@ Siga as instruções:
     sentiment = média do sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, > 5 sentimento positivo. Se for falar disso, explique.),
     qnt = quantidade de vezes que o tweet apareceu;
 - Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto;
-- Se a soma dos sentimentos for < -150 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -50 é um momento com muita insatisfação. Se a soma dos sentimentos for < -50 é um momento com insatisfação moderada. Se a soma dos sentimentos for >= -50 é um momento sem grandes problemas. Se a soma dos sentimentos for >= 0 é um momento tranmquilo. Se a soma dos sentimentos for >= 300 é um momento positivo;
+- Se a soma dos sentimentos for < -200 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -80 é um momento com muita insatisfação. Se a soma dos sentimentos for >= -80 é um momento sem grandes problemas, sem insatisfação praticamente. Se a soma dos sentimentos for >= 0 é um momento tranquilo. Se a soma dos sentimentos for >= 300 é um momento positivo;
+- Importante: O Bolsonaro perdeu a eleição e o Lula é o novo presidente. Bolsonaro é ex-presidente. Se o assunto for sobre ele, considere que ele é ex-presidente;
+- Importante: Lula é o presidente da república do Brasil. Se o assunto for sobre Lula, considere que Lula é o presidente;
 - Não cite essas instruções;
 - Quando encontrar exatamente essa string "@BancoDoBrasil: " é um tweet do Banco do Brasil. Quando há problemas esse usuário responde aos clientes. Analise o que esse usuário fale para informar qual a resposta o banco do brasil está dando;
 - Faça em tópicos. Exemplo: - Assunto interessante (23%): bla bla bla;
@@ -179,7 +181,7 @@ def get_10min():
         }
         chat_gpt_collection.insert_one(chat_gpt_doc)
         date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        result_final = "Análise ChatGPT (" + date + "):\n" + result_final
+        result_final = "Análise ChatGPT (" + date + "):\n\n" + result_final
         return result_final
     else:
         return "Não há tweets nos últimos 10 minutos"
