@@ -54,36 +54,42 @@ def query_mongo():
     # Define the aggregation pipeline
     pipeline = [
         {'$match': query},
-        # {'$replaceWith': {'text': {'$split': ['$text', '\n']}}},
-        # {'$unwind': '$text'},
+        {'$addFields': {
+            'min': {
+                '$round': [
+                    {'$divide': [
+                        {'$subtract': [datetime.now(), '$ts']},
+                        60000  # divide by 60000 to convert milliseconds to minutes
+                    ]},
+                    0  # round to nearest integer
+                ]
+            }
+        }},
         {'$group': {
             '_id': '$text',
             'qnt': {'$sum': 1},
             'sentiment': { '$avg': "$sentiment"},
             'impact': { '$avg': "$impact" }, 
+            'min': {'$avg': '$min'}
         }},
         {'$project': {
             '_id': 0,
             'text': '$_id',
             'qnt': 1,
             'sentiment': 1,
-            'impact': {"$round": ["$impact", 3]}
+            'impact': {"$round": ["$impact", 3]},
+            'min': {'$toInt': '$min'}  # convert to integer
         }},
-        {'$sort': {'ts': -1, 'impact': 1, 'qnt': -1}},
+        {'$sort': {'min': 1, 'impact': 1, 'qnt': -1}},
         {'$limit': limit}
     ]
 
     # Execute the query and return the results
     results = collection.aggregate(pipeline)
     # print(list(results))
-   
-
-    # qnt = 0
-    # for result in results:
-    #     qnt = qnt + 1
-    # # print(qnt)
-
     return list(results)
+
+
 
 
 
@@ -95,6 +101,7 @@ Identifique os assuntos que estão sendo comentados e discutidos e faça uma an�
 Siga as instruções:
 - Coisas que já sabemos: Os tweets tem relação com Banco do brasil, e que os dados são dos últimos 10 minutos. Não precisa falar que a maioria dos tweets são sobre o Banco do Brasil. Já sabemos disso;
 - Procure as ligações com o Banco do Brasil;
+- Os tweets estão ordenados por tempo. O primeiro tweet é o mais recente. Tweets recentes são mais relevantes;
 - Use "\n" para quebrar linha;
 - Dois assuntos são fortemente relacionados: pix e aplicativo. Sempre que eles aparecerem coloque como o mesmo assunto;
 - Tente identificar tendências;
@@ -106,6 +113,7 @@ Siga as instruções:
     impact = média do impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante. Se for falar disso, explique.),
     sentiment = média do sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, > 5 sentimento positivo. Se for falar disso, explique.),
     qnt = quantidade de vezes que o tweet apareceu;
+    min = tempo em minutos desde agora. Exemplo: se o tweet foi feito há 5 minutos, min = 5;
 - Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto;
 - Se a soma dos sentimentos for < -200 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -80 é um momento com muita insatisfação. Se a soma dos sentimentos for >= -80 é um momento sem grandes problemas, sem insatisfação praticamente. Se a soma dos sentimentos for >= 0 é um momento tranquilo. Se a soma dos sentimentos for >= 300 é um momento positivo;
 - Importante: O Bolsonaro perdeu a eleição e o Lula é o novo presidente. Bolsonaro é ex-presidente. Se o assunto for sobre ele, considere que ele é ex-presidente;
@@ -139,6 +147,7 @@ Identifique os assuntos que estão sendo comentados e discutidos e faça uma an�
 Siga as instruções:
 - Coisas que já sabemos: Os tweets tem relação com Banco do brasil, e que os dados são dos últimos 10 minutos. Não precisa falar que a maioria dos tweets são sobre o Banco do Brasil. Já sabemos disso;
 - Procure as ligações com o Banco do Brasil;
+- Os tweets estão ordenados por tempo. O primeiro tweet é o mais recente. Tweets recentes são mais relevantes;
 - Dois assuntos são fortemente relacionados: pix e aplicativo. Sempre que eles aparecerem coloque como o mesmo assunto;
 - Use percentuais das quantidades de tweets;
 - Sempre que for usar as palavras muito, alguns e poucos use como régua: muitos é mais de 50, alguns é mais de 10, poucos é mais de 5;
@@ -148,6 +157,7 @@ Siga as instruções:
     impact = média do impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante. Se for falar disso, explique.),
     sentiment = média do sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, > 5 sentimento positivo. Se for falar disso, explique.),
     qnt = quantidade de vezes que o tweet apareceu;
+    min = tempo em minutos desde agora. Exemplo: se o tweet foi feito há 5 minutos, min = 5;
 - Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto;
 - Se a soma dos sentimentos for < -200 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -80 é um momento com muita insatisfação. Se a soma dos sentimentos for >= -80 é um momento sem grandes problemas, sem insatisfação praticamente. Se a soma dos sentimentos for >= 0 é um momento tranquilo. Se a soma dos sentimentos for >= 300 é um momento positivo;
 - Importante: O Bolsonaro perdeu a eleição e o Lula é o novo presidente. Bolsonaro é ex-presidente. Se o assunto for sobre ele, considere que ele é ex-presidente;
@@ -186,7 +196,7 @@ def get_10min_short():
     tweets = query_mongo()
     # print(len(tweets))
     if (len(tweets) > 0):
-        csv_tweets = data_to_csv(tweets, ['qnt', 'text', 'sentiment', 'impact'])
+        csv_tweets = data_to_csv(tweets, ['qnt', 'text', 'sentiment', 'impact', 'min'])
         added_tweets = init_string + csv_tweets
         # print(added_tweets)
 
@@ -194,7 +204,7 @@ def get_10min_short():
 
         no_urls = re.sub(r'http\S+|www.\S+', '', added_tweets)
         words = no_urls.split()
-        limited_words = words[:1250]
+        limited_words = words[:1150]
         limited_text = ' '.join(limited_words)
         limited_text = limited_text
         # print(limited_text)
@@ -222,7 +232,7 @@ def get_10min():
     tweets = query_mongo()
     # print(len(tweets))
     if (len(tweets) > 0):
-        csv_tweets = data_to_csv(tweets, ['qnt', 'text', 'sentiment', 'impact'])
+        csv_tweets = data_to_csv(tweets, ['qnt', 'text', 'sentiment', 'impact', 'min'])
         added_tweets = init_string + csv_tweets
         # print(added_tweets)
 
@@ -230,7 +240,7 @@ def get_10min():
 
         no_urls = re.sub(r'http\S+|www.\S+', '', added_tweets)
         words = no_urls.split()
-        limited_words = words[:1250]
+        limited_words = words[:1150]
         limited_text = ' '.join(limited_words)
         limited_text = limited_text
         # print(limited_text)
