@@ -16,7 +16,7 @@ async function connectMongo() {
 async function main() {
     await connectMongo();
 
-    const response = await get10min(db);
+    const response = await get10minShort(db);
     console.log(response);
 
     process.exit(0);
@@ -65,10 +65,10 @@ Siga as instruções:
  Dados:
  `;
     prompt = prompt + tweetsData;
-    const tokens = charsToToken(prompt, 2000);
+    const tokens = charsToToken(prompt, 2200);
     // console.log(tokens.str);
     // console.log(prompt);
-    const messages = [{ "role": "system", "content": "Você é um jornalista, você está no Brasil. Lula é o presidente e Bolsonaro é ex-presidente" }, { "role": "user", "content": tokens.str }]
+    const messages = [{ "role": "system", "content": "Você é um jornalista, você está no Brasil. Lula é o presidente e Bolsonaro é ex-presidente" }, { "role": "user", "content": tokens }]
     const responseChatGPT = await getChatGPTResponse(messages);
     return "ChatGPT: " + responseChatGPT;
 }
