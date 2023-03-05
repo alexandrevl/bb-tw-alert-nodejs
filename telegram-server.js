@@ -198,8 +198,15 @@ async function alertTemp(msg) {
       .toLocaleString("pt-BR")} ${getImpactEmoji(
         hourImpact
       )}\n\nWords:\n${resultWordsStr}`;
-  console.log(`Sent to ${chatId}: ${strFinal}`);
-  bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
+  const pythonProcess = spawn('python3', ['/usr/src/app/chatgpt.py short']);
+  let isProcessing = true;
+  pythonProcess.stdout.on('data', (data) => {
+    strFinal = strFinal + `\n\n${data}`;
+    console.log(`short - ChatGPT - Final Response (${chatId}): ` + strFinal);
+    isProcessing = false;
+    // console.log(`Sent to ${chatId}: ${strFinal}`);
+    bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
+  });
 }
 
 bot.onText(/\/f (.+)/, (msg, match) => {
