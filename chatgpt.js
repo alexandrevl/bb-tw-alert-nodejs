@@ -65,7 +65,7 @@ Siga as instruções:
  Dados:
  `;
     prompt = prompt + tweetsData;
-    const tokens = charsToToken(prompt, 2200);
+    const tokens = charsToToken(prompt, 2000);
     // console.log(tokens.str);
     // console.log(prompt);
     const messages = [{ "role": "system", "content": "Você é um jornalista, você está no Brasil. Lula é o presidente e Bolsonaro é ex-presidente" }, { "role": "user", "content": tokens }]
