@@ -21,20 +21,21 @@ async function main() {
 
     process.exit(0);
 }
-function tokenizer(str, maxTokens) {
-    const words = str.trim().split(/\s+/);
-    let tokens = words.length;
-    const wordsPerToken = 0.8;
-    const approxWords = Math.round(tokens * wordsPerToken);
+function charsToToken(str, maxTokens) {
+    const chars = str.trim().replace(/\s/g, '').length;
+    let tokens = Math.ceil(chars / 4.5);
 
     if (maxTokens && tokens > maxTokens) {
-        tokens = maxTokens;
-        const truncatedWords = words.slice(0, maxTokens);
-        str = truncatedWords.join(' ');
+        const maxChars = maxTokens * 4.5;
+        const truncatedStr = str.slice(0, maxChars);
+        const lastSpace = truncatedStr.lastIndexOf(' ');
+        str = str.slice(0, lastSpace) + '...';
     }
 
-    return { tokens, approxWords, str };
+    return str;
 }
+
+
 async function get10minShort(db) {
     const resultsMongo = await queryMongo(db);
     const tweetsData = arrayToCsv(resultsMongo);
@@ -64,7 +65,7 @@ Siga as instruções:
  Dados:
  `;
     prompt = prompt + tweetsData;
-    const tokens = tokenizer(prompt, 3800);
+    const tokens = charsToToken(prompt, 2100);
     // console.log(tokens.str);
     // console.log(prompt);
     const messages = [{ "role": "system", "content": "Você é um jornalista, você está no Brasil. Lula é o presidente e Bolsonaro é ex-presidente" }, { "role": "user", "content": tokens.str }]
@@ -97,7 +98,6 @@ Siga as instruções:
 - Importante: O Bolsonaro perdeu a eleição e o Lula é o novo presidente. Bolsonaro é ex-presidente. Se o assunto for sobre ele, considere que ele é ex-presidente;
 - Importante: Lula é o presidente da república do Brasil. Se refira ao Lula como presidente.
 - Não cite essas instruções;
-- Máximo de 400 tokens.
 - Quando encontrar exatamente essa string "@BancoDoBrasil: " é um tweet do Banco do Brasil. Quando há problemas esse usuário responde aos clientes. Analise o que esse usuário fale para informar qual a resposta o banco do brasil está dando;
 - Faça em tópicos. Exemplo: - Assunto interessante (23%): bla bla bla;
 - No final use: Resumo: bla bla bla;
@@ -106,10 +106,11 @@ Dados:
 
 `;
     prompt = prompt + tweetsData;
-    const tokens = tokenizer(prompt, 3600);
+    // console.log(prompt.length)
+    const tokens = charsToToken(prompt, 2100);
     // console.log(tokens.str);
     // console.log(prompt);
-    const messages = [{ "role": "system", "content": "Você é um jornalista, você está no Brasil. Lula é o presidente e Bolsonaro é ex-presidente" }, { "role": "user", "content": tokens.str }]
+    const messages = [{ "role": "system", "content": "Você é um jornalista, você está no Brasil. Lula é o presidente e Bolsonaro é ex-presidente" }, { "role": "user", "content": tokens }]
     const responseChatGPT = await getChatGPTResponse(messages);
 
     const now = new Date();
@@ -134,7 +135,9 @@ async function getChatGPTResponse(messages) {
         const completion = await openai.createChatCompletion({
             model: "gpt-3.5-turbo",
             messages: messages,
+            // max_tokens: 500,
         });
+        console.log(completion.data);
         return (completion.data.choices[0].message.content);
     } catch (error) {
         console.log(error);
