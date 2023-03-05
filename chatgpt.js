@@ -126,18 +126,20 @@ Dados:
 }
 exports.get10min = get10min;
 async function getChatGPTResponse(messages) {
-    const configuration = new Configuration({
-        apiKey: process.env.OPENAI_API_KEY,
-    });
-    const openai = new OpenAIApi(configuration);
-
-    const completion = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo",
-        messages: messages,
-    });
-    // console.log(completion.data);
-    // console.log(completion.data.choices[0].message.content);
-    return (completion.data.choices[0].message.content);
+    try {
+        const configuration = new Configuration({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+        const openai = new OpenAIApi(configuration);
+        const completion = await openai.createChatCompletion({
+            model: "gpt-3.5-turbo",
+            messages: messages,
+        });
+        return (completion.data.choices[0].message.content);
+    } catch (error) {
+        console.log(error);
+        return "Erro: " + error.message;
+    }
 }
 
 function arrayToCsv(data) {
