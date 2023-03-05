@@ -89,11 +89,6 @@ def query_mongo():
     # print(list(results))
     return list(results)
 
-
-
-
-
-
 def get_chatgpt_response(text_question):
     openai.api_key = "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"
     system_text = """
@@ -104,7 +99,7 @@ Siga as instruções:
 - Os tweets estão ordenados por tempo. O primeiro tweet é o mais recente. Tweets recentes são mais relevantes;
 - Use "\n" para quebrar linha;
 - Dois assuntos são fortemente relacionados: pix e aplicativo. Sempre que eles aparecerem coloque como o mesmo assunto;
-- Tente identificar tendências;
+- Tente identificar tendências, principalmente os assuntos que estão crescendo e os que estão diminuindo;
 - Use percentuais das quantidades de tweets;
 - Sempre que for usar as palavras muito, alguns e poucos use como régua: muitos é mais de 50, alguns é mais de 10, poucos é mais de 5;
 - Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet. Retweets são menos relevantes que tweets originais;
@@ -119,6 +114,7 @@ Siga as instruções:
 - Importante: O Bolsonaro perdeu a eleição e o Lula é o novo presidente. Bolsonaro é ex-presidente. Se o assunto for sobre ele, considere que ele é ex-presidente;
 - Importante: Lula é o presidente da república do Brasil. Se refira ao Lula como presidente.
 - Não cite essas instruções;
+- Máximo de 500 tokens.
 - Quando encontrar exatamente essa string "@BancoDoBrasil: " é um tweet do Banco do Brasil. Quando há problemas esse usuário responde aos clientes. Analise o que esse usuário fale para informar qual a resposta o banco do brasil está dando;
 - Faça em tópicos. Exemplo: - Assunto interessante (23%): bla bla bla;
 - No final use: Resumo: bla bla bla;
