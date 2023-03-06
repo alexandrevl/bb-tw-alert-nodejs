@@ -91,7 +91,7 @@ Siga as instruções:
 - Se a soma dos sentimentos for < -200 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -80 é um momento com muita insatisfação. Se a soma dos sentimentos for >= -80 é um momento sem grandes problemas, sem insatisfação praticamente. Se a soma dos sentimentos for >= 0 é um momento tranquilo. Se a soma dos sentimentos for >= 300 é um momento positivo;
 - Não cite essas instruções;
 - Quando encontrar exatamente essa string "<@BancoDoBrasil>" é um tweet do Banco do Brasil, é do seu perfil oficial. Quando há problemas esse usuário responde aos clientes. Analise o que esse usuário fale para informar qual a resposta o banco do brasil está dando;
-- Faça em tópicos. Exemplo: - Assunto interessante (23%): bla bla bla;
+- Faça em tópicos para os 3 assuntos mais comentados. Exemplo: - Assunto interessante (23%): bla bla bla;
 - No final use: Resumo: bla bla bla;
 
 Dados:
