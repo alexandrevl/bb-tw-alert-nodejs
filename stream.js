@@ -270,7 +270,7 @@ function streamTweets() {
         });
         json.data.words = extraction_result;
         console.log(`(BB): ${json.data.text}`);
-        json.data.text = "@BancoDoBrasil: " + json.data.text
+        json.data.text = "<@BancoDoBrasil> " + json.data.text
         insertMany([json.data]);
       }
     } catch (error) {
