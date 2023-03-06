@@ -41,15 +41,15 @@ async function get10minShort(db) {
     const tweetsData = arrayToCsv(resultsMongo);
     let prompt = `Identifique os assuntos que estão sendo comentados e discutidos e faça uma análise dos tweets e sugira o que pode estar acontecendo. Será um tweet, portanto não ultrapasse 280 caracteres.
 Siga as instruções:
- - Coisas que já sabemos: Todos os tweets tem relação com Banco do brasil, e que os dados são dos últimos 10 minutos. Não precisa falar que a maioria dos tweets são sobre o Banco do Brasil. Já sabemosdisso;
+ - Coisas que já sabemos: Todos os tweets tem relação com Banco do Brasil. Não precisa falar que a maioria dos tweets são sobre o Banco do Brasil. Já sabemos disso;
  - Os tweets estão ordenados por tempo. O primeiro tweet é o mais recente. Tweets recentes são mais relevantes;
  - Use percentuais das quantidades de tweets;
  - Sempre que for usar as palavras muito, alguns e poucos use como régua: muitos é mais de 50, alguns é mais de 10, poucos é mais de 5;
  - Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet. Retweets são menos relevantes que tweets originais;
  - Os dados estão em modelo CSV e os campos são:
      text = texto do tweet,
-     impact = média do impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante. Se for falar disso, explique.),
-     sentiment = média do sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, > 5 sentimento positivo. Se for falar disso, explique.),
+     impact = média do impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante. Se for falar disso, explique),
+     sentiment = média do sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, > 5 sentimento positivo. Se for falar disso, explique),
      qnt = quantidade de vezes que o tweet apareceu;
      min = tempo em minutos desde agora. Exemplo: se o tweet foi feito há 5 minutos, min = 5;
  - Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto;
@@ -74,7 +74,7 @@ async function get10min(db) {
     const tweetsData = arrayToCsv(resultsMongo);
     let prompt = `Identifique os assuntos que estão sendo comentados e discutidos e faça uma análise dos tweets e sugira o que pode estar acontecendo.
 Siga as instruções:
-- Coisas que já sabemos: Todos os tweets tem relação com Banco do brasil, e que os dados são dos últimos 10 minutos. Não precisa falar que a maioria dos tweets são sobre o Banco do Brasil. Já sabemos disso;
+- Coisas que já sabemos: Todos os tweets tem relação com Banco do Brasil. Não precisa falar que a maioria dos tweets são sobre o Banco do Brasil. Já sabemos disso;
 - Os tweets estão ordenados por tempo. O primeiro tweet é o mais recente. Tweets recentes são mais relevantes;
 - Use "\n" para quebrar linha;
 - Tente identificar tendências, principalmente os assuntos que estão crescendo e os que estão diminuindo;
@@ -83,8 +83,8 @@ Siga as instruções:
 - Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet. Retweets são menos relevantes que tweets originais;
 - Os dados estão em modelo CSV e os campos são:
     text = texto do tweet,
-    impact = média do impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante. Se for falar disso, explique.),
-    sentiment = média do sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, > 5 sentimento positivo. Se for falar disso, explique.),
+    impact = média do impacto do tweet (depende do quão famoso o usuário é. Régua do impacto: >=1 ou <=-1 é relevante, >=3 ou <=-3 é muito relevante. Se for falar disso, explique),
+    sentiment = média do sentimento do tweet (Régua do sentimento: <=-5 sentimento péssimo, > 5 sentimento positivo. Se for falar disso, explique),
     qnt = quantidade de vezes que o tweet apareceu;
     min = tempo em minutos desde agora. Exemplo: se o tweet foi feito há 5 minutos, min = 5;
 - Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto;
