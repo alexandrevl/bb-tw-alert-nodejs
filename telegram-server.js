@@ -183,9 +183,9 @@ async function alertRelevant(msg) {
   bot.sendMessage(chatId, `⚠️ Relevant Tweet: ${msg}`);
 }
 
-async function alertTemp(msg, isTest) {
+async function alertTemp(msg, isChatGPT) {
   let chatId = "@bb_alert_tw";
-  if (isTest) {
+  if (isChatGPT) {
     chatId = msg.chat.id;
   }
   let hourSentiment = await getHourSentiment();
@@ -226,9 +226,9 @@ bot.onText(/\/app/, (msg) => {
 bot.onText(/\/latest/, (msg) => {
   if (db != null) sendSearch(msg, ["", " "], 0);
 });
-bot.onText(/\/testAlert/, (msg) => {
+bot.onText(/\/temp/, (msg) => {
   bot.sendMessage(msg.chat.id, "Checando temperatura... Aguarde...");
-  alertTemp(msg, isTest = true);
+  alertTemp(msg, isChatGPT = true);
 });
 bot.onText(/\/10min/, async (msg) => {
   try {
