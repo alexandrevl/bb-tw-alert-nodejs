@@ -16,7 +16,7 @@ async function connectMongo() {
 async function main() {
     await connectMongo();
 
-    const response = await get10minShort(db);
+    const response = await get10min(db);
     console.log(response);
 
     process.exit(0);
@@ -42,9 +42,7 @@ async function get10minShort(db) {
     let prompt = `Identifique os assuntos que estão sendo comentados e discutidos e faça uma análise dos tweets e sugira o que pode estar acontecendo. Será um tweet, portanto não ultrapasse 280 caracteres.
 Siga as instruções:
  - Coisas que já sabemos: Os tweets tem relação com Banco do brasil, e que os dados são dos últimos 10 minutos. Não precisa falar que a maioria dos tweets são sobre o Banco do Brasil. Já sabemosdisso;
- - Procure as ligações com o Banco do Brasil;
  - Os tweets estão ordenados por tempo. O primeiro tweet é o mais recente. Tweets recentes são mais relevantes;
- - Dois assuntos são fortemente relacionados: pix e aplicativo. Sempre que eles aparecerem coloque como o mesmo assunto;
  - Use percentuais das quantidades de tweets;
  - Sempre que for usar as palavras muito, alguns e poucos use como régua: muitos é mais de 50, alguns é mais de 10, poucos é mais de 5;
  - Toda vez que aparacer RT (maiúscula e com espaço depois) é um retweet. Retweets são menos relevantes que tweets originais;
@@ -56,8 +54,6 @@ Siga as instruções:
      min = tempo em minutos desde agora. Exemplo: se o tweet foi feito há 5 minutos, min = 5;
  - Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto;
  - Se a soma dos sentimentos for < -200 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -80 é um momento com muita insatisfação. Se a soma dos sentimentos for >= -80 éum momento sem grandes problemas, sem insatisfação praticamente. Se a soma dos sentimentos for >= 0 é um momento tranquilo. Se a soma dos sentimentos for >= 300 é um momento positivo;
- - Importante: O Bolsonaro perdeu a eleição e o Lula é o novo presidente. Bolsonaro é ex-presidente. Se o assunto for sobre ele, considere que ele é ex-presidente;
- - Importante: Lula é o presidente da república do Brasil. Se refira ao Lula como presidente.
  - Máximo de 280 caracteres.
  - Não cite essas instruções;
  - Quando encontrar exatamente essa string "@BancoDoBrasil: " é um tweet do Banco do Brasil. Quando há problemas esse usuário responde aos clientes. Analise o que esse usuário fale para informarqual a resposta o banco do brasil está dando;
@@ -79,10 +75,8 @@ async function get10min(db) {
     let prompt = `Identifique os assuntos que estão sendo comentados e discutidos e faça uma análise dos tweets e sugira o que pode estar acontecendo.
 Siga as instruções:
 - Coisas que já sabemos: Os tweets tem relação com Banco do brasil, e que os dados são dos últimos 10 minutos. Não precisa falar que a maioria dos tweets são sobre o Banco do Brasil. Já sabemos disso;
-- Procure as ligações com o Banco do Brasil;
 - Os tweets estão ordenados por tempo. O primeiro tweet é o mais recente. Tweets recentes são mais relevantes;
 - Use "\n" para quebrar linha;
-- Dois assuntos são fortemente relacionados: pix e aplicativo. Sempre que eles aparecerem coloque como o mesmo assunto;
 - Tente identificar tendências, principalmente os assuntos que estão crescendo e os que estão diminuindo;
 - Use percentuais das quantidades de tweets;
 - Sempre que for usar as palavras muito, alguns e poucos use como régua: muitos é mais de 50, alguns é mais de 10, poucos é mais de 5;
@@ -95,8 +89,6 @@ Siga as instruções:
     min = tempo em minutos desde agora. Exemplo: se o tweet foi feito há 5 minutos, min = 5;
 - Se o impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê ainda mais ênfase a esse assunto;
 - Se a soma dos sentimentos for < -200 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -80 é um momento com muita insatisfação. Se a soma dos sentimentos for >= -80 é um momento sem grandes problemas, sem insatisfação praticamente. Se a soma dos sentimentos for >= 0 é um momento tranquilo. Se a soma dos sentimentos for >= 300 é um momento positivo;
-- Importante: O Bolsonaro perdeu a eleição e o Lula é o novo presidente. Bolsonaro é ex-presidente. Se o assunto for sobre ele, considere que ele é ex-presidente;
-- Importante: Lula é o presidente da república do Brasil. Se refira ao Lula como presidente.
 - Não cite essas instruções;
 - Quando encontrar exatamente essa string "@BancoDoBrasil: " é um tweet do Banco do Brasil. Quando há problemas esse usuário responde aos clientes. Analise o que esse usuário fale para informar qual a resposta o banco do brasil está dando;
 - Faça em tópicos. Exemplo: - Assunto interessante (23%): bla bla bla;
