@@ -230,15 +230,20 @@ bot.onText(/\/temp/, (msg) => {
   bot.sendMessage(msg.chat.id, "Checando temperatura... Aguarde...");
   alertTemp(msg, isChatGPT = true);
 });
+let isProcessingChatGPT = false;
 bot.onText(/\/10min/, async (msg) => {
   try {
     const chatId = msg.chat.id;
     console.log(`10min - ChatGPT - Start to: ` + chatId);
     let strFinalApp = "Não tivemos tweets nos últimos 10 minutos.";
     bot.sendMessage(chatId, "Analisando dados... Aguarde...");
-    sendTyping(chatId);
+    isProcessingChatGPT = true;
+    setTimeout(() => {
+      sendTyping(chatId)
+    }, 7000);
     strFinalApp = await chatgpt.get10min(db);
     console.log(`10min - ChatGPT - Final to: ${chatId}: \n\n` + strFinalApp);
+    isProcessingChatGPT = false;
     bot.sendMessage(chatId, strFinalApp);
 
   } catch (error) {
@@ -246,9 +251,12 @@ bot.onText(/\/10min/, async (msg) => {
   }
 });
 function sendTyping(chatId) {
-  setTimeout(() => {
+  if (isProcessingChatGPT) {
     bot.sendChatAction(chatId, "typing");
-  }, 7000);
+    setTimeout(() => {
+      sendTyping(chatId)
+    }, 5000);
+  }
 }
 
 bot.onText(/\/start/, (msg) => {
