@@ -7,7 +7,7 @@ const { encode, decode } = require('gpt-3-encoder')
 
 let db = null;
 const PROMPT_LENGTH = 4500;
-const PROMPT_LENGTH_ADJUST = 300;
+const PROMPT_LENGTH_ADJUST = 200;
 async function connectMongo() {
     console.log("Connecting mongo...");
     await client.connect();
@@ -42,7 +42,7 @@ function charsToToken(str, maxTokens) {
 async function get10minShort(db) {
     const resultsMongo = await queryMongo(db);
     const tweetsData = arrayToCsv(resultsMongo);
-    let prompt = `Identifique os assuntos que estão sendo comentados e discutidos e faça uma análise dos tweets e sugira o que pode estar acontecendo. Será um tweet, portanto não ultrapasse 280 caracteres.
+    let prompt = `Identifique os assuntos que estão sendo comentados e discutidos, faça uma análise dos tweets e sugira o que pode estar acontecendo. Será um tweet, portanto não ultrapasse 280 caracteres.
 Siga as instruções:
  - Coisas que já sabemos: Todos os tweets tem relação com Banco do Brasil. Não precisa falar que a maioria dos tweets são sobre o Banco do Brasil. Já sabemos disso;
  - Os tweets estão ordenados por tempo. O primeiro tweet é o mais recente. Tweets recentes são mais relevantes;
@@ -76,8 +76,9 @@ exports.get10minShort = get10minShort;
 async function get10min(db) {
     const resultsMongo = await queryMongo(db);
     const tweetsData = arrayToCsv(resultsMongo);
-    let prompt = `Identifique os assuntos que estão sendo comentados e discutidos e faça uma análise dos tweets e sugira o que pode estar acontecendo.
+    let prompt = `Identifique os assuntos que estão sendo comentados e discutidos, faça uma análise dos tweets e sugira o que pode estar acontecendo.
 Siga as instruções:
+- Máximo 400 tokens;
 - Coisas que já sabemos: Todos os tweets tem relação com Banco do Brasil. Não precisa falar que a maioria dos tweets são sobre o Banco do Brasil. Já sabemos disso;
 - Os tweets estão ordenados por tempo. O primeiro tweet é o mais recente. Tweets recentes são mais relevantes;
 - Use "\n" para quebrar linha;
