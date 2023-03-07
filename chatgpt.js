@@ -18,7 +18,7 @@ async function connectMongo() {
 async function main() {
     await connectMongo();
 
-    const response = await get10min(db);
+    const response = await get10minShort(db);
     console.log(response);
 
     process.exit(0);
@@ -69,6 +69,7 @@ Siga as instruções:
     prompt = decode(toDecode);
     const messages = [{ "role": "system", "content": "Você é um jornalista." }, { "role": "user", "content": prompt }]
     const responseChatGPT = await getChatGPTResponse(messages);
+    return "ChatGPT: " + responseChatGPT;
 }
 exports.get10minShort = get10minShort;
 async function get10min(db) {
