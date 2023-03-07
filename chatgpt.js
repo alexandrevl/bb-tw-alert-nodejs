@@ -61,7 +61,7 @@ Siga as instruções:
  Dados:
  `;
     prompt = prompt + tweetsData;
-    const tokens = charsToToken(prompt, 2000);
+    const tokens = charsToToken(prompt, 1500);
     // console.log(tokens.str);
     // console.log(prompt);
     const messages = [{ "role": "system", "content": "Você é um jornalista." }, { "role": "user", "content": tokens }]
@@ -99,7 +99,7 @@ Dados:
 `;
     prompt = prompt + tweetsData;
     // console.log(prompt.length)
-    const tokens = charsToToken(prompt, 2000);
+    const tokens = charsToToken(prompt, 1500);
     // console.log(tokens.str);
     // console.log(prompt);
     const messages = [{ "role": "system", "content": "Você é um jornalista." }, { "role": "user", "content": tokens }]
