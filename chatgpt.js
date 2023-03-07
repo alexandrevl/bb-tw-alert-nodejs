@@ -3,8 +3,10 @@ const { MongoClient } = require("mongodb");
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
 const { Configuration, OpenAIApi } = require("openai");
+const { encode, decode } = require('gpt-3-encoder')
 
 let db = null;
+const PROMPT_LENGTH = 4500;
 async function connectMongo() {
     console.log("Connecting mongo...");
     await client.connect();
@@ -61,12 +63,12 @@ Siga as instruções:
  Dados:
  `;
     prompt = prompt + tweetsData;
-    const tokens = charsToToken(prompt, 1500);
-    // console.log(tokens.str);
-    // console.log(prompt);
-    const messages = [{ "role": "system", "content": "Você é um jornalista." }, { "role": "user", "content": tokens }]
+    const encoded = encode(prompt);
+    let toDecode = encoded.slice(0, PROMPT_LENGTH);
+    console.log('Tokens: ', encoded.length, ' - Slice: ', toDecode.length);
+    prompt = decode(toDecode);
+    const messages = [{ "role": "system", "content": "Você é um jornalista." }, { "role": "user", "content": prompt }]
     const responseChatGPT = await getChatGPTResponse(messages);
-    return "ChatGPT: " + responseChatGPT;
 }
 exports.get10minShort = get10minShort;
 async function get10min(db) {
@@ -98,11 +100,11 @@ Dados:
 
 `;
     prompt = prompt + tweetsData;
-    // console.log(prompt.length)
-    const tokens = charsToToken(prompt, 1500);
-    // console.log(tokens.str);
-    // console.log(prompt);
-    const messages = [{ "role": "system", "content": "Você é um jornalista." }, { "role": "user", "content": tokens }]
+    const encoded = encode(prompt);
+    let toDecode = encoded.slice(0, PROMPT_LENGTH);
+    console.log('Tokens: ', encoded.length, ' - Slice: ', toDecode.length);
+    prompt = decode(toDecode);
+    const messages = [{ "role": "system", "content": "Você é um jornalista." }, { "role": "user", "content": prompt }]
     const responseChatGPT = await getChatGPTResponse(messages);
 
     const now = new Date();
@@ -161,8 +163,8 @@ function arrayToCsv(data) {
 
 async function queryMongo(db) {
     const collectionName = 'raw_data_stream';
-    const minutesBack = 20;
-    const limit = 400;
+    const minutesBack = 60;
+    const limit = 100;
     const collection = db.collection(collectionName);
 
     const query = {
@@ -221,3 +223,4 @@ async function queryMongo(db) {
 if (require.main === module) {
     main();
 }
+
