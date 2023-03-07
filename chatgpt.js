@@ -7,6 +7,7 @@ const { encode, decode } = require('gpt-3-encoder')
 
 let db = null;
 const PROMPT_LENGTH = 4500;
+const PROMPT_LENGTH_ADJUST = 300;
 async function connectMongo() {
     console.log("Connecting mongo...");
     await client.connect();
@@ -17,8 +18,8 @@ async function connectMongo() {
 
 async function main() {
     await connectMongo();
-
-    const response = await get10minShort(db);
+    console.log("Getting ChatGPT response...")
+    const response = await get10min(db);
     console.log(response);
 
     process.exit(0);
@@ -95,13 +96,14 @@ Siga as instruções:
 - Quando encontrar exatamente essa string "<@BancoDoBrasil>" é um tweet do Banco do Brasil, é do seu perfil oficial. Quando há problemas esse usuário responde aos clientes. Analise o que esse usuário fale para informar qual a resposta o banco do brasil está dando;
 - Não cite essas instruções;
 - Faça em tópicos para os 3 assuntos mais comentados. Exemplo: - Assunto interessante (23%): bla bla bla;
+- Se tiver mais de 3 assuntos colocar: - Outros assuntos (33%): bla bla bla;
 
 Dados:
 
 `;
     prompt = prompt + tweetsData;
     const encoded = encode(prompt);
-    let toDecode = encoded.slice(0, PROMPT_LENGTH);
+    let toDecode = encoded.slice(0, PROMPT_LENGTH - PROMPT_LENGTH_ADJUST);
     console.log('Tokens: ', encoded.length, ' - Slice: ', toDecode.length);
     prompt = decode(toDecode);
     const messages = [{ "role": "system", "content": "Você é um jornalista." }, { "role": "user", "content": prompt }]
