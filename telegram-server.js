@@ -247,6 +247,7 @@ bot.onText(/\/10min/, async (msg) => {
     bot.sendMessage(chatId, strFinalApp);
 
   } catch (error) {
+    isProcessingChatGPT = false;
     console.log(error);
   }
 });
