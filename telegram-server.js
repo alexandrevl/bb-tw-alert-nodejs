@@ -31,7 +31,7 @@ async function getHourWords() {
     .find(
       {
         ts: {
-          $gt: new Date(new Date().getTime() - 1000 * 60 * 60 * hours),
+          $gte: new Date(new Date().getTime() - 1000 * 60 * 60 * hours),
         },
       },
       { projection: { _id: 0, words: 1 } }
