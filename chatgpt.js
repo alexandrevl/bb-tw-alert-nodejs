@@ -167,7 +167,7 @@ function arrayToCsv(data) {
 async function queryMongo(db) {
     const collectionName = 'raw_data_stream';
     const minutesBack = 60;
-    const limit = 100;
+    const limit = 300;
     const collection = db.collection(collectionName);
 
     const query = {
