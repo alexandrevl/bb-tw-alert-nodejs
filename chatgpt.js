@@ -6,7 +6,7 @@ const { Configuration, OpenAIApi } = require("openai");
 const { encode, decode } = require('gpt-3-encoder')
 
 let db = null;
-const PROMPT_LENGTH = 4500;
+const PROMPT_LENGTH = 4300;
 const PROMPT_LENGTH_ADJUST = 200;
 async function connectMongo() {
     console.log("Connecting mongo...");
@@ -68,7 +68,7 @@ Siga as instrucoes:
     let toDecode = encoded.slice(0, PROMPT_LENGTH);
     console.log('Tokens: ', encoded.length, ' - Slice: ', toDecode.length);
     prompt = decode(toDecode);
-    const messages = [{ "role": "system", "content": "Você é um jornalista. Lula é o presidente do Brasil." }, { "role": "user", "content": prompt }]
+    const messages = [{ "role": "system", "content": "Você é um jornalista." }, { "role": "user", "content": prompt }]
     const responseChatGPT = await getChatGPTResponse(messages);
     return "ChatGPT: " + responseChatGPT;
 }
@@ -107,7 +107,7 @@ Dados:
     let toDecode = encoded.slice(0, PROMPT_LENGTH - PROMPT_LENGTH_ADJUST);
     console.log('Tokens: ', encoded.length, ' - Slice: ', toDecode.length);
     prompt = decode(toDecode);
-    const messages = [{ "role": "system", "content": "Você é um jornalista. Lula é o presidente do Brasil." }, { "role": "user", "content": prompt }]
+    const messages = [{ "role": "system", "content": "Você é um jornalista." }, { "role": "user", "content": prompt }]
     const responseChatGPT = await getChatGPTResponse(messages);
 
     const now = new Date();
