@@ -228,7 +228,7 @@ bot.onText(/\/latest/, (msg) => {
   if (db != null) sendSearch(msg, ["", " "], 0);
 });
 bot.onText(/\/temp/, (msg) => {
-  console.log(`short - ChatGPT - Start to: ` + chatId);
+  console.log(`short - ChatGPT - Start to: ` + msg.chat.id);
   bot.sendMessage(msg.chat.id, "Checando temperatura... Aguarde...");
   console.log(msg);
   alertTemp(msg, isChatGPT = true);
