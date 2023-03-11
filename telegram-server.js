@@ -224,9 +224,11 @@ bot.onText(/\/app/, (msg) => {
   if (db != null) sendApp(msg, 0);
 });
 bot.onText(/\/latest/, (msg) => {
+  console.log(msg);
   if (db != null) sendSearch(msg, ["", " "], 0);
 });
 bot.onText(/\/temp/, (msg) => {
+  console.log(msg);
   bot.sendMessage(msg.chat.id, "Checando temperatura... Aguarde...");
   alertTemp(msg, isChatGPT = true);
 });
@@ -234,6 +236,7 @@ let isProcessingChatGPT = false;
 bot.onText(/\/10min/, async (msg) => {
   try {
     const chatId = msg.chat.id;
+    console.log(msg);
     console.log(`10min - ChatGPT - Start to: ` + chatId);
     let strFinalApp = "Não tivemos tweets nos últimos 10 minutos.";
     bot.sendMessage(chatId, "Analisando dados... Aguarde...");
@@ -287,8 +290,6 @@ bot.on("callback_query", (query) => {
 
 async function sendSearch(msg, match, skip) {
   const chatId = msg.chat.id;
-  console.log(msg);
-
   let strFinalApp = "";
   let words = await searchWordsMatch(match, skip);
   if (match[1] != "*" && words[0].ts != 0) {
