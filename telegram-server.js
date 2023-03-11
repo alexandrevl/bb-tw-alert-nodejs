@@ -228,16 +228,17 @@ bot.onText(/\/latest/, (msg) => {
   if (db != null) sendSearch(msg, ["", " "], 0);
 });
 bot.onText(/\/temp/, (msg) => {
-  console.log(msg);
+  console.log(`short - ChatGPT - Start to: ` + chatId);
   bot.sendMessage(msg.chat.id, "Checando temperatura... Aguarde...");
+  console.log(msg);
   alertTemp(msg, isChatGPT = true);
 });
 let isProcessingChatGPT = false;
 bot.onText(/\/10min/, async (msg) => {
   try {
     const chatId = msg.chat.id;
-    console.log(msg);
     console.log(`10min - ChatGPT - Start to: ` + chatId);
+    console.log(msg);
     let strFinalApp = "Não tivemos tweets nos últimos 10 minutos.";
     bot.sendMessage(chatId, "Analisando dados... Aguarde...");
     isProcessingChatGPT = true;
