@@ -228,10 +228,15 @@ bot.onText(/\/latest/, (msg) => {
   if (db != null) sendSearch(msg, ["", " "], 0);
 });
 bot.onText(/\/temp/, (msg) => {
-  console.log(`short - ChatGPT - Start to: ` + msg.chat.id);
-  bot.sendMessage(msg.chat.id, "Checando temperatura... Aguarde...");
-  console.log(msg);
-  alertTemp(msg, isChatGPT = true);
+  try {
+    console.log(`short - ChatGPT - Start to: ` + msg.chat.id);
+    bot.sendMessage(msg.chat.id, "Checando temperatura... Aguarde...");
+    console.log(msg);
+    alertTemp(msg, isChatGPT = true);
+  } catch (error) {
+    console.log(error);
+    bot.sendMessage(msg.chat.id, "Não foi possível checar a temperatura.");
+  }
 });
 let isProcessingChatGPT = false;
 bot.onText(/\/10min/, async (msg) => {
@@ -253,6 +258,7 @@ bot.onText(/\/10min/, async (msg) => {
   } catch (error) {
     isProcessingChatGPT = false;
     console.log(error);
+    bot.sendMessage(msg.chat.id, "Não foi possível analisar os tweets.");
   }
 });
 function sendTyping(chatId) {
