@@ -240,6 +240,20 @@ bot.onText(/\/temp/, (msg) => {
 });
 let isProcessingChatGPT = false;
 bot.onText(/\/10min/, async (msg) => {
+  if (isProcessingChatGPT) {
+    bot.sendMessage(msg.chat.id, "Já temos um processamento em andamento. Aguarde.");
+    return;
+  }
+  getChatGpt(msg);
+});
+bot.onText(/\/chatgpt/, async (msg) => {
+  if (isProcessingChatGPT) {
+    bot.sendMessage(msg.chat.id, "Já temos um processamento em andamento. Aguarde.");
+    return;
+  }
+  getChatGpt(msg);
+});
+async function getChatGpt(msg) {
   try {
     const chatId = msg.chat.id;
     console.log(`10min - ChatGPT - Start to: ` + chatId);
@@ -260,7 +274,7 @@ bot.onText(/\/10min/, async (msg) => {
     console.log(error);
     bot.sendMessage(msg.chat.id, "Não foi possível analisar os tweets.");
   }
-});
+}
 function sendTyping(chatId) {
   if (isProcessingChatGPT) {
     bot.sendChatAction(chatId, "typing");
