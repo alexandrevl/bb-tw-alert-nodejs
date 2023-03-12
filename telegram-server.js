@@ -68,7 +68,7 @@ bot.onText(/\/f (.+)/, async (msg, match) => {
         chatResponse = await chatgpt.getChatMsg(matricula, db);
         finalMsg = finalMsg + "\n\n" + chatResponse;
       } else {
-        chatResponse = await chatgpt.chatGPTNullResponse(db)
+        chatResponse = await chatgpt.chatGPTNullResponse()
         finalMsg = `Não foram encontradas datas futuras de TRI híbrido para essa matrícula.`;
         finalMsg = finalMsg + "\n\n" + chatResponse;
       }

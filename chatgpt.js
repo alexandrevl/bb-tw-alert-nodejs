@@ -19,7 +19,7 @@ async function main() {
     try {
         db = await connectMongo();
         console.log("Getting ChatGPT response...")
-        const response = await getChatMsg("F9561259", db);
+        const response = await chatGPTNullResponse();
         console.log(response);
     } catch (e) {
         console.log(e);
@@ -40,7 +40,7 @@ function charsToToken(str, maxTokens) {
     return str;
 }
 
-async function chatGPTNullResponse(db) {
+async function chatGPTNullResponse() {
     let prompt = `Infelizmente o funcionário não está na escala de home office nesse momento. Mas já na semana que vem, ou até nessa semana poderá ter um dia. Crie uma mensagem para anamimá-lo, super curta, máximo 500 caracteres. Não use hashtags.`;
     const encoded = encode(prompt);
     let toDecode = encoded.slice(0, PROMPT_LENGTH - 200);
