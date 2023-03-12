@@ -19,7 +19,7 @@ async function main() {
     try {
         await connectMongo();
         console.log("Getting ChatGPT response...")
-        const response = await get10minShort(db);
+        const response = await get10min(db);
         console.log(response);
     } catch (e) {
         console.log(e);

@@ -1,95 +1,306 @@
-const config = require("dotenv").config();
+require("dotenv").config();
+const io = require("socket.io")();
 const { MongoClient } = require("mongodb");
-const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/escalinha?authSource=admin`;
+const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
 const client = new MongoClient(url);
 const _ = require("lodash");
 const moment = require("moment");
 const TelegramBot = require("node-telegram-bot-api");
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
+const { spawn } = require('child_process');
 const chatgpt = require("./chatgpt");
 
+
 let db = null;
-const CALLBACK_TYPE_TRI = 0;
+const SEARCH = 0;
 const APP = 1;
-const LIMIT_TELEGRAM = 80;
 
 async function connectMongo() {
   console.log("Connecting mongo...");
   await client.connect();
-  db = client.db("escalinha");
+  db = client.db("twitter");
   console.log("Mongo connected");
   return db;
 }
-bot.onText(/\/f/, async (msg, match) => {
-  console.log(msg.from.username, match);
-  if (match.input == "/f") {
 
-    const chatId = msg.chat.id;
-    const opts = {
-      disable_web_page_preview: true,
-      reply_to_message_id: msg.message_id,
-    };
-    const finalMsg = "Use /f F0000000";
-    console.log(`${msg.from.username}: ${finalMsg.replaceAll("\n", " | ")}`);
-    // chatgpt.getChatMsg(msg.from.username, db, bot, chatId, opts, finalMsg);
-    bot.sendMessage(chatId, finalMsg, opts);
+async function getHourWords() {
+  const hours = 0.08;
+  let qtWordsDisplay = 10;
+  let words = await db
+    .collection("raw_data_stream")
+    .find(
+      {
+        ts: {
+          $gte: new Date(new Date().getTime() - 1000 * 60 * 60 * hours),
+        },
+      },
+      { projection: { _id: 0, words: 1 } }
+    )
+    .sort({ _id: -1 })
+    .toArray();
 
+  let totalWords = [];
+  for (let i = 0; i < words.length; i++) {
+    let word = words[i];
+    totalWords = totalWords.concat(word.words);
   }
-});
-
-bot.onText(/\/f (.+)/, async (msg, match) => {
-  // console.log(match);
-  if (db != null) {
-    const chatId = msg.chat.id;
-    const opts = {
-      disable_web_page_preview: true,
-      reply_to_message_id: msg.message_id,
-    };
-    if (match[1]) {
-      let matricula = match[1].toUpperCase();
-      let dtNow = moment().format("YYYY-MM-DD");
-      let escala = await db
-        .collection("escalas")
-        .find({
-          $and: [{ matricula: matricula }, { data: { $gte: dtNow } }],
-        })
-        .limit(10)
-        .sort({ data: 1 })
-        .toArray();
-      let finalMsg = `Datas futuras de TRI híbrido:\n\n`;
-      if (escala.length > 0) {
-        for (let index = 0; index < escala.length; index++) {
-          const outItem = escala[index];
-          if (!outItem.undefined) {
-            let data = moment(outItem.data).format("DD/MM/YYYY");
-            finalMsg += `${data} - ${outItem.dia}\n`;
-          }
-        }
-        chatResponse = await chatgpt.getChatMsg(matricula, db);
-        finalMsg = finalMsg + "\n\n" + chatResponse;
-      } else {
-        chatResponse = await chatgpt.chatGPTNullResponse()
-        finalMsg = `Não foram encontradas datas futuras de TRI híbrido para essa matrícula.`;
-        finalMsg = finalMsg + "\n\n" + chatResponse;
-      }
-      console.log(`${msg.from.username}: ${finalMsg.replaceAll("\n", " | ")}`);
-      bot.sendMessage(chatId, finalMsg, opts);
-    } else {
-      const finalMsg = "Use /f F0000000";
-      console.log(`${msg.from.username}: ${finalMsg.replaceAll("\n", " | ")}`);
-      bot.sendMessage(chatId, finalMsg, opts);
+  // console.log({totalWords})
+  let wordsCounted = _.countBy(totalWords);
+  let finalWords = [];
+  for (const [key, value] of Object.entries(wordsCounted)) {
+    if (
+      !key.includes("banco") &&
+      key.length > 2 &&
+      key != "pra" &&
+      key != "pro" &&
+      !key.includes("brasil")
+    ) {
+      finalWords.push({ word: key, count: value });
     }
   }
+  let orderedFinalWords = _.orderBy(finalWords, ["count"], ["desc"]);
+  if (qtWordsDisplay > orderedFinalWords.length) {
+    qtWordsDisplay = orderedFinalWords.length;
+  }
+  let result = [];
+  for (let i = 0; i < qtWordsDisplay; i++) {
+    let word = orderedFinalWords[i];
+    result.push(word);
+  }
+  return result;
+}
+
+async function getHourSentiment() {
+  //console.log("getHourSentiment");
+  const result = await db
+    .collection("tw_timeline")
+    .aggregate([
+      {
+        $match: {
+          ts: {
+            $gt: new Date(new Date().getTime() - 1000 * 60 * 60),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$id",
+          sum: { $sum: "$sumSentiment" },
+        },
+      },
+    ])
+    .toArray();
+  //console.log(result[0].sum);
+  return result[0];
+}
+async function getHourImpact() {
+  const result = await db
+    .collection("tw_timeline")
+    .aggregate([
+      {
+        $match: {
+          ts: {
+            $gt: new Date(new Date().getTime() - 1000 * 60 * 60),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$id",
+          sum: { $sum: "$sumImpact" },
+        },
+      },
+    ])
+    .toArray();
+  let sum = parseFloat(result[0].sum);
+  if (sum == null || sum == undefined) {
+    sum = 0;
+  }
+  return parseFloat(sum);
+}
+
+async function searchWords(skip) {
+  const result = await db
+    .collection("raw_data_stream")
+    .find(
+      { $or: [{ text: /aplicativo/ }, { text: /app/ }] },
+      { projection: { sentiment: 1, text: 1, ts: 1, _id: 0 } }
+    )
+    .skip(skip)
+    .limit(10)
+    .sort({ _id: -1 })
+    .toArray();
+  //console.log(result[0].sum);
+  return result;
+}
+
+function getSignalEmoji(sentiment) {
+  let result = "🟢";
+  if (sentiment < -40 && sentiment > -100) {
+    result = "🟡";
+  } else if (sentiment <= -100) {
+    result = "🔴";
+  }
+  return result;
+}
+function getImpactEmoji(impact) {
+  let result = "🟢";
+  if (impact < -10 && impact > -30) {
+    result = "🟡";
+  } else if (impact <= -30) {
+    result = "🔴";
+  }
+  return result;
+}
+
+async function searchWordsMatch(match, skip) {
+  let query = {};
+  if (match[1] == "*" || match[1] == " ") {
+    match[1] = " ";
+  } else {
+    let regex = new RegExp(match[1], "i");
+    query = { text: regex };
+  }
+  // console.log(query);
+  let result = await db
+    .collection("raw_data_stream")
+    .find(query, { projection: { sentiment: 1, text: 1, ts: 1, _id: 0 } })
+    .skip(skip)
+    .limit(10)
+    .sort({ _id: -1 })
+    .toArray();
+  // console.log(result);
+  if (result.length <= 0) {
+    result = [{ sentiment: 0, text: "", ts: 0 }];
+  }
+  // console.log(result);
+  return result;
+}
+
+async function alertRelevant(msg) {
+  const chatId = "@bb_alert_tw";
+  console.log(`Sent to relevant tweet to ${chatId}: ${msg}`);
+  bot.sendMessage(chatId, `⚠️ Relevant Tweet: ${msg}`);
+}
+
+async function alertTemp(msg, isChatGPT) {
+  let chatId = "@bb_alert_tw";
+  if (isChatGPT) {
+    chatId = msg.chat.id;
+  }
+  let hourSentiment = await getHourSentiment();
+  let hourWords = await getHourWords();
+  let hourImpact = await getHourImpact();
+  let resultWordsStr = "";
+  for (let index = 0; index < hourWords.length; index++) {
+    const word = hourWords[index];
+    resultWordsStr += `   • ${word.word} (${word.count})\n`;
+  }
+  let strFinal = `Twitter\`s Sentiment Temperature\n\nSentiment: ${hourSentiment.sum
+    } ${getSignalEmoji(hourSentiment.sum)}\n\nImpact: ${hourImpact
+      .toFixed(1)
+      .toLocaleString("pt-BR")} ${getImpactEmoji(
+        hourImpact
+      )}\n\nWords:\n${resultWordsStr}`;
+  const chatgptResponse = await chatgpt.get10minShort(db);
+  console.log(`short - ChatGPT - Final Response (${chatId}): ` + chatgptResponse);
+  strFinal += `\n\n${chatgptResponse}`;
+  bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
+}
+
+bot.onText(/\/f (.+)/, (msg, match) => {
+  if (db != null) sendSearch(msg, match, 0);
 });
 
+bot.onText(/\/search (.+)/, (msg, match) => {
+  if (db != null) sendSearch(msg, match, 0);
+});
+
+bot.onText(/\/status/, (msg) => {
+  if (db != null) sendStatus(msg);
+});
+
+bot.onText(/\/app/, (msg) => {
+  if (db != null) sendApp(msg, 0);
+});
+bot.onText(/\/latest/, (msg) => {
+  console.log(msg);
+  if (db != null) sendSearch(msg, ["", " "], 0);
+});
+bot.onText(/\/temp/, (msg) => {
+  try {
+    console.log(`short - ChatGPT - Start to: ` + msg.chat.id);
+    bot.sendMessage(msg.chat.id, "Checando temperatura... Aguarde...");
+    console.log(msg);
+    alertTemp(msg, isChatGPT = true);
+  } catch (error) {
+    console.log(error);
+    bot.sendMessage(msg.chat.id, "Não foi possível checar a temperatura.");
+  }
+});
+let isProcessingChatGPT = false;
+bot.onText(/\/10min/, async (msg) => {
+  if (isProcessingChatGPT) {
+    bot.sendMessage(msg.chat.id, "Já temos um processamento em andamento. Aguarde.");
+    return;
+  }
+  getChatGpt(msg);
+});
+bot.onText(/\/chatgpt/, async (msg) => {
+  if (isProcessingChatGPT) {
+    bot.sendMessage(msg.chat.id, "Já temos um processamento em andamento. Aguarde.");
+    return;
+  }
+  getChatGpt(msg);
+});
+async function getChatGpt(msg) {
+  try {
+    const chatId = msg.chat.id;
+    console.log(`10min - ChatGPT - Start to: ` + chatId);
+    console.log(msg);
+    let strFinalApp = "Não tivemos tweets nos últimos 10 minutos.";
+    bot.sendMessage(chatId, "Analisando dados... Aguarde...");
+    isProcessingChatGPT = true;
+    setTimeout(() => {
+      sendTyping(chatId)
+    }, 7000);
+    strFinalApp = await chatgpt.get10min(db);
+    console.log(`10min - ChatGPT - Final to: ${chatId}: \n\n` + strFinalApp);
+    isProcessingChatGPT = false;
+    bot.sendMessage(chatId, strFinalApp);
+
+  } catch (error) {
+    isProcessingChatGPT = false;
+    console.log(error);
+    bot.sendMessage(msg.chat.id, "Não foi possível analisar os tweets.");
+  }
+}
+function sendTyping(chatId) {
+  if (isProcessingChatGPT) {
+    bot.sendChatAction(chatId, "typing");
+    setTimeout(() => {
+      sendTyping(chatId)
+    }, 5000);
+  }
+}
+
+bot.onText(/\/start/, (msg) => {
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, "Hi! 👋", { parse_mode: "Markdown" });
+});
 bot.on("callback_query", (query) => {
   // console.log(query.data);
   try {
     let data = JSON.parse(query.data);
-    if (data.f == CALLBACK_TYPE_TRI) {
-      let skip = parseInt(data.s) + LIMIT_TELEGRAM;
-      console.log(skip);
-      if (db != null) triList(query.message, skip);
+    // console.log(data);
+    if (data.f == 1) {
+      let skip = parseInt(data.s) + 10;
+      if (db != null) sendApp(query.message, skip);
+    }
+    if (data.f == 0) {
+      let skip = parseInt(data.s) + 10;
+      let match = ["", data.p];
+      if (db != null) sendSearch(query.message, match, skip);
     }
   } catch (error) {
     console.log(error);
@@ -97,23 +308,82 @@ bot.on("callback_query", (query) => {
 
   // console.log(query.from.id);
 });
-bot.onText(/\/list/, async (msg) => {
-  if (db != null) triList(msg, 0);
-});
-async function triList(msg, skip) {
+
+async function sendSearch(msg, match, skip) {
   const chatId = msg.chat.id;
-  const optsButton = {
+  let strFinalApp = "";
+  let words = await searchWordsMatch(match, skip);
+  if (match[1] != "*" && words[0].ts != 0) {
+    match[1] = match[1].slice(0, 39);
+    console.log(
+      `(search) Search to ${msg.from.username}: ${match[1] == " " ? "latest" : match[1]
+      }`
+    );
+    strFinalApp = `Result for search: ${match[1]}\n\n`;
+    words.forEach((tweet) => {
+      strFinalApp += `● (${moment(tweet.ts).format(
+        "DD/MM HH:mm:ss"
+      )}) ${tweet.text.normalize("NFD").replace(/[^\x00-\x7F]/g, "")}\n\n`;
+    });
+    let opts = {
+      disable_web_page_preview: true,
+      reply_to_message_id: msg.message_id,
+      one_time_keyboard: true,
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "more tweets",
+              callback_data: JSON.stringify({
+                f: SEARCH,
+                p: match[1],
+                s: skip,
+              }),
+            },
+          ],
+        ],
+      },
+    };
+    console.log(
+      JSON.parse(opts.reply_markup.inline_keyboard[0][0].callback_data)
+    );
+    if (words.length < 10) {
+      opts = {
+        disable_web_page_preview: true,
+        reply_to_message_id: msg.message_id,
+      };
+    }
+    console.log(`(search) Sending to ${msg.from.username}`);
+    bot.sendMessage(chatId, strFinalApp.slice(0, 4096), opts);
+  } else {
+    strFinalApp = "No results";
+    bot.sendMessage(chatId, strFinalApp);
+  }
+  return true;
+}
+
+async function sendApp(msg, skip) {
+  const chatId = msg.chat.id;
+  let words = await searchWords(skip);
+  console.log(`(app) Search to ${msg.from.username}`);
+  let strFinalApp = `Result for search: app ${skip != 0 ? skip : ""}\n\n`;
+  words.forEach((tweet) => {
+    strFinalApp += `● (${moment(tweet.ts).format(
+      "DD/MM HH:mm:ss"
+    )}) ${tweet.text.normalize("NFD").replace(/[^\x00-\x7F]/g, "")}\n\n`;
+  });
+
+  const opts = {
     disable_web_page_preview: true,
     reply_to_message_id: msg.message_id,
     one_time_keyboard: true,
-    parse_mode: "MarkdownV2",
     reply_markup: {
       inline_keyboard: [
         [
           {
-            text: "mais dias",
+            text: "more tweets",
             callback_data: JSON.stringify({
-              f: CALLBACK_TYPE_TRI,
+              f: APP,
               s: skip,
             }),
           },
@@ -121,63 +391,51 @@ async function triList(msg, skip) {
       ],
     },
   };
-  const optsClean = {
+  console.log(`(app) Sending to ${msg.chat.username}`);
+  bot.sendMessage(chatId, strFinalApp, opts);
+}
+
+async function sendStatus(msg) {
+  const chatId = msg.chat.id;
+  console.log(`(status) Status to ${msg.from.username}`);
+  let hourSentiment = await getHourSentiment();
+  let hourWords = await getHourWords();
+  let hourImpact = await getHourImpact();
+  let resultWordsStr = "";
+  for (let index = 0; index < hourWords.length; index++) {
+    const word = hourWords[index];
+    resultWordsStr += `   • ${word.word} (${word.count})\n`;
+  }
+  let strFinal = `Twitter\`s Sentiment Temperature\n\nSentiment: ${hourSentiment.sum
+    } ${getSignalEmoji(hourSentiment.sum)}\n\nImpact: ${hourImpact
+      .toFixed(1)
+      .toLocaleString("pt-BR")} ${getImpactEmoji(
+        hourImpact
+      )}\n\nWords:\n${resultWordsStr}
+      \nChatGPT Analysis: /chatgpt`;
+  console.log(`Sending to ${msg.chat.username}: ${strFinal}`);
+  bot.sendMessage(chatId, strFinal, {
     disable_web_page_preview: true,
     reply_to_message_id: msg.message_id,
-    parse_mode: "MarkdownV2",
-  };
-  let opts = optsClean;
-  let escala = await getEscala(skip);
-  let finalMsg = `\`\`\` -> Datas futuras de TRI híbrido:\n`;
-  if (escala.length > 0) {
-    if (escala.length < LIMIT_TELEGRAM) {
-      opts = optsClean;
-    } else {
-      opts = optsButton;
-    }
-    let dataOld = 0;
-    for (let index = 0; index < escala.length; index++) {
-      const outItem = escala[index];
-      if (!outItem.undefined) {
-        let data = moment(outItem.data).format("DD/MM");
-        if (data != dataOld) {
-          finalMsg += `${data} - ${outItem.dia}\n`;
-          dataOld = data;
-        }
-        let nome = outItem.nome;
-        if (nome.length > 20) nome = nome.substring(0, 20) + "...";
-        finalMsg += `\t\t${outItem.matricula} - ${nome}\n`;
-      }
-    }
-    finalMsg += `\`\`\``;
-    // console.log(finalMsg);
-  } else {
-    finalMsg = `Não foram encontradas datas futuras de TRI híbrido.`;
-  }
-  bot.sendMessage(chatId, finalMsg, opts);
-  // console.log(`${msg.from.username}: ${finalMsg.replaceAll("\n", " | ")}`);
+  });
 }
-async function getEscala(skip) {
-  let dtNow = moment().format("YYYY-MM-DD");
-  let escala = await db
-    .collection("escalas")
-    .find({
-      data: { $gte: dtNow },
-    })
-    .skip(skip)
-    .limit(LIMIT_TELEGRAM)
-    .sort({ data: 1 })
-    .toArray();
-  return escala;
-}
-
-bot.onText(/\/start/, (msg) => {
-  const chatId = msg.chat.id;
-  bot.sendMessage(chatId, "Hi! 👋", { parse_mode: "Markdown" });
-});
 
 async function init() {
+  io.on("connection", async (client) => {
+    console.log(`New client connected ${client.id}`);
+    client.emit("welcome", "welcome man");
+    client.on("alertTemp", (data) => {
+      alertTemp(data);
+    });
+    client.on("alertRelevant", (data) => {
+      alertRelevant(data);
+    });
+  });
+  io.on("disconnect", () => {
+    console.log(`Client disconnected ${client.id}`);
+  });
+  io.listen(8000);
   await connectMongo();
-  console.log("Escalinha Bot Telegram UP");
+  console.log("Bot Telegram UP");
 }
 init();
