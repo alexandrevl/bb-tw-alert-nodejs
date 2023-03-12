@@ -17,22 +17,25 @@ async function connectMongo() {
 }
 
 async function main() {
-    await connectMongo();
-    console.log("Getting ChatGPT response...")
-    const response = await get10min(db);
-    console.log(response);
-
+    try {
+        await connectMongo();
+        console.log("Getting ChatGPT response...")
+        const response = await get10minShort(db);
+        console.log(response);
+    } catch (e) {
+        console.log(e);
+    }
     process.exit(0);
 }
 function charsToToken(str, maxTokens) {
-    const chars = str.trim().replace(/\s/g, '').length;
-    let tokens = Math.ceil(chars / 4.5);
+    const chars = str.trim().replace(/\s/g, '').length; // remove all spaces
+    let tokens = Math.ceil(chars / 4.5); // divide by 4.5 and round up
 
     if (maxTokens && tokens > maxTokens) {
-        const maxChars = maxTokens * 4.5;
-        const truncatedStr = str.slice(0, maxChars);
-        const lastSpace = truncatedStr.lastIndexOf(' ');
-        str = str.slice(0, lastSpace) + '...';
+        const maxChars = maxTokens * 4.5; // find max chars
+        const truncatedStr = str.slice(0, maxChars); // truncate string
+        const lastSpace = truncatedStr.lastIndexOf(' '); // find last space
+        str = str.slice(0, lastSpace) + '...'; // add ellipsis
     }
 
     return str;
@@ -69,7 +72,7 @@ Siga as instrucoes:
     console.log('Tokens: ', encoded.length, ' - Slice: ', toDecode.length);
     prompt = decode(toDecode);
     const messages = [{ "role": "system", "content": "Você é um jornalista." }, { "role": "user", "content": prompt }]
-    const responseChatGPT = await getChatGPTResponse(messages);
+    const responseChatGPT = await getChatGPTResponse(messages, 300);
     return "ChatGPT: " + responseChatGPT;
 }
 exports.get10minShort = get10minShort;
@@ -78,7 +81,6 @@ async function get10min(db) {
     const tweetsData = arrayToCsv(resultsMongo);
     let prompt = `Identifique os assuntos que estão sendo comentados e discutidos, faça uma análise dos tweets e sugira o que pode estar acontecendo.
 Siga as instrucoes:
-- Máximo 400 tokens;
 - Coisas que já sabemos: Todos os tweets tem relação com Banco do Brasil. Não precisa falar que a maioria dos tweets são sobre o Banco do Brasil. Já sabemos disso;
 - Os tweets estão ordenados por tempo. O primeiro tweet é o mais recente. Tweets recentes são mais relevantes;
 - Use "\n" para quebrar linha;
@@ -108,7 +110,7 @@ Dados:
     console.log('Tokens: ', encoded.length, ' - Slice: ', toDecode.length);
     prompt = decode(toDecode);
     const messages = [{ "role": "system", "content": "Você é um jornalista." }, { "role": "user", "content": prompt }]
-    const responseChatGPT = await getChatGPTResponse(messages);
+    const responseChatGPT = await getChatGPTResponse(messages, 400);
 
     const now = new Date();
     const dateString = now.toLocaleString("pt-BR", {
@@ -123,7 +125,7 @@ Dados:
     return result_final;
 }
 exports.get10min = get10min;
-async function getChatGPTResponse(messages) {
+async function getChatGPTResponse(messages, max_tokens) {
     try {
         const configuration = new Configuration({
             apiKey: process.env.OPENAI_API_KEY,
@@ -132,7 +134,8 @@ async function getChatGPTResponse(messages) {
         const completion = await openai.createChatCompletion({
             model: "gpt-3.5-turbo",
             messages: messages,
-            // max_tokens: 500,
+            temperature: 0.4,
+            max_tokens: max_tokens,
         });
         console.log(completion.data);
         return (completion.data.choices[0].message.content);
