@@ -66,11 +66,11 @@ bot.onText(/\/f (.+)/, async (msg, match) => {
           }
         }
         chatResponse = await chatgpt.getChatMsg(matricula, db);
-        finalMsg = finalMsg + "\n" + chatResponse;
+        finalMsg = finalMsg + "\n\n" + chatResponse;
       } else {
         chatResponse = await chatgpt.chatGPTNullResponse(db)
         finalMsg = `Não foram encontradas datas futuras de TRI híbrido para essa matrícula.`;
-        finalMsg = finalMsg + "\n" + chatResponse;
+        finalMsg = finalMsg + "\n\n" + chatResponse;
       }
       console.log(`${msg.from.username}: ${finalMsg.replaceAll("\n", " | ")}`);
       bot.sendMessage(chatId, finalMsg, opts);
