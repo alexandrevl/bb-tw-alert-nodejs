@@ -6,7 +6,7 @@ const { Configuration, OpenAIApi } = require("openai");
 const { encode, decode } = require('gpt-3-encoder')
 
 let db = null;
-const PROMPT_LENGTH = 4400;
+const PROMPT_LENGTH = 8000;
 async function connectMongo() {
     console.log("Connecting mongo...");
     await client.connect();
@@ -131,7 +131,8 @@ async function getChatGPTResponse(messages, max_tokens) {
         });
         const openai = new OpenAIApi(configuration);
         const completion = await openai.createChatCompletion({
-            model: "gpt-3.5-turbo",
+            // model: "gpt-3.5-turbo",
+            model: "gpt-4",
             messages: messages,
             temperature: 0.4,
             max_tokens: max_tokens,
