@@ -10,7 +10,6 @@ const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 const { spawn } = require('child_process');
 const chatgpt = require("./chatgpt");
 
-
 let db = null;
 const SEARCH = 0;
 const APP = 1;
@@ -205,6 +204,9 @@ async function alertTemp(msg, isChatGPT) {
   const chatgptResponse = await chatgpt.get10minShort(db);
   console.log(`short - ChatGPT - Final Response (${chatId}): ` + chatgptResponse);
   strFinal += `\n\n${chatgptResponse}`;
+  if (isChatGPT) {
+    strFinal += `\n\n/chatgpt for more`;
+  }
   bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
 }
 

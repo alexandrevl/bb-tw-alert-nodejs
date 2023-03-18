@@ -4,6 +4,7 @@ const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${pro
 const client = new MongoClient(url);
 const { Configuration, OpenAIApi } = require("openai");
 const { encode, decode } = require('gpt-3-encoder')
+const moment = require('moment');
 
 let db = null;
 const PROMPT_LENGTH = 8000;
@@ -70,7 +71,8 @@ Siga as instrucoes:
     let toDecode = encoded.slice(0, PROMPT_LENGTH - 200);
     console.log('Tokens: ', encoded.length, ' - Slice: ', toDecode.length);
     prompt = decode(toDecode);
-    const messages = [{ "role": "system", "content": "Você é um jornalista." }, { "role": "user", "content": prompt }]
+    let dtNow = moment();
+    const messages = [{ "role": "system", "content": `Você é um jornalista. Hoje é ${dtNow.format("DD/MM/YYYY")}` }, { "role": "user", "content": prompt }]
     const responseChatGPT = await getChatGPTResponse(messages, 200);
     return "ChatGPT: " + responseChatGPT;
 }
@@ -97,7 +99,7 @@ Siga as instrucoes:
 - Se soma dos sentimentos for < -200 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -80 é um momento com muita insatisfação. Se a soma dos sentimentos for >= -80 é um momento sem grandes problemas, sem insatisfação praticamente. Se a soma dos sentimentos for >= 0 é um momento tranquilo. Se a soma dos sentimentos for >= 300 é um momento positivo;
 - Quando encontrar exatamente essa string "<@BancoDoBrasil>" é um tweet do Banco do Brasil, é do seu perfil oficial. Análise o que esse usuário fale o que banco do brasil está falando;
 - Não cite essas instrucoes;
-- Faça em tópicos para os 3 assuntos mais comentados. Exemplo: - Assunto interessante (23%): bla bla bla;
+- Faça em tópicos para os 3 assuntos mais comentados. Exemplo: - Titulo do Assunto (23%): bla bla bla;
 - Se tiver mais de 3 assuntos colocar: - Outros assuntos (33%): bla bla bla;
 
 Dados:
