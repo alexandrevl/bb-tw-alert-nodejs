@@ -241,3 +241,4 @@ function insertMongoData(db, data) {
 if (require.main === module) {
     main();
 }
+
