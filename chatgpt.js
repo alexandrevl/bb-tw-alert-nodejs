@@ -234,9 +234,7 @@ async function queryMongo(db) {
 const proper = "o";
 function insertMongoData(db, data) {
     console.log('Inserting data (mongo)...');
-    const collectionName = 'chat_gpt_response';
-    const collection = db.collection(collectionName);
-    return collection.insertMany(data);
+    return db.collection('chat_gpt_response').insertMany(data);
 }
 
 if (require.main === module) {
