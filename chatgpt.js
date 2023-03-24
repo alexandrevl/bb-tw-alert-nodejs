@@ -20,7 +20,7 @@ async function main() {
     try {
         await connectMongo();
         console.log("Getting ChatGPT response...")
-        const response = await get10min(db);
+        const response = await get10minShort(db);
         console.log(response);
     } catch (e) {
         console.log(e);
@@ -140,6 +140,11 @@ async function getChatGPTResponse(messages, max_tokens) {
             max_tokens: max_tokens,
         });
         console.log(completion.data);
+        const toInsert = {
+            "timestamp": new Date(),
+            "response_message": completion.data.choices[0].message.content
+        };
+        await insertMongoData(db, [toInsert]);
         return (completion.data.choices[0].message.content);
     } catch (error) {
         console.log(error);
@@ -226,7 +231,12 @@ async function queryMongo(db) {
     const results = await collection.aggregate(pipeline).toArray();
     return results;
 }
-
+function insertMongoData(db, data) {
+    console.log('Inserting data (mongo)...');
+    const collectionName = 'chat_gpt_response';
+    const collection = db.collection(collectionName);
+    return collection.insertMany(data);
+}
 
 if (require.main === module) {
     main();
