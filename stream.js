@@ -286,6 +286,10 @@ async function recycle() {
   if (stream) {
     console.log("Recycling...");
     await stream.request.abort();
+    currentRules = await getRules();
+    await deleteRules(currentRules);
+    currentRules = await setRules();
+    console.log(currentRules);
     setTimeout(streamTweets, 1000);
     console.time("recycled in");
   }
