@@ -73,7 +73,7 @@ Siga as instrucoes:
     prompt = decode(toDecode);
     let dtNow = moment();
     const messages = [{ "role": "system", "content": `Você é um jornalista. Hoje é ${dtNow.format("DD/MM/YYYY")}` }, { "role": "user", "content": prompt }]
-    const responseChatGPT = await getChatGPTResponse(messages, 200);
+    const responseChatGPT = await getChatGPTResponse(db, messages, 200);
     return "ChatGPT: " + responseChatGPT;
 }
 exports.get10minShort = get10minShort;
@@ -111,7 +111,7 @@ Dados:
     console.log('Tokens: ', encoded.length, ' - Slice: ', toDecode.length);
     prompt = decode(toDecode);
     const messages = [{ "role": "system", "content": "Você é um jornalista." }, { "role": "user", "content": prompt }]
-    const responseChatGPT = await getChatGPTResponse(messages, 400);
+    const responseChatGPT = await getChatGPTResponse(db, messages, 400);
 
     const now = new Date();
     const dateString = now.toLocaleString("pt-BR", {
@@ -126,7 +126,7 @@ Dados:
     return result_final;
 }
 exports.get10min = get10min;
-async function getChatGPTResponse(messages, max_tokens) {
+async function getChatGPTResponse(db, messages, max_tokens) {
     try {
         const configuration = new Configuration({
             apiKey: process.env.OPENAI_API_KEY,
