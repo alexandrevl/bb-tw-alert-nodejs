@@ -27,7 +27,7 @@ app.get("/", async (req, res) => {
     hourSentiment: hourSentiment.sum,
     hourWords: hourWords,
   };
-  console.log(result);
+  // console.log(result);
 
   res.send(result);
 });
