@@ -231,6 +231,7 @@ async function queryMongo(db) {
     const results = await collection.aggregate(pipeline).toArray();
     return results;
 }
+const proper = "o";
 function insertMongoData(db, data) {
     console.log('Inserting data (mongo)...');
     const collectionName = 'chat_gpt_response';
