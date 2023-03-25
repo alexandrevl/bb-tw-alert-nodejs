@@ -195,10 +195,11 @@ function streamTweets() {
       Authorization: `Bearer ${TOKEN}`,
     },
   });
+  let countTweets = 0;
 
   stream.on("data", async (data) => {
     try {
-      console.log("--")
+      console.log("-")
       let json = null;
       if (!data.title) {
         const buffer = Buffer.from(data);
