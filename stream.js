@@ -11,7 +11,7 @@ const TOKEN = process.env.TW_BEARER;
 //Twitter`s API doc: https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/api-reference/get-tweets-search-stream
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL =
-  "https://api.twitter.com/2/tweets/search/stream?tweet.fields=author_id,public_metrics&expansions=author_id&user.fields=username";
+  "https://api.twitter.com/2/tweets/search/stream?tweet.fields=author_id&expansions=author_id&user.fields=username";
 
 //docker-compose up -d --no-deps --build stream
 //docker-compose up -d --no-deps stream
