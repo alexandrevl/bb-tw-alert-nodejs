@@ -34,26 +34,30 @@ function keepAliveTelegram() {
 }
 
 const rules = [
+  // {
+  //   value: '"banco do brasil" OR bb banco OR bancodobrasil OR carteira bb OR carteirabb is:reply is:retweet is:quote is:verified',
+  //   tag: "bb-tw",
+  // },
   {
-    value: '"banco do brasil"',
-    tag: "banco do brasil",
+    value: '"banco do brasil" OR bb banco OR bancodobrasil OR carteira bb OR carteirabb',
+    tag: "bb-tw-all",
   },
-  {
-    value: "bb banco",
-    tag: "banco do brasil",
-  },
-  {
-    value: "bancodobrasil",
-    tag: "bancodobrasil",
-  },
-  {
-    value: "carteira bb",
-    tag: "carteira bb",
-  },
-  {
-    value: "carteirabb",
-    tag: "carteira bb",
-  },
+  // {
+  //   value: "bb banco",
+  //   tag: "banco do brasil",
+  // },
+  // {
+  //   value: "bancodobrasil",
+  //   tag: "bancodobrasil",
+  // },
+  // {
+  //   value: "carteira bb",
+  //   tag: "carteira bb",
+  // },
+  // {
+  //   value: "carteirabb",
+  //   tag: "carteira bb",
+  // },
 ];
 
 const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_PROD}/twitter?authSource=admin`;
@@ -190,13 +194,22 @@ function streamTweets() {
 
   stream.on("data", async (data) => {
     try {
-      if (data.title) {
-        console.log(data);
+      console.log("-")
+      console.log(data);
+      let json = "";
+      if (!data.title) {
+        const buffer = Buffer.from(data);
+        const str = buffer.toString('utf8');
+        console.log("Str:", str);
+        console.log("Convert bytes to string");
+        json = JSON.parse(str);
+      } else {
+        json = JSON.parse(data);
       }
-      // console.log(data);
-      let json = JSON.parse(data);
+      // console.log(JSON.stringify(json, null, 2))
+      // console.log(json.data)
       if (json.data.author_id != "83723557") {
-        // console.dir(json, { depth: null });
+        console.dir(json, { depth: null });
         let r1 = sentiment(json.data.text, "pt-br", options);
         let userRelevance = await relevance.relevance(
           db,
@@ -274,7 +287,7 @@ function streamTweets() {
         insertMany([json.data]);
       }
     } catch (error) {
-      // console.log(error);
+      console.log(error);
       // if (error.title) {
       //   console.log(error);
       // }
@@ -286,11 +299,11 @@ async function recycle() {
   if (stream) {
     console.log("Recycling...");
     await stream.request.abort();
-    currentRules = await getRules();
-    await deleteRules(currentRules);
-    currentRules = await setRules();
-    console.log(currentRules);
-    setTimeout(streamTweets, 1000);
+    // currentRules = await getRules();
+    // await deleteRules(currentRules);
+    // currentRules = await setRules();
+    // console.log(currentRules);
+    setTimeout(streamTweets, 500);
     console.time("recycled in");
   }
 }
