@@ -195,7 +195,7 @@ function streamTweets() {
   stream.on("data", async (data) => {
     try {
       console.log("-")
-      let json = {};
+      let json = null;
       if (!data.title) {
         const buffer = Buffer.from(data);
         const str = buffer.toString('utf8');
@@ -210,83 +210,85 @@ function streamTweets() {
       }
       // console.log(JSON.stringify(json, null, 2))
       // console.log(json.data)
-      if (json.data.author_id != "83723557") {
-        console.dir(json, { depth: null });
-        let r1 = sentiment(json.data.text, "pt-br", options);
-        let userRelevance = await relevance.relevance(
-          db,
-          json.includes.users[0].username
-        );
-        if (userRelevance.relevance == "NaN") {
-          userRelevance.relevance = 0;
-        }
-        userRelevance.relevance = parseFloat(userRelevance.relevance);
-        let temperatureScore = await temperature.getHourSentiment(db);
-        if (temperatureScore != null) {
-          sumScore = temperatureScore.sum + r1.score;
+      if (json != null) {
+        if (json.data.author_id != "83723557") {
+          console.dir(json, { depth: null });
+          let r1 = sentiment(json.data.text, "pt-br", options);
+          let userRelevance = await relevance.relevance(
+            db,
+            json.includes.users[0].username
+          );
+          if (userRelevance.relevance == "NaN") {
+            userRelevance.relevance = 0;
+          }
+          userRelevance.relevance = parseFloat(userRelevance.relevance);
+          let temperatureScore = await temperature.getHourSentiment(db);
+          if (temperatureScore != null) {
+            sumScore = temperatureScore.sum + r1.score;
+          } else {
+            sumScore = r1.score;
+          }
+          //Calculo do impacto
+          let relevanceFixed = userRelevance.relevance;
+          if (relevanceFixed < 0.1) {
+            relevanceFixed = 0.1;
+          }
+          let impact = parseFloat(relevanceFixed);
+          if (sumScore < 0) {
+            impact = parseFloat(relevanceFixed * -1);
+          }
+          if (r1.score != 0) {
+            impact = parseFloat(Math.abs(relevanceFixed) * r1.score);
+          }
+          if (impact < 0.1 && impact >= 0) {
+            impact = 0.1;
+          } else if (impact > -0.1 && impact < 0) {
+            impact = -0.1;
+          }
+          //
+
+          let msg = `(${r1.score}/${sumScore})(${userRelevance.relevance.toFixed(
+            3
+          )}/${impact.toFixed(3)}) @${userRelevance.user}: ${json.data.text
+            } - https://twitter.com/u/status/${json.data.id}`;
+          console.log(msg);
+          if (impact >= 10 || impact <= -10 || relevanceFixed >= 5) {
+            socketTelegram.emit("alertRelevant", msg);
+          }
+
+          // socketTelegram.emit("alertRelevant", msg);
+          // let hasSibling = await temperature.hasSibling(db, json.data.id);
+          json.data.ts = new Date();
+          json.data.user_relevance = userRelevance.relevance;
+          json.data.impact = parseFloat(impact);
+          json.data.sentiment = r1.score;
+          json.data.fullSentiment = r1;
+          const extraction_result = keyword_extractor.extract(json.data.text, {
+            language: "portuguese",
+            remove_digits: true,
+            return_changed_case: true,
+            remove_duplicates: false,
+          });
+          json.data.words = extraction_result;
+          insertMany([json.data]);
+          ++countTweets;
         } else {
-          sumScore = r1.score;
+          json.data.ts = new Date();
+          json.data.user_relevance = 0.0;
+          json.data.impact = 0.0;
+          json.data.sentiment = 0;
+          json.data.fullSentiment = [];
+          const extraction_result = keyword_extractor.extract(json.data.text, {
+            language: "portuguese",
+            remove_digits: true,
+            return_changed_case: true,
+            remove_duplicates: false,
+          });
+          json.data.words = extraction_result;
+          console.log(`(BB): ${json.data.text}`);
+          json.data.text = "<@BancoDoBrasil> " + json.data.text
+          insertMany([json.data]);
         }
-        //Calculo do impacto
-        let relevanceFixed = userRelevance.relevance;
-        if (relevanceFixed < 0.1) {
-          relevanceFixed = 0.1;
-        }
-        let impact = parseFloat(relevanceFixed);
-        if (sumScore < 0) {
-          impact = parseFloat(relevanceFixed * -1);
-        }
-        if (r1.score != 0) {
-          impact = parseFloat(Math.abs(relevanceFixed) * r1.score);
-        }
-        if (impact < 0.1 && impact >= 0) {
-          impact = 0.1;
-        } else if (impact > -0.1 && impact < 0) {
-          impact = -0.1;
-        }
-        //
-
-        let msg = `(${r1.score}/${sumScore})(${userRelevance.relevance.toFixed(
-          3
-        )}/${impact.toFixed(3)}) @${userRelevance.user}: ${json.data.text
-          } - https://twitter.com/u/status/${json.data.id}`;
-        console.log(msg);
-        if (impact >= 10 || impact <= -10 || relevanceFixed >= 5) {
-          socketTelegram.emit("alertRelevant", msg);
-        }
-
-        // socketTelegram.emit("alertRelevant", msg);
-        // let hasSibling = await temperature.hasSibling(db, json.data.id);
-        json.data.ts = new Date();
-        json.data.user_relevance = userRelevance.relevance;
-        json.data.impact = parseFloat(impact);
-        json.data.sentiment = r1.score;
-        json.data.fullSentiment = r1;
-        const extraction_result = keyword_extractor.extract(json.data.text, {
-          language: "portuguese",
-          remove_digits: true,
-          return_changed_case: true,
-          remove_duplicates: false,
-        });
-        json.data.words = extraction_result;
-        insertMany([json.data]);
-        ++countTweets;
-      } else {
-        json.data.ts = new Date();
-        json.data.user_relevance = 0.0;
-        json.data.impact = 0.0;
-        json.data.sentiment = 0;
-        json.data.fullSentiment = [];
-        const extraction_result = keyword_extractor.extract(json.data.text, {
-          language: "portuguese",
-          remove_digits: true,
-          return_changed_case: true,
-          remove_duplicates: false,
-        });
-        json.data.words = extraction_result;
-        console.log(`(BB): ${json.data.text}`);
-        json.data.text = "<@BancoDoBrasil> " + json.data.text
-        insertMany([json.data]);
       }
     } catch (error) {
       console.log(error);
