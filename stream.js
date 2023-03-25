@@ -13,6 +13,11 @@ const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL =
   "https://api.twitter.com/2/tweets/search/stream?tweet.fields=author_id,public_metrics&expansions=author_id&user.fields=username";
 
+//docker-compose up -d --no-deps --build stream
+//docker-compose up -d --no-deps stream
+
+
+
 
 let socketTelegram = null;
 function keepAliveTelegram() {
@@ -190,11 +195,10 @@ function streamTweets() {
       Authorization: `Bearer ${TOKEN}`,
     },
   });
-  let countTweets = 0;
 
   stream.on("data", async (data) => {
     try {
-      console.log("-")
+      console.log("--")
       let json = null;
       if (!data.title) {
         const buffer = Buffer.from(data);
