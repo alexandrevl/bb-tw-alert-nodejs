@@ -195,14 +195,16 @@ function streamTweets() {
   stream.on("data", async (data) => {
     try {
       console.log("-")
-      console.log(data);
-      let json = "";
+      let json = {};
       if (!data.title) {
         const buffer = Buffer.from(data);
         const str = buffer.toString('utf8');
-        console.log("Str:", str);
-        console.log("Convert bytes to string");
-        json = JSON.parse(str);
+        if (str != "\r\n") {
+          console.log(data);
+          console.log("Str:", str);
+          console.log("Convert bytes to string");
+          json = JSON.parse(str);
+        }
       } else {
         json = JSON.parse(data);
       }
