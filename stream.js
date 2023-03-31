@@ -198,6 +198,7 @@ function streamTweets() {
   let countTweets = 0;
 
   stream.on("data", async (data) => {
+    let isBytes = false;
     try {
       console.log("-")
       let json = null;
@@ -205,9 +206,10 @@ function streamTweets() {
         const buffer = Buffer.from(data);
         const str = buffer.toString('utf8');
         if (str != "\r\n") {
-          console.log(data);
-          console.log("Str:", str);
-          console.log("Convert bytes to string");
+          // console.log(data);
+          // console.log("Str:", str);
+          // console.log("Convert bytes to string");
+          isBytes = true;
           json = JSON.parse(str);
         }
       } else {
@@ -217,7 +219,7 @@ function streamTweets() {
       // console.log(json.data)
       if (json != null) {
         if (json.data.author_id != "83723557") {
-          console.dir(json, { depth: null });
+          // console.dir(json, { depth: null });
           let r1 = sentiment(json.data.text, "pt-br", options);
           let userRelevance = await relevance.relevance(
             db,
@@ -254,7 +256,7 @@ function streamTweets() {
 
           let msg = `(${r1.score}/${sumScore})(${userRelevance.relevance.toFixed(
             3
-          )}/${impact.toFixed(3)}) @${userRelevance.user}: ${json.data.text
+          )}/${impact.toFixed(3)})(${isBytes ? "B" : "S"}) @${userRelevance.user}: ${json.data.text
             } - https://twitter.com/u/status/${json.data.id}`;
           console.log(msg);
           if (impact >= 10 || impact <= -10 || relevanceFixed >= 5) {
