@@ -23,4 +23,4 @@ jobs:
 
       - name: Deploy to remote server
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@144.22.144.218 "cd bb-tw-alert/nodejs/; docker-compose down; git pull github; npm install; docker-compose up -d"
+          ssh -o StrictHostKeyChecking=no ubuntu@144.22.144.218 "cd bb-tw-alert/nodejs/; docker-compose down; git pull; npm install; docker-compose up -d"
