@@ -10,17 +10,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up SSH
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add remote server to known_hosts
         run: |
-          sudo apt-get install -y openssh-client
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
-          chmod 600 private_key
-          eval $(ssh-agent)
-          ssh-add private_key
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           ssh-keyscan -t rsa 144.22.144.218 >> ~/.ssh/known_hosts
 
       - name: Deploy to remote server
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@144.22.144.218 "cd bb-tw-alert/nodejs/; docker-compose down; git pull; npm install; docker-compose up -d"
+          ssh -o StrictHostKeyChecking=no ubuntu@144.22.144.218 "cd bb-tw-alert/nodejs/; docker-compose down; git pull github; npm install; docker-compose up -d"
