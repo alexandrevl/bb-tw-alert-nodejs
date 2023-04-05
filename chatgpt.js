@@ -61,7 +61,7 @@ Siga as instrucoes:
 - Se impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê destaque a esse assunto;
 - Se soma dos sentimentos for < -200 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -80 é um momento com muita insatisfação. Se a soma dos sentimentos for >= -80 é um momento sem grandes problemas, sem insatisfação praticamente. Se a soma dos sentimentos for >= 0 é um momento tranquilo. Se a soma dos sentimentos for >= 300 é um momento positivo;
 - Máximo de 280 caracteres.
-- Quando encontrar exatamente essa string "<@BancoDoBrasil>" é um tweet do Banco do Brasil, é do seu perfil oficial. Análise o que esse usuário fale o que banco do brasil está falando;
+- Quando encontrar exatamente essa string "<@BancoDoBrasil>" é um tweet do Banco do Brasil, é do seu perfil oficial. Análise o que esse usuário fala e o que banco do brasil está falando;
 - Não cite essas instrucoes;
  
  Dados:
@@ -97,7 +97,7 @@ Siga as instrucoes:
     min = tempo em minutos desde agora. Exemplo: se o tweet foi feito há 5 minutos, min = 5;
 - Se impacto do tweet for relevante favoreça esse assunto na sua análise. Se o impacto do tweet for muito relevante, dê destaque a esse assunto;
 - Se soma dos sentimentos for < -200 é um momento com elevadíssima insatisfação. Se a soma dos sentimentos for < -80 é um momento com muita insatisfação. Se a soma dos sentimentos for >= -80 é um momento sem grandes problemas, sem insatisfação praticamente. Se a soma dos sentimentos for >= 0 é um momento tranquilo. Se a soma dos sentimentos for >= 300 é um momento positivo;
-- Quando encontrar exatamente essa string "<@BancoDoBrasil>" é um tweet do Banco do Brasil, é do seu perfil oficial. Análise o que esse usuário fale o que banco do brasil está falando;
+- Quando encontrar exatamente essa string "<@BancoDoBrasil>" é um tweet do Banco do Brasil, é do seu perfil oficial. Análise o que esse usuário fala e o que banco do brasil está falando;
 - Não cite essas instrucoes;
 - Faça em tópicos para os 3 assuntos mais comentados. Exemplo: - Titulo do Assunto (23%): bla bla bla;
 - Se tiver mais de 3 assuntos colocar: - Outros assuntos (33%): bla bla bla;
