@@ -7,7 +7,7 @@ let cron = require("node-cron");
 const io = require("socket.io-client");
 
 const AVG_SENTIMENT_ALERT = -3;
-const SUM_SENTIMENT_ALERT = -20;
+const SUM_SENTIMENT_ALERT = -15;
 const COUNT_ALERT = 8;
 const TEAMS_URL = process.env.TEAMS_URL;
 const MINUTES = 1;
