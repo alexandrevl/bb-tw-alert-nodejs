@@ -201,10 +201,10 @@ async function alertTemp(msg, isChatGPT) {
       .toLocaleString("pt-BR")} ${getImpactEmoji(
         hourImpact
       )}\n\nWords:\n${resultWordsStr}`;
-  const chatgptResponse = await chatgpt.get10minShort(db);
-  console.log(`short - ChatGPT - Final Response (${chatId}): ` + chatgptResponse);
-  strFinal += `\n\n${chatgptResponse}`;
   if (isChatGPT) {
+    const chatgptResponse = await chatgpt.get10minShort(db);
+    console.log(`short - ChatGPT - Final Response (${chatId}): ` + chatgptResponse);
+    strFinal += `\n\n${chatgptResponse}`;
     strFinal += `\n\n/chatgpt for more`;
   }
   bot.sendMessage(chatId, strFinal, { disable_web_page_preview: true });
@@ -427,7 +427,7 @@ async function init() {
     console.log(`New client connected ${client.id}`);
     client.emit("welcome", "welcome man");
     client.on("alertTemp", (data) => {
-      alertTemp(data);
+      alertTemp(data, false);
     });
     client.on("alertRelevant", (data) => {
       alertRelevant(data);
