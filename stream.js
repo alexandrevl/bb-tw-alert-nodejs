@@ -202,6 +202,7 @@ function streamTweets() {
     try {
       console.log("-")
       let json = null;
+      console.log(data);
       if (!data.title) {
         const buffer = Buffer.from(data);
         const str = buffer.toString('utf8');

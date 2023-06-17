@@ -16,6 +16,13 @@ const url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${pro
 const client = new MongoClient(url);
 
 let socketTelegram = null;
+/**
+ * keepAliveTelegram() - Connects to the telegram-server using a websocket connection
+ * and keeps the connection alive by listening for the "disconnect" and "connect_error" events.
+ * When the connection is lost, it will try to reconnect to the server, but if the connection
+ * fails, it will try again in 5 seconds.
+ */
+
 function keepAliveTelegram() {
   socketTelegram = io(`ws://${process.env.TELEGRAM_SERVER}:8000`);
   console.log("Connecting to telegram-server...");
